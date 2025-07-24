@@ -1,0 +1,21 @@
+{
+  "cli": {
+    "version": ">= 16.9.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "app-bundle"  // ✅ this is the correct value, NOT "aab"
+      }
+    },
+    "apk": {
+      "android": {
+        "buildType": "apk"         // ✅ generates APK
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
