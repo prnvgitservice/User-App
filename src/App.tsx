@@ -12,6 +12,7 @@ import BookingDetails from './components/homescreen/BookingDetails';
 import BuyProductScreen from './components/homescreen/BuyProductScreen';
 
 const Stack = createNativeStackNavigator();
+import "./global.css"
 
 export default function App() {
   return (
