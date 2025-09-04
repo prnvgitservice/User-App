@@ -1,16 +1,15 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import OnboardingScreen from './OnboardingScreen';
-import LoginScreen from './LoginScreen';
-import CalendarScreen from './CalendarScreen';
-import BuyProductScreen from './BuyProductScreen';
-import MainTabs from './MainTabs';
-import SearchScreen from './SearchScreen';
-import BookingDetails from './BookingDetails';
-import TechnicianProfile from './TechnicianProfile';
-import ProfileScreen from './ProfileScreen';
-import RegisterScreen from './RegisterScreen';
+import OnboardingScreen from './components/homescreen/OnboardingScreen';
+import LoginScreen from './components/auth/LoginScreen';
+import MainTabs from './components/homescreen/MainTabs';
+import CalendarScreen from './components/homescreen/CalendarScreen';
+import RegisterScreen from './components/auth/RegisterScreen';
+import ProfileScreen from './components/homescreen/ProfileScreen';
+import TechnicianProfile from './components/homescreen/TechnicianProfile';
+import BookingDetails from './components/homescreen/BookingDetails';
+import BuyProductScreen from './components/homescreen/BuyProductScreen';
 
 const Stack = createNativeStackNavigator();
 
