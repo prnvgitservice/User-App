@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './HomeScreen';
 import MyBookingScreen from './MyBookingScreen';
 import CategoryScreen from './CategoryScreen';
-import TechProfile from './ProfileScreen';
+import TechProfile from './ProfileEditScreen';
 import SearchScreen from './SearchScreen';
 import UserProfile from './UserProfile';
 import { Text } from 'react-native';
