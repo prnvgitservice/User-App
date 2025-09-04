@@ -7,7 +7,6 @@ const endpoints: any = {
         },
       },
 
-
     userGetProfile: {
     method: "get",
     url: (userId: string) => `/api/userAuth/profile/${userId}`
