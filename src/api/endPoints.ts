@@ -1,14 +1,25 @@
 const endpoints: any = {
-    
-    getAllCategories: {
-        method: "get",
-        url: () => {
-          return `/api/categories/get`;
-        },
-      },
+  login: {
+    method: "post",
+    url: () => {
+      return `/api/auth/login`;
+    },
+  },
 
-      getTechByCategorie:{
-    method:"get",
+  userLogin: {
+    method: "post",
+    url: () => `/api/userAuth/login`,
+  },
+
+  getAllCategories: {
+    method: "get",
+    url: () => {
+      return `/api/categories/get`;
+    },
+  },
+
+  getTechByCategorie: {
+    method: "get",
     url: (categoryId: string) => {
       return `/api/techDetails/getAllTechniciansByCateId/${categoryId}`;
     },
@@ -23,18 +34,29 @@ const endpoints: any = {
 
   addToCart: {
     method: "post",
-    url: () => `/api/cart/addToCart`
+    url: () => `/api/cart/addToCart`,
   },
-   getCartItems: {
+  getCartItems: {
     method: "get",
     url: (id: string) => {
       return `/api/cart/getCart/${id}`;
     },
   },
-     removeFromCart: {
+  removeFromCart: {
     method: "put",
-    url: () => `/api/cart/removeFromCartService`
+    url: () => `/api/cart/removeFromCartService`,
   },
-}
+
+  createBookService: {
+    method: "post",
+    url: () => `/api/bookingServices/createBookService`,
+  },
+
+  getAllPincodes: {
+    method: "get",
+    url: () => `/api/pincodes/allAreas`,
+  },
+
+};
 
 export default endpoints;

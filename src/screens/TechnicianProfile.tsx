@@ -83,22 +83,19 @@ const TechnicianProfile = () => {
       try {
         setLoading(true);
         const response = await getAllTechnicianDetails(technicianId);
+        console.log("Technician Details Response:", response);
         if (response?.success && response.result) {
           const result = response.result;
-          const derivedServices = result.services?.length > 0
-            ? result.services
-            : (result.technician?.categoryServices || [])
-                .filter((c: CategoryService) => c.status && c.details)
-                .map((c: CategoryService) => ({
-                  ...c.details,
-                  _id: c.details._id || c.categoryServiceId, // Ensure _id is present
-                }));
+          // const derivedServices = result.services?.length > 0
+          //   ? result.services
+          //   : (result.technician?.categoryServices || [])
+          //       .filter((c: CategoryService) => c.status && c.details)
+          //       .map((c: CategoryService) => ({
+          //         ...c.details,
+          //         _id: c.details._id || c.categoryServiceId, // Ensure _id is present
+          //       }));
           
-          setTechnicianDetails({
-            ...result,
-            services: derivedServices || [],
-            ratings: Array.isArray(result.ratings) ? result.ratings : result.ratings ? [result.ratings] : [],
-          });
+          setTechnicianDetails(result);
           setError("");
         } else {
           setError("Failed to load technician details. Invalid response format.");
