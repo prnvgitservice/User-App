@@ -16,12 +16,6 @@ const pages = [
   'Ready to start? This is page 4.'
 ];
 
-const images = [
-  require('./assets/1.jpg'),
-  require('./assets/f2.jpg'),
-  require('./assets/f3.jpg'),
-  require('./assets/f2.jpg'),
-];
 
 const OnboardingScreen: React.FC<Props> = ({ navigation }) => {
   const [page, setPage] = useState(0);
@@ -38,7 +32,7 @@ const OnboardingScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Image source={images[page]} style={styles.image} resizeMode="cover" />
+      {/* <Image source={images[page]} style={styles.image} resizeMode="cover" /> */}
       <View style={styles.overlay} />
       <View style={styles.buttonContainer}>
         {page < pages.length - 1 ? (
