@@ -90,7 +90,8 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Trending Services */}
+
+
         <View className="px-5 mb-5">
           <Text className="text-lg font-bold text-gray-900 mb-2">
             Trending Services
