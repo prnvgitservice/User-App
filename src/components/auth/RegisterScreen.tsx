@@ -11,11 +11,13 @@ import {
   ScrollView,
   Image,
   Alert,
+  Keyboard,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   getAllPincodes,
+  userRegister,
 } from '@/src/api/apiMethods';
 import { Feather } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
@@ -70,6 +72,58 @@ const initialFormState: FormData = {
   pincode: '',
 };
 
+// Dynamic input fields configuration
+const dynamicInputFields = [
+  {
+    id: 'name' as keyof FormData,
+    label: 'Name',
+    type: 'text',
+    placeholder: 'Enter your full name',
+    keyboardType: 'default' as const,
+    autoCapitalize: 'words' as const,
+    maxLength: undefined,
+    required: true,
+    emoji: '👤',
+    validation: (value: string) => !value.trim() ? 'Name is required' : '',
+  },
+  {
+    id: 'mobile' as keyof FormData,
+    label: 'Phone Number',
+    type: 'tel',
+    placeholder: 'Enter 10-digit phone number',
+    keyboardType: 'phone-pad' as const,
+    autoCapitalize: 'none' as const,
+    maxLength: 10,
+    required: true,
+    emoji: '📞',
+    validation: (value: string) => !value.match(/^[0-9]{10}$/) ? 'Enter a valid 10-digit phone number' : '',
+  },
+  {
+    id: 'password' as keyof FormData,
+    label: 'Password',
+    type: 'password',
+    placeholder: 'Password (6-10 characters)',
+    keyboardType: 'default' as const,
+    autoCapitalize: 'none' as const,
+    maxLength: 10,
+    required: true,
+    emoji: '🔒',
+    validation: (value: string) => value.length < 6 || value.length > 10 ? 'Password must be 6-10 characters' : '',
+  },
+  {
+    id: 'buildingName' as keyof FormData,
+    label: 'House/Building Name',
+    type: 'text',
+    placeholder: 'Enter house or building name',
+    keyboardType: 'default' as const,
+    autoCapitalize: 'words' as const,
+    maxLength: undefined,
+    required: true,
+    emoji: '🏠',
+    validation: (value: string) => !value.trim() ? 'Building name is required' : '',
+  }
+];
+
 const RegisterScreen = () => {
   const navigation = useNavigation();
   const [formData, setFormData] = useState<FormData>(initialFormState);
@@ -80,12 +134,11 @@ const RegisterScreen = () => {
   const [areaOptions, setAreaOptions] = useState<PincodeArea[]>([]);
   const [subAreaOptions, setSubAreaOptions] = useState<{ _id: string; name: string }[]>([]);
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [pincodeLoading, setPincodeLoading] = useState<boolean>(false);
+  const [activeField, setActiveField] = useState<keyof FormData | null>(null);
 
   // Load pincodes data
   useEffect(() => {
     const loadPincodes = async () => {
-      setPincodeLoading(true);
       try {
         const response = await getAllPincodes();
         if (Array.isArray(response?.data)) {
@@ -93,8 +146,6 @@ const RegisterScreen = () => {
         }
       } catch (error) {
         console.error('Failed to load pincodes:', error);
-      } finally {
-        setPincodeLoading(false);
       }
     };
     loadPincodes();
@@ -106,7 +157,6 @@ const RegisterScreen = () => {
       const found = pincodeData.find((p) => p.code === selectedPincode);
       if (found && found.areas) {
         setAreaOptions(found.areas);
-        // Auto-populate city and state
         setFormData((prev) => ({ 
           ...prev, 
           city: found.city || '', 
@@ -157,10 +207,15 @@ const RegisterScreen = () => {
   const validateForm = useCallback((): FormErrors => {
     const newErrors: FormErrors = {};
 
-    if (!formData.name.trim()) newErrors.name = 'Name is required';
-    if (!formData.mobile.match(/^[0-9]{10}$/)) newErrors.mobile = 'Enter a valid 10-digit phone number';
-    if (formData.password.length < 6 || formData.password.length > 10) newErrors.password = 'Password must be 6-10 characters';
-    if (!formData.buildingName.trim()) newErrors.buildingName = 'Building name is required';
+    // Validate dynamic fields
+    dynamicInputFields.forEach(field => {
+      const error = field.validation(formData[field.id]);
+      if (error) {
+        newErrors[field.id] = error;
+      }
+    });
+
+    // Validate other fields
     if (!formData.areaName) newErrors.areaName = 'Area is required';
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.state.trim()) newErrors.state = 'State is required';
@@ -174,12 +229,35 @@ const RegisterScreen = () => {
     if (name === 'pincode') {
       setSelectedPincode(value);
     }
-    // Clear error when user starts typing
+    
+    // Clear error for this field
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   }, []);
 
+  const handleFocus = useCallback((field: keyof FormData) => {
+    setActiveField(field);
+  }, []);
+
+  const handleBlur = useCallback((field: keyof FormData) => {
+    // Validate on blur for dynamic fields
+    if (dynamicInputFields.find(f => f.id === field)) {
+      const fieldConfig = dynamicInputFields.find(f => f.id === field);
+      if (fieldConfig) {
+        const error = fieldConfig.validation(formData[field]);
+        if (error) {
+          setErrors(prev => ({ ...prev, [field]: error }));
+        }
+      }
+    }
+    setActiveField(null);
+  }, [formData]);
+
+  // Handle keyboard dismiss on scroll
+  const handleScroll = useCallback(() => {
+    Keyboard.dismiss();
+  }, []);
+
   const handleSubmit = useCallback(async () => {
-    // UI-only - no actual submission
     const formErrors = validateForm();
     
     if (Object.keys(formErrors).length > 0) {
@@ -189,11 +267,10 @@ const RegisterScreen = () => {
     }
 
     setLoading(true);
+    setErrors({}); // Clear previous errors
+    Keyboard.dismiss(); // Dismiss keyboard before API call
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const basePayload = {
         username: formData.name,
         phoneNumber: formData.mobile,
@@ -208,13 +285,16 @@ const RegisterScreen = () => {
 
       console.log('Registration payload:', basePayload);
       
-      // For demo purposes, simulate success
-      await AsyncStorage.setItem('userRegistration', JSON.stringify(basePayload));
+      const response = await userRegister(basePayload);
       
-      Alert.alert('Success', 'Registration completed! Redirecting to login...');
-      navigation.replace('Login');
+      if (response.success) {
+        Alert.alert('Success', 'Registration completed! Redirecting to login...');
+        navigation.replace('Login');
+      } else {
+        throw new Error(response?.message || 'Registration failed');
+      }
     } catch (err: any) {
-      const errorMsg = err?.data?.error?.[0] || 'Registration failed. Please try again.';
+      const errorMsg = err?.data?.error?.[0] || err?.message || 'Registration failed. Please try again.';
       setErrors({ ...errors, general: errorMsg });
       Alert.alert('Registration Error', errorMsg);
     } finally {
@@ -229,8 +309,7 @@ const RegisterScreen = () => {
     value, 
     onChange, 
     error, 
-    required = true, 
-    options = [] 
+    required = true 
   }: {
     id: keyof FormData;
     label: string;
@@ -239,75 +318,11 @@ const RegisterScreen = () => {
     onChange: (value: string) => void;
     error?: string;
     required?: boolean;
-    options?: { _id: string; name: string }[] | PincodeArea[];
   }) => {
-    // Determine if this field should use Picker
-    const isPickerField = id === 'pincode' || id === 'areaName' || id === 'subAreaName' || 
-                         (options && options.length > 0);
-    const isCityStateAuto = (id === 'city' || id === 'state') && selectedPincode;
+    // Get field configuration for dynamic fields
+    const fieldConfig = dynamicInputFields.find(f => f.id === id);
+    const isDynamicField = !!fieldConfig;
 
-    if (isPickerField || isCityStateAuto) {
-      // For Picker fields
-      let pickerItems = [];
-      
-      if (id === 'pincode') {
-        pickerItems = pincodeData
-          .sort((a, b) => parseInt(a.code) - parseInt(b.code))
-          .map((p) => ({ label: p.code, value: p.code, key: p._id }));
-      } else if (id === 'areaName') {
-        pickerItems = areaOptions.map((a) => ({ label: a.name, value: a.name, key: a._id }));
-      } else if (id === 'subAreaName') {
-        pickerItems = subAreaOptions
-          .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
-          .map((a) => ({ label: a.name, value: a.name, key: a._id }));
-      } else if (options && options.length > 0) {
-        pickerItems = options.map((opt) => ({ 
-          label: 'name' in opt ? opt.name : opt, 
-          value: 'name' in opt ? opt.name : opt,
-          key: 'name' in opt ? opt._id : opt 
-        }));
-      } else if (isCityStateAuto && selectedPincode) {
-        const foundPincode = pincodeData.find((p) => p.code === selectedPincode);
-        if (foundPincode) {
-          pickerItems = [{ label: id === 'city' ? foundPincode.city : foundPincode.state, 
-                          value: id === 'city' ? foundPincode.city : foundPincode.state, 
-                          key: `auto-${id}` }];
-        }
-      }
-
-      return (
-        <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-700 mb-1">
-            {label} {required && <Text className="text-red-500">*</Text>}
-          </Text>
-          <View className="border border-gray-300 rounded-md bg-white">
-            <Picker
-              selectedValue={value}
-              onValueChange={(itemValue) => onChange(itemValue)}
-              enabled={!loading}
-              style={{ height: 44, justifyContent: 'center' }}
-              dropdownIconColor="#6b7280"
-            >
-              <Picker.Item 
-                label={pincodeLoading ? 'Loading...' : `Select ${label}`} 
-                value="" 
-                enabled={false}
-              />
-              {pickerItems.map((item) => (
-                <Picker.Item 
-                  key={item.key} 
-                  label={item.label} 
-                  value={item.value} 
-                />
-              ))}
-            </Picker>
-          </View>
-          {error && <Text className="text-red-500 text-xs mt-1">{error}</Text>}
-        </View>
-      );
-    }
-
-    // For regular TextInput fields
     return (
       <View className="mb-4">
         <Text className="text-sm font-medium text-gray-700 mb-1">
@@ -316,38 +331,183 @@ const RegisterScreen = () => {
         
         {id === 'password' ? (
           <View className="relative">
-            <TextInput
-              className="w-full border border-gray-300 rounded-md p-3 pr-10 text-base"
-              placeholder={`Enter ${label.toLowerCase()} (6-10 characters)`}
-              value={value}
-              onChangeText={onChange}
-              secureTextEntry={!showPassword}
-              editable={!loading}
-              maxLength={10}
-            />
-            <Pressable
-              onPress={() => !loading && setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1"
-              disabled={loading}
-            >
-              <Feather
-                name={showPassword ? 'eye-off' : 'eye'}
-                size={20}
-                color="#6b7280"
+            <View className={`flex-row items-center border rounded-md p-2 bg-white ${
+              activeField === 'password' ? 'border-blue-500' : 'border-gray-300'
+            }`}>
+              <Text className="text-base mr-2">{fieldConfig?.emoji || '🔒'}</Text>
+              <TextInput
+                className="flex-1 text-base text-gray-800 pr-10"
+                placeholder={fieldConfig?.placeholder || "Password (6-10 characters)"}
+                value={value}
+                onChangeText={onChange}
+                secureTextEntry={!showPassword}
+                editable={!loading}
+                maxLength={10}
+                keyboardType={fieldConfig?.keyboardType || 'default'}
+                autoCapitalize={fieldConfig?.autoCapitalize || 'none'}
+                onFocus={() => handleFocus('password')}
+                onBlur={() => handleBlur('password')}
+                autoCorrect={false}
               />
-            </Pressable>
+              <Pressable
+                onPress={() => !loading && setShowPassword(!showPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2"
+                disabled={loading}
+              >
+                <Text className="text-lg">
+                  {showPassword ? '🙈' : '👁️'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : id === 'pincode' ? (
+          <View className="border border-gray-300 rounded-md">
+            <View className="flex-row items-center p-2">
+              <Text className="text-base mr-2">📍</Text>
+              <Picker
+                selectedValue={value}
+                onValueChange={(itemValue) => onChange(itemValue)}
+                enabled={!loading}
+                style={{ flex: 1, height: 44 }}
+                dropdownIconColor="#6b7280"
+                mode="dropdown"
+              >
+                <Picker.Item label="Select Pincode" value="" style={{ fontSize: 11 }} />
+                {pincodeData
+                  .sort((a, b) => parseInt(a.code) - parseInt(b.code))
+                  .map((p) => (
+                    <Picker.Item key={p._id} label={p.code} value={p.code} style={{ fontSize: 11 }} />
+                  ))}
+              </Picker>
+            </View>
+          </View>
+        ) : id === 'city' ? (
+          <View className="border border-gray-300 rounded-md">
+            <View className="flex-row items-center p-2">
+              <Text className="text-base mr-2">🏙️</Text>
+              <Picker
+                selectedValue={value}
+                onValueChange={(itemValue) => onChange(itemValue)}
+                enabled={!loading}
+                style={{ flex: 1, height: 44 }}
+                dropdownIconColor="#6b7280"
+                mode="dropdown"
+              >
+                <Picker.Item label="Select City" value="" style={{ fontSize: 11 }}  />
+                {selectedPincode && pincodeData.find((p) => p.code === selectedPincode) ? (
+                  <Picker.Item
+                    label={pincodeData.find((p) => p.code === selectedPincode)?.city || ''}
+                    value={pincodeData.find((p) => p.code === selectedPincode)?.city || ''}
+                    style={{ fontSize: 11 }} 
+                  />
+                ) : (
+                  pincodeData.map((p) => (
+                    <Picker.Item key={p._id} label={p.city} value={p.city} />
+                  ))
+                )}
+              </Picker>
+            </View>
+          </View>
+        ) : id === 'state' ? (
+          <View className="border border-gray-300 rounded-md">
+            <View className="flex-row items-center p-2">
+              <Text className="text-base mr-2">🌍</Text>
+              <Picker
+                selectedValue={value}
+                onValueChange={(itemValue) => onChange(itemValue)}
+                enabled={!loading}
+                style={{ flex: 1, height: 44 }}
+                dropdownIconColor="#6b7280"
+                mode="dropdown"
+              >
+                <Picker.Item label="Select State" value="" style={{ fontSize: 11 }}  />
+                {selectedPincode && pincodeData.find((p) => p.code === selectedPincode) ? (
+                  <Picker.Item
+                    label={pincodeData.find((p) => p.code === selectedPincode)?.state || ''}
+                    value={pincodeData.find((p) => p.code === selectedPincode)?.state || ''}
+                    style={{ fontSize: 11 }} 
+                  />
+                ) : (
+                  pincodeData.map((p) => (
+                    <Picker.Item key={p._id} label={p.state} value={p.state} />
+                  ))
+                )}
+              </Picker>
+            </View>
+          </View>
+        ) : id === 'areaName' ? (
+          <View className="border border-gray-300 rounded-md">
+            <View className="flex-row items-center p-2">
+              <Text className="text-base mr-2">🗺️</Text>
+              <Picker
+                selectedValue={value}
+                onValueChange={(itemValue) => onChange(itemValue)}
+                enabled={!loading}
+                style={{ flex: 1, height: 44 }}
+                dropdownIconColor="#6b7280"
+                mode="dropdown"
+              >
+                <Picker.Item label="Select Area" value="" style={{ fontSize: 11 }}  />
+                {areaOptions.map((a) => (
+                  <Picker.Item key={a._id} label={a.name} value={a.name} style={{ fontSize: 11 }}  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+        ) : id === 'subAreaName' ? (
+          <View className="border border-gray-300 rounded-md">
+            <View className="flex-row items-center p-2">
+              <Text className="text-base mr-2">📋</Text>
+              <Picker
+                selectedValue={value}
+                onValueChange={(itemValue) => onChange(itemValue)}
+                enabled={!loading}
+                style={{ flex: 1, height: 44 }}
+                dropdownIconColor="#6b7280"
+                mode="dropdown"
+              >
+                <Picker.Item label="Select Sub Area" value="" style={{ fontSize: 11 }}  />
+                {subAreaOptions
+                  .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+                  .map((a) => (
+                    <Picker.Item key={a._id} label={a.name} value={a.name} style={{ fontSize: 11 }}  />
+                  ))}
+              </Picker>
+            </View>
           </View>
         ) : (
-          <TextInput
-            className="w-full border border-gray-300 rounded-md p-3 text-base"
-            placeholder={`Enter ${label.toLowerCase()}`}
-            value={value}
-            onChangeText={onChange}
-            keyboardType={type === 'tel' ? 'phone-pad' : 'default'}
-            autoCapitalize={type === 'text' ? 'words' : 'none'}
-            editable={!loading}
-            maxLength={type === 'tel' ? 10 : undefined}
-          />
+          // Dynamic text input fields
+          <View className={`relative flex-row items-center border rounded-md p-2 bg-white ${
+            activeField === id ? 'border-blue-500 shadow-md' : 'border-gray-300'
+          }`}>
+            <Text className="text-base mr-2">{fieldConfig?.emoji || '📝'}</Text>
+            <TextInput
+              className="flex-1 text-base text-gray-800"
+              placeholder={fieldConfig?.placeholder || label}
+              value={value}
+              onChangeText={onChange}
+              keyboardType={fieldConfig?.keyboardType || 'default'}
+              autoCapitalize={fieldConfig?.autoCapitalize || 'none'}
+              editable={!loading}
+              maxLength={fieldConfig?.maxLength}
+              onFocus={() => handleFocus(id)}
+              onBlur={() => handleBlur(id)}
+              autoCorrect={false}
+              returnKeyType={id === 'buildingName' ? 'next' : 'done'}
+              onSubmitEditing={id === 'buildingName' ? () => {
+                // Focus on next field or submit
+                if (!loading) {
+                  const nextField = document.getElementById('pincode-input');
+                  if (nextField) {
+                    (nextField as any).focus();
+                  }
+                }
+              } : Keyboard.dismiss}
+            />
+            {activeField === id && (
+              <View className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 rounded-b-md" />
+            )}
+          </View>
         )}
         
         {error && <Text className="text-red-500 text-xs mt-1">{error}</Text>}
@@ -357,79 +517,53 @@ const RegisterScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white py-10">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
-      >
         <ScrollView 
-          contentContainerClassName="px-4 pt-8 pb-8" 
+          contentContainerClassName="px-4 sm:px-6 lg:px-8 py-8"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          bounces={false}
         >
-          {/* Logo */}
-          <View className="items-center mb-6">
-            <View className="bg-blue-900 rounded-lg px-2 py-1">
+          {/* Logo Header */}
+          <View className="flex justify-center mb-6">
+            <View className="bg-blue-900 rounded px-1 py-1 self-center">
               <Image
                 source={require('../../../assets/prnv_logo.jpg')}
-                className="h-8 w-64"
+                className="h-14 w-72"
                 resizeMode="contain"
               />
             </View>
           </View>
 
           {/* Form Container */}
-          <View className="bg-white p-6 rounded-lg shadow-md w-full max-w-md mx-auto">
-            <Text className="text-2xl font-semibold mb-6 text-center text-gray-800">
+          <View className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto w-full">
+            <Text className="text-2xl font-semibold mb-6 text-center capitalize text-gray-800">
               Sign Up as User
             </Text>
 
-            {/* Error Message */}
+            {/* General Error */}
             {errors.general && (
-              <View className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                <View className="flex-row items-center">
-                  <Feather name="alert-circle" size={20} color="#ef4444" className="mr-2" />
-                  <Text className="text-red-600 text-sm flex-1">{errors.general}</Text>
-                </View>
+              <View className="bg-red-50 p-2 rounded mb-4">
+                <Text className="text-red-600 text-sm text-center">{errors.general}</Text>
               </View>
             )}
 
-            {/* Form Fields */}
-            <InputField
-              id="name"
-              label="Name"
-              type="text"
-              value={formData.name}
-              onChange={(value) => handleChange('name', value)}
-              error={errors.name}
-            />
-            
-            <InputField
-              id="mobile"
-              label="Phone Number"
-              type="tel"
-              value={formData.mobile}
-              onChange={(value) => handleChange('mobile', value)}
-              error={errors.mobile}
-            />
+            {/* Dynamic Form Fields */}
+            {dynamicInputFields.map((field) => (
+              <InputField
+                key={field.id}
+                id={field.id}
+                label={field.label}
+                type={field.type}
+                value={formData[field.id]}
+                onChange={(value) => handleChange(field.id, value)}
+                error={errors[field.id]}
+                required={field.required}
+              />
+            ))}
 
-            <InputField
-              id="password"
-              label="Password"
-              type="password"
-              value={formData.password}
-              onChange={(value) => handleChange('password', value)}
-              error={errors.password}
-            />
-
-            <InputField
-              id="buildingName"
-              label="House/Building Name"
-              type="text"
-              value={formData.buildingName}
-              onChange={(value) => handleChange('buildingName', value)}
-              error={errors.buildingName}
-            />
-
+            {/* Static Form Fields */}
             <InputField
               id="pincode"
               label="Pincode"
@@ -437,17 +571,17 @@ const RegisterScreen = () => {
               value={formData.pincode}
               onChange={(value) => handleChange('pincode', value)}
               error={errors.pincode}
-              options={[]}
+              required={true}
             />
 
-             <InputField
+            <InputField
               id="areaName"
               label="Area Name"
               type="text"
               value={formData.areaName}
               onChange={(value) => handleChange('areaName', value)}
               error={errors.areaName}
-              options={areaOptions}
+              required={true}
             />
 
             <InputField
@@ -458,7 +592,6 @@ const RegisterScreen = () => {
               onChange={(value) => handleChange('subAreaName', value)}
               error={undefined}
               required={false}
-              options={subAreaOptions}
             />
 
             <InputField
@@ -468,7 +601,7 @@ const RegisterScreen = () => {
               value={formData.city}
               onChange={(value) => handleChange('city', value)}
               error={errors.city}
-              options={[]}
+              required={true}
             />
 
             <InputField
@@ -478,60 +611,1215 @@ const RegisterScreen = () => {
               value={formData.state}
               onChange={(value) => handleChange('state', value)}
               error={errors.state}
-              options={[]}
+              required={true}
             />
 
             {/* Submit Button */}
-            <TouchableOpacity
-              className={`w-full rounded-lg py-3 items-center shadow-md ${
-                loading ? 'bg-green-400 opacity-70' : 'bg-green-600'
-              }`}
-              onPress={handleSubmit}
-              disabled={loading}
-              activeOpacity={0.7}
-            >
-              <Text className="text-white font-semibold text-base">
-                {loading ? 'Signing Up...' : 'Sign Up'}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Switch Role Link */}
-            <View className="mt-4 items-center">
-              <Text className="text-gray-600 text-sm text-center">
-                Are you a technician?{' '}
-                <TouchableOpacity 
-                  onPress={() => navigation.navigate('TechnicianRegister' as never)}
-                  disabled={loading}
-                >
-                  <Text className={`font-medium ${loading ? 'text-gray-400' : 'text-blue-600'}`}>
-                    Sign Up here
-                  </Text>
-                </TouchableOpacity>
-              </Text>
+            <View className="pt-4">
+              <TouchableOpacity
+                className={`w-full py-2 rounded-md items-center ${
+                  loading 
+                    ? 'bg-gray-400' 
+                    : 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+                }`}
+                onPress={handleSubmit}
+                disabled={loading}
+                activeOpacity={0.7}
+              >
+                <Text className="text-white font-semibold text-base">
+                  {loading ? 'Signing Up...' : 'Sign Up'}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
 
-          {/* Back to Login */}
-          <View className="mt-6 items-center">
-            <Text className="text-gray-600 text-sm text-center">
-              Already have an account?{' '}
-              <TouchableOpacity 
-                onPress={() => navigation.navigate('Login' as never)}
-                disabled={loading}
-              >
-                <Text className={`font-medium ${loading ? 'text-gray-400' : 'text-blue-600'}`}>
-                  Sign In
-                </Text>
+          {/* Sign In Link */}
+          <View className="mt-2 text-center">
+            <Text className="text-gray-600 text-sm">
+              Already Sign up?{' '}
+              <TouchableOpacity onPress={() => navigation.navigate('Login' as never)}>
+                <Text className="text-blue-600 font-medium">Sign In</Text>
               </TouchableOpacity>
             </Text>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 export default RegisterScreen;
+// import React, { useState, useCallback, useEffect } from 'react';
+// import {
+//   SafeAreaView,
+//   View,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   Pressable,
+//   Platform,
+//   KeyboardAvoidingView,
+//   ScrollView,
+//   Image,
+//   Alert,
+// } from 'react-native';
+// import { useNavigation } from '@react-navigation/native';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import {
+//   getAllPincodes,
+//   userRegister,
+// } from '@/src/api/apiMethods';
+// import { Feather } from '@expo/vector-icons';
+// import { Picker } from '@react-native-picker/picker';
+
+// interface PincodeArea {
+//   _id: string;
+//   name: string;
+//   subAreas: { _id: string; name: string }[];
+// }
+
+// interface PincodeData {
+//   _id: string;
+//   code: string;
+//   city: string;
+//   state: string;
+//   areas: PincodeArea[];
+// }
+
+// interface FormData {
+//   name: string;
+//   mobile: string;
+//   password: string;
+//   buildingName: string;
+//   areaName: string;
+//   subAreaName: string;
+//   city: string;
+//   state: string;
+//   pincode: string;
+// }
+
+// interface FormErrors {
+//   name?: string;
+//   mobile?: string;
+//   password?: string;
+//   buildingName?: string;
+//   areaName?: string;
+//   city?: string;
+//   state?: string;
+//   pincode?: string;
+//   general?: string;
+// }
+
+// const initialFormState: FormData = {
+//   name: '',
+//   mobile: '',
+//   password: '',
+//   buildingName: '',
+//   areaName: '',
+//   subAreaName: '',
+//   city: '',
+//   state: '',
+//   pincode: '',
+// };
+
+// const RegisterScreen = () => {
+//   const navigation = useNavigation();
+//   const [formData, setFormData] = useState<FormData>(initialFormState);
+//   const [errors, setErrors] = useState<FormErrors>({});
+//   const [loading, setLoading] = useState<boolean>(false);
+//   const [pincodeData, setPincodeData] = useState<PincodeData[]>([]);
+//   const [selectedPincode, setSelectedPincode] = useState<string>('');
+//   const [areaOptions, setAreaOptions] = useState<PincodeArea[]>([]);
+//   const [subAreaOptions, setSubAreaOptions] = useState<{ _id: string; name: string }[]>([]);
+//   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+//   // Load pincodes data
+//   useEffect(() => {
+//     const loadPincodes = async () => {
+//       try {
+//         const response = await getAllPincodes();
+//         if (Array.isArray(response?.data)) {
+//           setPincodeData(response.data);
+//         }
+//       } catch (error) {
+//         console.error('Failed to load pincodes:', error);
+//       }
+//     };
+//     loadPincodes();
+//   }, []);
+
+//   // Handle pincode selection
+//   useEffect(() => {
+//     if (selectedPincode) {
+//       const found = pincodeData.find((p) => p.code === selectedPincode);
+//       if (found && found.areas) {
+//         setAreaOptions(found.areas);
+//         setFormData((prev) => ({ 
+//           ...prev, 
+//           city: found.city || '', 
+//           state: found.state || '',
+//           areaName: '',
+//           subAreaName: '' 
+//         }));
+//       } else {
+//         setAreaOptions([]);
+//         setFormData((prev) => ({ 
+//           ...prev, 
+//           city: '', 
+//           state: '',
+//           areaName: '',
+//           subAreaName: '' 
+//         }));
+//       }
+//       setSubAreaOptions([]);
+//     } else {
+//       setAreaOptions([]);
+//       setSubAreaOptions([]);
+//       setFormData((prev) => ({ 
+//         ...prev, 
+//         city: '', 
+//         state: '',
+//         areaName: '',
+//         subAreaName: '' 
+//       }));
+//     }
+//   }, [selectedPincode, pincodeData]);
+
+//   // Handle area selection
+//   useEffect(() => {
+//     if (formData.areaName) {
+//       const selectedArea = areaOptions.find((a) => a.name === formData.areaName);
+//       if (selectedArea && selectedArea.subAreas) {
+//         setSubAreaOptions(selectedArea.subAreas);
+//       } else {
+//         setSubAreaOptions([]);
+//       }
+//       setFormData((prev) => ({ ...prev, subAreaName: '' }));
+//     } else {
+//       setSubAreaOptions([]);
+//       setFormData((prev) => ({ ...prev, subAreaName: '' }));
+//     }
+//   }, [formData.areaName, areaOptions]);
+
+//   const validateForm = useCallback((): FormErrors => {
+//     const newErrors: FormErrors = {};
+
+//     if (!formData.name.trim()) newErrors.name = 'Name is required';
+//     if (!formData.mobile.match(/^[0-9]{10}$/)) newErrors.mobile = 'Enter a valid 10-digit phone number';
+//     if (formData.password.length < 6 || formData.password.length > 10) newErrors.password = 'Password must be 6-10 characters';
+//     if (!formData.buildingName.trim()) newErrors.buildingName = 'Building name is required';
+//     if (!formData.areaName) newErrors.areaName = 'Area is required';
+//     if (!formData.city.trim()) newErrors.city = 'City is required';
+//     if (!formData.state.trim()) newErrors.state = 'State is required';
+//     if (!formData.pincode.match(/^[0-9]{6}$/)) newErrors.pincode = 'Pincode must be exactly 6 digits';
+
+//     return newErrors;
+//   }, [formData]);
+
+//   const handleChange = useCallback((name: keyof FormData, value: string) => {
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//     if (name === 'pincode') {
+//       setSelectedPincode(value);
+//     }
+//     setErrors((prev) => ({ ...prev, [name]: undefined }));
+//   }, []);
+
+//   const handleSubmit = useCallback(async () => {
+//     const formErrors = validateForm();
+    
+//     if (Object.keys(formErrors).length > 0) {
+//       setErrors(formErrors);
+//       Alert.alert('Validation Error', 'Please fix the errors in the form');
+//       return;
+//     }
+
+//     setLoading(true);
+//     setErrors({}); // Clear previous errors
+    
+//     try {
+//       const basePayload = {
+//         username: formData.name,
+//         phoneNumber: formData.mobile,
+//         password: formData.password,
+//         buildingName: formData.buildingName,
+//         areaName: formData.areaName,
+//         subAreaName: formData.subAreaName || '-',
+//         city: formData.city,
+//         state: formData.state,
+//         pincode: formData.pincode,
+//       };
+
+//       console.log('Registration payload:', basePayload);
+      
+//       const response = await userRegister(basePayload);
+      
+//       if (response.success) {
+        
+//         Alert.alert('Success', 'Registration completed! Redirecting to login...');
+//         navigation.replace('Login');
+//       } else {
+//         throw new Error(response?.message || 'Registration failed');
+//       }
+//     } catch (err: any) {
+//       const errorMsg = err?.data?.error?.[0] || err?.message || 'Registration failed. Please try again.';
+//       setErrors({ ...errors, general: errorMsg });
+//       Alert.alert('Registration Error', errorMsg);
+//     } finally {
+//       setLoading(false);
+//     }
+//   }, [formData, validateForm, errors, navigation]);
+
+//   const InputField = ({ 
+//     id, 
+//     label, 
+//     type, 
+//     value, 
+//     onChange, 
+//     error, 
+//     required = true 
+//   }: {
+//     id: keyof FormData;
+//     label: string;
+//     type: string;
+//     value: string;
+//     onChange: (value: string) => void;
+//     error?: string;
+//     required?: boolean;
+//   }) => {
+//     // Emoji mapping for fields
+//     const getEmojiForField = (fieldId: keyof FormData) => {
+//       switch (fieldId) {
+//         case 'name': return '👤';
+//         case 'mobile': return '📞';
+//         case 'password': return '🔒';
+//         case 'buildingName': return '🏠';
+//         case 'pincode': return '📍';
+//         case 'city': return '🏙️';
+//         case 'state': return '🌍';
+//         case 'areaName': return '🗺️';
+//         case 'subAreaName': return '📋';
+//         default: return '📝';
+//       }
+//     };
+
+//     return (
+//       <View className="mb-4">
+//         <Text className="text-sm font-medium text-gray-700 mb-1">
+//           {label} {required && <Text className="text-red-500">*</Text>}
+//         </Text>
+        
+//         {id === 'password' ? (
+//           <View className="relative">
+//             <View className="flex-row items-center border border-gray-300 rounded-md p-2 bg-white">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <TextInput
+//                 className="flex-1 text-base text-gray-800 pr-10"
+//                 placeholder="Password (6-10 characters)"
+//                 value={value}
+//                 onChangeText={onChange}
+//                 secureTextEntry={!showPassword}
+//                 editable={!loading}
+//                 maxLength={10}
+//               />
+//               <Pressable
+//                 onPress={() => !loading && setShowPassword(!showPassword)}
+//                 className="absolute right-2 top-1/2 -translate-y-1/2"
+//                 disabled={loading}
+//               >
+//                 <Text className="text-lg">
+//                   {showPassword ? '🙈' : '👁️'}
+//                 </Text>
+//               </Pressable>
+//             </View>
+//           </View>
+//         ) : id === 'pincode' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select Pincode" value="" style={{ fontSize: 11 }} />
+//                 {pincodeData
+//                   .sort((a, b) => parseInt(a.code) - parseInt(b.code))
+//                   .map((p) => (
+//                     <Picker.Item key={p._id} label={p.code} value={p.code} style={{ fontSize: 11 }} />
+//                   ))}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'city' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select City" value="" style={{ fontSize: 11 }}  />
+//                 {selectedPincode && pincodeData.find((p) => p.code === selectedPincode) ? (
+//                   <Picker.Item
+//                     label={pincodeData.find((p) => p.code === selectedPincode)?.city || ''}
+//                     value={pincodeData.find((p) => p.code === selectedPincode)?.city || ''}
+//                     style={{ fontSize: 11 }} 
+//                   />
+//                 ) : (
+//                   pincodeData.map((p) => (
+//                     <Picker.Item key={p._id} label={p.city} value={p.city} />
+//                   ))
+//                 )}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'state' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select State" value="" style={{ fontSize: 11 }}  />
+//                 {selectedPincode && pincodeData.find((p) => p.code === selectedPincode) ? (
+//                   <Picker.Item
+//                     label={pincodeData.find((p) => p.code === selectedPincode)?.state || ''}
+//                     value={pincodeData.find((p) => p.code === selectedPincode)?.state || ''}
+//                     style={{ fontSize: 11 }} 
+//                   />
+//                 ) : (
+//                   pincodeData.map((p) => (
+//                     <Picker.Item key={p._id} label={p.state} value={p.state} />
+//                   ))
+//                 )}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'areaName' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select Area" value="" style={{ fontSize: 11 }}  />
+//                 {areaOptions.map((a) => (
+//                   <Picker.Item key={a._id} label={a.name} value={a.name} style={{ fontSize: 11 }}  />
+//                 ))}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'subAreaName' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select Sub Area" value="" style={{ fontSize: 11 }}  />
+//                 {subAreaOptions
+//                   .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+//                   .map((a) => (
+//                     <Picker.Item key={a._id} label={a.name} value={a.name} style={{ fontSize: 11 }}  />
+//                   ))}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : (
+//           <View className="flex-row items-center border border-gray-300 rounded-md p-2 bg-white">
+//             <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//             <TextInput
+//               className="flex-1 text-base text-gray-800"
+//               placeholder={label}
+//               value={value}
+//               onChangeText={onChange}
+//               keyboardType={type === 'tel' ? 'phone-pad' : 'default'}
+//               autoCapitalize={type === 'text' ? 'words' : 'none'}
+//               editable={!loading}
+//               maxLength={type === 'tel' ? 10 : undefined}
+//             />
+//           </View>
+//         )}
+        
+//         {error && <Text className="text-red-500 text-xs mt-1">{error}</Text>}
+//       </View>
+//     );
+//   };
+
+//   return (
+//     <SafeAreaView className="flex-1 bg-white py-10">
+//       <KeyboardAvoidingView
+//         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+//         className="flex-1"
+//       >
+//         <ScrollView 
+//           contentContainerClassName="px-4 sm:px-6 lg:px-8 py-8"
+//           showsVerticalScrollIndicator={false}
+//           keyboardShouldPersistTaps="handled"
+//         >
+//           {/* Logo Header */}
+//           <View className="flex justify-center mb-6">
+//             <View className="bg-blue-900 rounded px-1 py-1 self-center">
+//               <Image
+//                 source={require('../../../assets/prnv_logo.jpg')}
+//                 className="h-14 w-72"
+//                 resizeMode="contain"
+//               />
+//             </View>
+//           </View>
+
+//           {/* Form Container */}
+//           <View className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto w-full">
+//             <Text className="text-2xl font-semibold mb-6 text-center capitalize text-gray-800">
+//               Sign Up as User
+//             </Text>
+
+//             {/* General Error */}
+//             {errors.general && (
+//               <View className="bg-red-50 p-2 rounded mb-4">
+//                 <Text className="text-red-600 text-sm text-center">{errors.general}</Text>
+//               </View>
+//             )}
+
+//             {/* Form Fields */}
+//             <InputField
+//               id="name"
+//               label="Name"
+//               type="text"
+//               value={formData.name}
+//               onChange={(value) => handleChange('name', value)}
+//               error={errors.name}
+//               required={true}
+//             />
+            
+//             <InputField
+//               id="mobile"
+//               label="Phone Number"
+//               type="tel"
+//               value={formData.mobile}
+//               onChange={(value) => handleChange('mobile', value)}
+//               error={errors.mobile}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="password"
+//               label="Password"
+//               type="password"
+//               value={formData.password}
+//               onChange={(value) => handleChange('password', value)}
+//               error={errors.password}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="buildingName"
+//               label="House/Building Name"
+//               type="text"
+//               value={formData.buildingName}
+//               onChange={(value) => handleChange('buildingName', value)}
+//               error={errors.buildingName}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="pincode"
+//               label="Pincode"
+//               type="text"
+//               value={formData.pincode}
+//               onChange={(value) => handleChange('pincode', value)}
+//               error={errors.pincode}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="areaName"
+//               label="Area Name"
+//               type="text"
+//               value={formData.areaName}
+//               onChange={(value) => handleChange('areaName', value)}
+//               error={errors.areaName}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="subAreaName"
+//               label="Sub Area"
+//               type="text"
+//               value={formData.subAreaName}
+//               onChange={(value) => handleChange('subAreaName', value)}
+//               error={undefined}
+//               required={false}
+//             />
+
+//             <InputField
+//               id="city"
+//               label="City"
+//               type="text"
+//               value={formData.city}
+//               onChange={(value) => handleChange('city', value)}
+//               error={errors.city}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="state"
+//               label="State"
+//               type="text"
+//               value={formData.state}
+//               onChange={(value) => handleChange('state', value)}
+//               error={errors.state}
+//               required={true}
+//             />
+
+//             {/* Submit Button */}
+//             <View className="pt-4">
+//               <TouchableOpacity
+//                 className={`w-full py-2 rounded-md items-center ${
+//                   loading 
+//                     ? 'bg-gray-400' 
+//                     : 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+//                 }`}
+//                 onPress={handleSubmit}
+//                 disabled={loading}
+//               >
+//                 <Text className="text-white font-semibold text-base">
+//                   {loading ? 'Signing Up...' : 'Sign Up'}
+//                 </Text>
+//               </TouchableOpacity>
+//             </View>
+//           </View>
+
+//           {/* Role Switch Link */}
+//           {/* <View className="mt-4 text-center">
+//             <Text className="text-gray-600 text-sm">
+//               Are you a technician?{' '}
+//               <TouchableOpacity onPress={() => navigation.navigate('TechnicianRegister')}>
+//                 <Text className="text-blue-600 font-medium">Sign Up here</Text>
+//               </TouchableOpacity>
+//             </Text>
+//           </View> */}
+
+//           {/* Sign In Link */}
+//           <View className="mt-2 text-center">
+//             <Text className="text-gray-600 text-sm">
+//               Already Sign up?{' '}
+//               <TouchableOpacity onPress={() => navigation.navigate('Login' as never)}>
+//                 <Text className="text-blue-600 font-medium">Sign In</Text>
+//               </TouchableOpacity>
+//             </Text>
+//           </View>
+//         </ScrollView>
+//       </KeyboardAvoidingView>
+//     </SafeAreaView>
+//   );
+// };
+
+// export default RegisterScreen;
+// import React, { useState, useCallback, useEffect } from 'react';
+// import {
+//   SafeAreaView,
+//   View,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   Pressable,
+//   Platform,
+//   KeyboardAvoidingView,
+//   ScrollView,
+//   Image,
+//   Alert,
+// } from 'react-native';
+// import { useNavigation } from '@react-navigation/native';
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import {
+//   getAllPincodes,
+// } from '@/src/api/apiMethods';
+// import { Feather } from '@expo/vector-icons';
+// import { Picker } from '@react-native-picker/picker';
+
+// interface PincodeArea {
+//   _id: string;
+//   name: string;
+//   subAreas: { _id: string; name: string }[];
+// }
+
+// interface PincodeData {
+//   _id: string;
+//   code: string;
+//   city: string;
+//   state: string;
+//   areas: PincodeArea[];
+// }
+
+// interface FormData {
+//   name: string;
+//   mobile: string;
+//   password: string;
+//   buildingName: string;
+//   areaName: string;
+//   subAreaName: string;
+//   city: string;
+//   state: string;
+//   pincode: string;
+// }
+
+// interface FormErrors {
+//   name?: string;
+//   mobile?: string;
+//   password?: string;
+//   buildingName?: string;
+//   areaName?: string;
+//   city?: string;
+//   state?: string;
+//   pincode?: string;
+//   general?: string;
+// }
+
+// const initialFormState: FormData = {
+//   name: '',
+//   mobile: '',
+//   password: '',
+//   buildingName: '',
+//   areaName: '',
+//   subAreaName: '',
+//   city: '',
+//   state: '',
+//   pincode: '',
+// };
+
+// const RegisterScreen = () => {
+//   const navigation = useNavigation();
+//   const [formData, setFormData] = useState<FormData>(initialFormState);
+//   const [errors, setErrors] = useState<FormErrors>({});
+//   const [loading, setLoading] = useState<boolean>(false);
+//   const [pincodeData, setPincodeData] = useState<PincodeData[]>([]);
+//   const [selectedPincode, setSelectedPincode] = useState<string>('');
+//   const [areaOptions, setAreaOptions] = useState<PincodeArea[]>([]);
+//   const [subAreaOptions, setSubAreaOptions] = useState<{ _id: string; name: string }[]>([]);
+//   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+//   // Load pincodes data
+//   useEffect(() => {
+//     const loadPincodes = async () => {
+//       try {
+//         const response = await getAllPincodes();
+//         if (Array.isArray(response?.data)) {
+//           setPincodeData(response.data);
+//         }
+//       } catch (error) {
+//         console.error('Failed to load pincodes:', error);
+//       }
+//     };
+//     loadPincodes();
+//   }, []);
+
+//   // Handle pincode selection
+//   useEffect(() => {
+//     if (selectedPincode) {
+//       const found = pincodeData.find((p) => p.code === selectedPincode);
+//       if (found && found.areas) {
+//         setAreaOptions(found.areas);
+//         setFormData((prev) => ({ 
+//           ...prev, 
+//           city: found.city || '', 
+//           state: found.state || '',
+//           areaName: '',
+//           subAreaName: '' 
+//         }));
+//       } else {
+//         setAreaOptions([]);
+//         setFormData((prev) => ({ 
+//           ...prev, 
+//           city: '', 
+//           state: '',
+//           areaName: '',
+//           subAreaName: '' 
+//         }));
+//       }
+//       setSubAreaOptions([]);
+//     } else {
+//       setAreaOptions([]);
+//       setSubAreaOptions([]);
+//       setFormData((prev) => ({ 
+//         ...prev, 
+//         city: '', 
+//         state: '',
+//         areaName: '',
+//         subAreaName: '' 
+//       }));
+//     }
+//   }, [selectedPincode, pincodeData]);
+
+//   // Handle area selection
+//   useEffect(() => {
+//     if (formData.areaName) {
+//       const selectedArea = areaOptions.find((a) => a.name === formData.areaName);
+//       if (selectedArea && selectedArea.subAreas) {
+//         setSubAreaOptions(selectedArea.subAreas);
+//       } else {
+//         setSubAreaOptions([]);
+//       }
+//       setFormData((prev) => ({ ...prev, subAreaName: '' }));
+//     } else {
+//       setSubAreaOptions([]);
+//       setFormData((prev) => ({ ...prev, subAreaName: '' }));
+//     }
+//   }, [formData.areaName, areaOptions]);
+
+//   const validateForm = useCallback((): FormErrors => {
+//     const newErrors: FormErrors = {};
+
+//     if (!formData.name.trim()) newErrors.name = 'Name is required';
+//     if (!formData.mobile.match(/^[0-9]{10}$/)) newErrors.mobile = 'Enter a valid 10-digit phone number';
+//     if (formData.password.length < 6 || formData.password.length > 10) newErrors.password = 'Password must be 6-10 characters';
+//     if (!formData.buildingName.trim()) newErrors.buildingName = 'Building name is required';
+//     if (!formData.areaName) newErrors.areaName = 'Area is required';
+//     if (!formData.city.trim()) newErrors.city = 'City is required';
+//     if (!formData.state.trim()) newErrors.state = 'State is required';
+//     if (!formData.pincode.match(/^[0-9]{6}$/)) newErrors.pincode = 'Pincode must be exactly 6 digits';
+
+//     return newErrors;
+//   }, [formData]);
+
+//   const handleChange = useCallback((name: keyof FormData, value: string) => {
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//     if (name === 'pincode') {
+//       setSelectedPincode(value);
+//     }
+//     setErrors((prev) => ({ ...prev, [name]: undefined }));
+//   }, []);
+
+//   const handleSubmit = useCallback(async () => {
+//     const formErrors = validateForm();
+    
+//     if (Object.keys(formErrors).length > 0) {
+//       setErrors(formErrors);
+//       return;
+//     }
+
+//     setLoading(true);
+    
+//     try {
+//       // Simulate API call delay
+//       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+//       const basePayload = {
+//         username: formData.name,
+//         phoneNumber: formData.mobile,
+//         password: formData.password,
+//         buildingName: formData.buildingName,
+//         areaName: formData.areaName,
+//         subAreaName: formData.subAreaName || '-',
+//         city: formData.city,
+//         state: formData.state,
+//         pincode: formData.pincode,
+//       };
+
+//       console.log('Registration payload:', basePayload);
+      
+//       // For demo purposes, simulate success
+//       await AsyncStorage.setItem('userRegistration', JSON.stringify(basePayload));
+      
+//       Alert.alert('Success', 'Registration completed! Redirecting to login...');
+//       navigation.replace('Login');
+//     } catch (err: any) {
+//       const errorMsg = err?.data?.error?.[0] || 'Registration failed. Please try again.';
+//       setErrors({ ...errors, general: errorMsg });
+//     } finally {
+//       setLoading(false);
+//     }
+//   }, [formData, validateForm, errors, navigation]);
+
+//   const InputField = ({ 
+//     id, 
+//     label, 
+//     type, 
+//     value, 
+//     onChange, 
+//     error, 
+//     required = true 
+//   }: {
+//     id: keyof FormData;
+//     label: string;
+//     type: string;
+//     value: string;
+//     onChange: (value: string) => void;
+//     error?: string;
+//     required?: boolean;
+//   }) => {
+//     // Emoji mapping for fields
+//     const getEmojiForField = (fieldId: keyof FormData) => {
+//       switch (fieldId) {
+//         case 'name': return '👤';
+//         case 'mobile': return '📞';
+//         case 'password': return '🔒';
+//         case 'buildingName': return '🏠';
+//         case 'pincode': return '📍';
+//         case 'city': return '🏙️';
+//         case 'state': return '🌍';
+//         case 'areaName': return '🗺️';
+//         case 'subAreaName': return '📋';
+//         default: return '📝';
+//       }
+//     };
+
+//     return (
+//       <View className="mb-4">
+//         <Text className="text-sm font-medium text-gray-700 mb-1">
+//           {label} {required && <Text className="text-red-500">*</Text>}
+//         </Text>
+        
+//         {id === 'password' ? (
+//           <View className="relative">
+//             <View className="flex-row items-center border border-gray-300 rounded-md p-2 bg-white">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <TextInput
+//                 className="flex-1 text-base text-gray-800 pr-10"
+//                 placeholder="Password (6-10 characters)"
+//                 value={value}
+//                 onChangeText={onChange}
+//                 secureTextEntry={!showPassword}
+//                 editable={!loading}
+//                 maxLength={10}
+//               />
+//               <Pressable
+//                 onPress={() => !loading && setShowPassword(!showPassword)}
+//                 className="absolute right-2 top-1/2 -translate-y-1/2"
+//                 disabled={loading}
+//               >
+//                 <Text className="text-lg">
+//                   {showPassword ? '🙈' : '👁️'}
+//                 </Text>
+//               </Pressable>
+//             </View>
+//           </View>
+//         ) : id === 'pincode' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select Pincode" value="" />
+//                 {pincodeData
+//                   .sort((a, b) => parseInt(a.code) - parseInt(b.code))
+//                   .map((p) => (
+//                     <Picker.Item key={p._id} label={p.code} value={p.code} />
+//                   ))}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'city' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44  }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select City" value="" />
+//                 {selectedPincode && pincodeData.find((p) => p.code === selectedPincode) ? (
+//                   <Picker.Item
+//                     label={pincodeData.find((p) => p.code === selectedPincode)?.city || ''}
+//                     value={pincodeData.find((p) => p.code === selectedPincode)?.city || ''}
+//                   />
+//                 ) : (
+//                   pincodeData.map((p) => (
+//                     <Picker.Item key={p._id} label={p.city} value={p.city} />
+//                   ))
+//                 )}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'state' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select State" value="" />
+//                 {selectedPincode && pincodeData.find((p) => p.code === selectedPincode) ? (
+//                   <Picker.Item
+//                     label={pincodeData.find((p) => p.code === selectedPincode)?.state || ''}
+//                     value={pincodeData.find((p) => p.code === selectedPincode)?.state || ''}
+//                   />
+//                 ) : (
+//                   pincodeData.map((p) => (
+//                     <Picker.Item key={p._id} label={p.state} value={p.state} />
+//                   ))
+//                 )}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'areaName' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select Area" value="" />
+//                 {areaOptions.map((a) => (
+//                   <Picker.Item key={a._id} label={a.name} value={a.name} />
+//                 ))}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : id === 'subAreaName' ? (
+//           <View className="border border-gray-300 rounded-md">
+//             <View className="flex-row items-center p-2">
+//               <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//               <Picker
+//                 selectedValue={value}
+//                 onValueChange={(itemValue) => onChange(itemValue)}
+//                 enabled={!loading}
+//                 style={{ flex: 1, height: 44 }}
+//                 dropdownIconColor="#6b7280"
+//                 mode="dropdown"
+//               >
+//                 <Picker.Item label="Select Sub Area" value="" />
+//                 {subAreaOptions
+//                   .sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()))
+//                   .map((a) => (
+//                     <Picker.Item key={a._id} label={a.name} value={a.name} />
+//                   ))}
+//               </Picker>
+//             </View>
+//           </View>
+//         ) : (
+//           <View className="flex-row items-center border border-gray-300 rounded-md p-2 bg-white">
+//             <Text className="text-base mr-2">{getEmojiForField(id)}</Text>
+//             <TextInput
+//               className="flex-1 text-base text-gray-800"
+//               placeholder={label}
+//               value={value}
+//               onChangeText={onChange}
+//               keyboardType={type === 'tel' ? 'phone-pad' : 'default'}
+//               autoCapitalize={type === 'text' ? 'words' : 'none'}
+//               editable={!loading}
+//               maxLength={type === 'tel' ? 10 : undefined}
+//             />
+//           </View>
+//         )}
+        
+//         {error && <Text className="text-red-500 text-xs mt-1">{error}</Text>}
+//       </View>
+//     );
+//   };
+
+//   return (
+//     <SafeAreaView className="flex-1 bg-white">
+//       <KeyboardAvoidingView
+//         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+//         className="flex-1"
+//       >
+//         <ScrollView 
+//           contentContainerClassName="px-4 sm:px-6 lg:px-8 py-8"
+//           showsVerticalScrollIndicator={false}
+//           keyboardShouldPersistTaps="handled"
+//         >
+//           {/* Logo Header */}
+//           <View className="flex justify-center mb-6">
+//             <View className="bg-blue-900 rounded px-1 py-1 self-center w-fit">
+//               <Image
+//                 source={require('../../../assets/prnv_logo.jpg')}
+//                 className="h-8 w-auto"
+//                 resizeMode="contain"
+//               />
+//             </View>
+//           </View>
+
+//           {/* Form Container */}
+//           <View className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto w-full">
+//             <Text className="text-2xl font-semibold mb-6 text-center capitalize text-gray-800">
+//               Sign Up as User
+//             </Text>
+
+//             {/* General Error */}
+//             {errors.general && (
+//               <View className="bg-red-50 p-2 rounded mb-4">
+//                 <Text className="text-red-600 text-sm text-center">{errors.general}</Text>
+//               </View>
+//             )}
+
+//             {/* Form Fields */}
+//             <InputField
+//               id="name"
+//               label="Name"
+//               type="text"
+//               value={formData.name}
+//               onChange={(value) => handleChange('name', value)}
+//               error={errors.name}
+//               required={true}
+//             />
+            
+//             <InputField
+//               id="mobile"
+//               label="Phone Number"
+//               type="tel"
+//               value={formData.mobile}
+//               onChange={(value) => handleChange('mobile', value)}
+//               error={errors.mobile}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="password"
+//               label="Password"
+//               type="password"
+//               value={formData.password}
+//               onChange={(value) => handleChange('password', value)}
+//               error={errors.password}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="buildingName"
+//               label="House/Building Name"
+//               type="text"
+//               value={formData.buildingName}
+//               onChange={(value) => handleChange('buildingName', value)}
+//               error={errors.buildingName}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="pincode"
+//               label="Pincode"
+//               type="text"
+//               value={formData.pincode}
+//               onChange={(value) => handleChange('pincode', value)}
+//               error={errors.pincode}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="areaName"
+//               label="Area Name"
+//               type="text"
+//               value={formData.areaName}
+//               onChange={(value) => handleChange('areaName', value)}
+//               error={errors.areaName}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="subAreaName"
+//               label="Sub Area"
+//               type="text"
+//               value={formData.subAreaName}
+//               onChange={(value) => handleChange('subAreaName', value)}
+//               error={undefined}
+//               required={false}
+//             />
+
+//             <InputField
+//               id="city"
+//               label="City"
+//               type="text"
+//               value={formData.city}
+//               onChange={(value) => handleChange('city', value)}
+//               error={errors.city}
+//               required={true}
+//             />
+
+//             <InputField
+//               id="state"
+//               label="State"
+//               type="text"
+//               value={formData.state}
+//               onChange={(value) => handleChange('state', value)}
+//               error={errors.state}
+//               required={true}
+//             />
+
+//             {/* Submit Button */}
+//             <View className="pt-4">
+//               <TouchableOpacity
+//                 className={`w-full py-2 rounded-md items-center ${
+//                   loading 
+//                     ? 'bg-gray-400' 
+//                     : 'bg-green-600 hover:bg-green-700 active:bg-green-800'
+//                 }`}
+//                 onPress={handleSubmit}
+//                 disabled={loading}
+//               >
+//                 <Text className="text-white font-semibold text-base">
+//                   {loading ? 'Signing Up...' : 'Sign Up'}
+//                 </Text>
+//               </TouchableOpacity>
+//             </View>
+//           </View>
+
+//           {/* Role Switch Link */}
+//           <View className="mt-4 text-center">
+//             <Text className="text-gray-600 text-sm">
+//               Are you a technician?{' '}
+//               <TouchableOpacity onPress={() => navigation.navigate('TechnicianRegister')}>
+//                 <Text className="text-blue-600 font-medium">Sign Up here</Text>
+//               </TouchableOpacity>
+//             </Text>
+//           </View>
+
+//           {/* Sign In Link */}
+//           <View className="mt-2 text-center">
+//             <Text className="text-gray-600 text-sm">
+//               Already Sign up?{' '}
+//               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+//                 <Text className="text-blue-600 font-medium">Sign In</Text>
+//               </TouchableOpacity>
+//             </Text>
+//           </View>
+//         </ScrollView>
+//       </KeyboardAvoidingView>
+//     </SafeAreaView>
+//   );
+// };
+
+// export default RegisterScreen;
+
 // import React, { useState } from 'react';
 // import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native';
 // import { useNavigation } from '@react-navigation/native';

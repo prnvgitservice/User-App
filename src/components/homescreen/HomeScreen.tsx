@@ -104,7 +104,7 @@ const HomeScreen: React.FC = () => {
           </ScrollView>
         </View>
 
-          <BlogSection/>
+          {/* <BlogSection/> */}
 
       {/* Banners
         <View className="mx-5 mb-5 bg-gray-200 h-24 rounded-2xl flex items-center justify-center">
