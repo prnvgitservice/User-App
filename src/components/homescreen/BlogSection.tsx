@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
@@ -21,7 +20,6 @@ interface ApiResponse {
 }
 
 const BlogSection: React.FC = () => {
-  const navigation = useNavigation();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -67,14 +65,6 @@ const BlogSection: React.FC = () => {
     }, 1000);
   }, []);
 
-  const handleBlogPress = (blog: Blog) => {
-    navigation.navigate('Blog', { blog });
-  };
-
-  const handleViewAllPress = () => {
-    navigation.navigate('AllBlogs');
-  };
-
   const getBlogCategory = (tags: string[]) => {
     if (tags.includes('plumbing')) return 'Plumbing Services';
     if (tags.includes('pestcontrol')) return 'Pest Control Service';
@@ -96,7 +86,6 @@ const BlogSection: React.FC = () => {
     >
       <TouchableOpacity
         className="bg-white rounded-lg shadow-md overflow-hidden active:scale-95"
-        onPress={() => handleBlogPress(item)}
       >
         <View className="relative">
           <Image
@@ -165,7 +154,7 @@ const BlogSection: React.FC = () => {
           <View className="w-1 h-12 bg-gradient-to-b from-pink-500 to-purple-500 mr-4" />
           <Text className="text-4xl font-bold text-gray-900">Blogs</Text>
         </View>
-        <TouchableOpacity onPress={handleViewAllPress}>
+        <TouchableOpacity >
           <Text className="text-xl font-semibold text-blue-600">View All</Text>
         </TouchableOpacity>
       </View>

@@ -1,5 +1,4 @@
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -57,7 +56,6 @@ function MainTabs({ navigation }) {
 // Main Stack Navigator (auth flow + main tabs)
 function AppNavigator() {
   return (
-    <NavigationContainer>
       <Stack.Navigator
         initialRouteName="Onboarding"
         screenOptions={{ headerShown: false }}
@@ -88,7 +86,6 @@ function AppNavigator() {
 
         {/* Add more stacks for profile options if needed */}
       </Stack.Navigator>
-    </NavigationContainer>
   );
 }
 

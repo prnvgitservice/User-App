@@ -3,6 +3,9 @@ import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
+import TrendingSection from "./TrendingSection";
+import BlogSection from "./BlogSection";
+
 
 // Define navigation param list
 type RootStackParamList = {
@@ -36,7 +39,7 @@ const HomeScreen: React.FC = () => {
         <View className="flex-row justify-between items-center px-5 pt-12 pb-4">
           <View className="bg-blue-600 px-3 py-2 rounded-full">
             <Image
-              source={require("../../../assets/prnv_logo.jpg")} // Update path as needed
+              source={require("../../../assets/prnv_logo.jpg")}
               className="w-56 h-9"
             />
           </View>
@@ -67,12 +70,48 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Banners */}
-        <View className="mx-5 mb-5 bg-gray-200 h-24 rounded-2xl flex items-center justify-center">
-          <Text className="text-gray-900 text-lg">Banners Placeholder</Text>
+
+        <View className="h-2 bg-gray-100 mb-4" />
+        <Text className="text-center text-gray-600 mb-4">Most Popular Categories</Text>
+        <View className="px-5 mb-5">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {categories.map((cat, idx) => (
+              <TouchableOpacity
+                key={idx}
+                className="bg-gray-100 p-3 rounded-lg mr-2"
+                onPress={() => navigation.navigate("Category")}
+              >
+                <Text className="text-center text-gray-900">{cat}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
-        {/* Categories */}
+
+        <View className="h-2 bg-gray-100 mb-4" />
+        <Text className="text-center text-gray-600 mb-4">Other categories</Text>
+        <View className="px-5 mb-5">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {categories.map((cat, idx) => (
+              <TouchableOpacity
+                key={idx}
+                className="bg-gray-100 p-3 rounded-lg mr-2"
+                onPress={() => navigation.navigate("Category")}
+              >
+                <Text className="text-center text-gray-900">{cat}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+          <BlogSection/>
+
+      {/* Banners
+        <View className="mx-5 mb-5 bg-gray-200 h-24 rounded-2xl flex items-center justify-center">
+          <Text className="text-gray-900 text-lg">Banners Placeholder</Text>
+        </View> */}
+
+        {/* Categories
         <View className="px-5 mb-5">
           <Text className="text-lg font-bold text-gray-900 mb-2">
             Categories
@@ -88,11 +127,11 @@ const HomeScreen: React.FC = () => {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
+        </View> */}
 
 
 
-        <View className="px-5 mb-5">
+        {/* <View className="px-5 mb-5">
           <Text className="text-lg font-bold text-gray-900 mb-2">
             Trending Services
           </Text>
@@ -108,78 +147,23 @@ const HomeScreen: React.FC = () => {
               </View>
             ))}
           </View>
-        </View>
+        </View> */}
 
-        {/* Most Popular Categories */}
-        <View className="px-5 mb-5">
-          <Text className="text-lg font-bold text-gray-900 mb-2">
-            Most Popular Categories
-          </Text>
-          <View className="flex-row flex-wrap justify-between">
-            {popularServices.map((service, idx) => (
-              <View
-                key={idx}
-                className="w-[30%] bg-gray-100 p-2 rounded-lg mb-2"
-              >
-                <Text className="text-center text-gray-900 text-sm">
-                  {service}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
+        
 
-        {/* Blogs */}
-        <View className="px-5 mb-5">
-          <Text className="text-lg font-bold text-gray-900 mb-2">Blogs</Text>
-          <View className="flex-col space-y-2">
-            {blogs.map((blog, idx) => (
-              <TouchableOpacity
-                key={idx}
-                className="bg-gray-100 p-3 rounded-lg"
-                onPress={() =>
-                  navigation.navigate("Blog", { id: `blog${idx}` })
-                }
-              >
-                <Text className="text-gray-900 text-sm">{blog}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+        
+        
 
-        {/* What Our Customers Say */}
-        <View className="px-5 mb-5">
-          <Text className="text-lg font-bold text-gray-900 mb-2">
-            What Our Customers Say
-          </Text>
-          <View className="flex-col space-y-2">
-            {reviews.map((review, idx) => (
-              <View key={idx} className="bg-gray-100 p-3 rounded-lg">
-                <Text className="text-gray-900 text-sm">{review.user}</Text>
-                <Text className="text-gray-600 text-xs">{review.text}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Transaction Section */}
-        <View className="px-5 mb-5 bg-green-100 p-4 rounded-lg">
-          <Text className="text-gray-900 text-lg font-bold mb-2">
-            Transaction
-          </Text>
-          <Text className="text-gray-600 text-sm">
-            Complete your payment here
-          </Text>
-          <TouchableOpacity className="bg-green-600 px-4 py-2 rounded-lg mt-2">
-            <Text className="text-white text-sm">Pay Now</Text>
-          </TouchableOpacity>
-        </View>
+        
       </ScrollView>
     </View>
   );
 };
 
 export default HomeScreen;
+
+
+
 // import React, { useState, useEffect } from "react";
 // import {
 //   View,
