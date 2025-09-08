@@ -74,7 +74,7 @@ const popularServices = [
 const categoriessearch = [
   { id: 1, name: 'Cleaning' },
   { id: 2, name: 'Plumbing' },
-  { id: 3, name: 'Electrician' },
+  { id: 3, name: 'Electrician'},
   { id: 4, name: 'Gardening' },
   { id: 5, name: 'Babysitting' },
   { id: 6, name: 'Car Repair' },
@@ -203,7 +203,7 @@ const HomeScreen = () => {
 
         {/* Services */}
         <View style={styles.sectionRow }>
-          <Text style={styles.sectionTitle}>Services</Text>
+          <Text style={styles.sectionTitle}>Categories</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Category')}>
             <Text style={styles.seeAll}>See All</Text></TouchableOpacity>
         </View>
