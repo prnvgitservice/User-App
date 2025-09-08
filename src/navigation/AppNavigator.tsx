@@ -11,6 +11,7 @@ import RegisterScreen from "../components/auth/RegisterScreen";
 import ProfileScreen from "../components/homescreen/ProfileScreen";
 import TechniciansScreen from "../screens/TechniciansScreen";
 import TechnicianProfile from "../screens/TechnicianProfile";
+import CartScreen from "../screens/CartScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,7 +43,7 @@ function MainTabs({ navigation }) {
       />
       <Tab.Screen
         name="Cart"
-        component={HomeScreen}
+        component={CartScreen}
         options={{ headerShown: false }}
       />
       <Tab.Screen

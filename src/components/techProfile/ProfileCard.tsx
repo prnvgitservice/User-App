@@ -8,11 +8,11 @@ interface ProfileCardProps {
   ratings: Rating[];
 }
 
-const ProfileCard = ({ technician, ratings }: ProfileCardProps) => {
-  const averageRating = ratings.length > 0
-    ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1)
-    : "N/A";
-  const ratingCount = ratings.length;
+const ProfileCard = ({ technician}: ProfileCardProps) => {
+  // const averageRating = ratings.length > 0
+  //   ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1)
+  //   : "N/A";
+  // const ratingCount = ratings.length;
 
   return (
     <View className="border border-gray-300 rounded-xl p-5 flex-col relative overflow-hidden">
@@ -27,10 +27,10 @@ const ProfileCard = ({ technician, ratings }: ProfileCardProps) => {
 
         <View className="flex-row items-center gap-4 my-3">
           <View className="flex-row items-center border border-yellow-500 rounded-lg px-2 py-1">
-            <Text>{averageRating}</Text>
+            <Text>4.5</Text>
             <MaterialCommunityIcons name="star-outline" size={18} color="#ffc71b" className="ml-1" />
           </View>
-          <Text className="text-gray-600 text-sm font-light">{ratingCount} Ratings</Text>
+          <Text className="text-gray-600 text-sm font-light">4 Ratings</Text>
         </View>
         {technician.service && (
           <View className="flex-row gap-2">
