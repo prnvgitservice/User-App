@@ -48,7 +48,7 @@ const Reviews = ({ ratings }: ReviewsProps) => {
     <View className="border border-gray-200 shadow-md rounded-xl p-4 max-h-[80vh]">
       <Text className="text-xl font-light mb-4">Reviews</Text>
 
-      {ratings.length === 0 ? (
+      {ratings?.length === 0 ? (
         <Text className="text-gray-600">No reviews available</Text>
       ) : (
         <FlatList
