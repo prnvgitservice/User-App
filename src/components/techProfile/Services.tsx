@@ -127,7 +127,7 @@ const Services = ({ services, technician }: ServicesProps) => {
       </View>
 
       <View className="flex-col gap-4">
-        {services.length > 0 ? (
+        {services?.length > 0 ? (
           services.map((service) => {
             const isInCart = cartItems.some((item) => item.serviceId === service._id);
             const isLoading = loading[service._id];
