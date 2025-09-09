@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,11 @@ import {
   Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { getAllBlogs } from '../../api/apiMethods'; // Adjust path as needed
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/src/navigation/AppNavigator';
+  Platform,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from "expo-linear-gradient";
+import { getAllBlogs } from "../../api/apiMethods"; // Adjust path as needed
 
 // Define the Blog interface based on API response
 interface Blog {
@@ -34,24 +33,17 @@ interface ApiResponse {
   data: Blog[];
 }
 
-// Define navigation prop type for full type safety
-type BlogListNavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
 const BlogList: React.FC = () => {
-  const navigation = useNavigation<BlogListNavigationProp>();
+  const navigation = useNavigation();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
-  const screenWidth = Dimensions.get('window').width;
+  const screenWidth = Dimensions.get("window").width;
   const cardWidth = screenWidth * 0.8; // 80% of screen width
   const cardSpacing = 16;
   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const touchTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch blogs on component mount
   useEffect(() => {
@@ -61,11 +53,11 @@ const BlogList: React.FC = () => {
         if (response.success && Array.isArray(response.data)) {
           setBlogs(response.data);
         } else {
-          setError('No blogs found');
+          setError("No blogs found");
         }
       } catch (err) {
-        console.error('Error fetching blogs:', err);
-        setError('Failed to load blogs. Please try again later.');
+        console.error("Error fetching blogs:", err);
+        setError("Failed to load blogs. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -74,7 +66,7 @@ const BlogList: React.FC = () => {
     fetchBlogs();
   }, []);
 
-  // Auto-scroll logic with smoother animation
+  // Auto-scroll logic
   useEffect(() => {
     if (isPaused || blogs.length === 0) return;
 
@@ -82,37 +74,30 @@ const BlogList: React.FC = () => {
       if (scrollViewRef.current) {
         const currentOffset = scrollPosition;
         const maxScroll = (cardWidth + cardSpacing) * (blogs.length - 1);
-        
+
         if (currentOffset >= maxScroll - 1) {
-          // Smooth scroll back to the beginning
+          // Scroll back to the beginning
           scrollViewRef.current.scrollTo({ x: 0, animated: true });
           setScrollPosition(0);
         } else {
-          // Smooth scroll to the next card
+          // Scroll to the next card
           const newOffset = currentOffset + cardWidth + cardSpacing;
-          scrollViewRef.current.scrollTo({ 
-            x: newOffset, 
-            animated: true,
-          });
+          scrollViewRef.current.scrollTo({ x: newOffset, animated: true });
           setScrollPosition(newOffset);
         }
       }
     };
 
-    // Clear any existing interval
-    if (scrollInterval.current) {
-      clearInterval(scrollInterval.current);
-    }
-
-    // Set new interval with slower scroll (every 3 seconds)
-    scrollInterval.current = setInterval(autoScroll, 3000);
+    scrollInterval.current = setInterval(autoScroll, 1000);
 
     return () => {
       if (scrollInterval.current) {
         clearInterval(scrollInterval.current);
       }
     };
-  }, [isPaused, blogs, scrollPosition, cardWidth, cardSpacing]);
+  }, [isPaused, blogs, scrollPosition]);
+
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   // Handle scroll events
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -122,14 +107,8 @@ const BlogList: React.FC = () => {
   // Handle touch events for swipe
   const handleTouchStart = () => {
     setIsPaused(true);
-    
-    // Clear any existing timeout
-    if (touchTimeout.current) {
-      clearTimeout(touchTimeout.current);
-    }
-    
     // Resume auto-scroll after a delay when user stops interacting
-    touchTimeout.current = setTimeout(() => setIsPaused(false), 3000);
+    setTimeout(() => setIsPaused(false), 3000);
   };
 
   // Calculate active indicator
@@ -137,25 +116,15 @@ const BlogList: React.FC = () => {
     return Math.floor(scrollPosition / (cardWidth + cardSpacing));
   };
 
+  // Navigate to blog detail
   const navigateToBlog = (blog: Blog) => {
-    navigation.navigate('BlogDetail', { blog }); // TS-safe now with proper typing
+    navigation.navigate("BlogDetail", { blog });
   };
 
+  // Navigate to all blogs
   const navigateToAllBlogs = () => {
-    navigation.navigate('AllBlogs'); // TS-safe with no params
+    navigation.navigate("AllBlogs");
   };
-
-  // Clean up on unmount
-  useEffect(() => {
-    return () => {
-      if (scrollInterval.current) {
-        clearInterval(scrollInterval.current);
-      }
-      if (touchTimeout.current) {
-        clearTimeout(touchTimeout.current);
-      }
-    };
-  }, []);
 
   if (loading) {
     return (
@@ -182,27 +151,18 @@ const BlogList: React.FC = () => {
   }
 
   return (
-    <View 
-      className="flex-1 bg-gradient-to-b from-blue-50 to-purple-50 py-6"
-      onTouchStart={handleTouchStart}
-    >
-      <View className="px-4 mx-auto">
+    <View className="flex-1 bg-blue-50 py-6" onTouchStart={handleTouchStart}>
+      <View className="px-4 mx-auto max-w-7xl">
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View className="flex-row items-center">
-            <LinearGradient
-              colors={['#EC4899', '#8B5CF6']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              className="w-1 h-12 mr-3 rounded-full"
-            />
+            <View className="w-1 h-12 bg-pink-500 mr-3 rounded-full" />
             <Text className="text-3xl font-bold text-gray-900">Blogs</Text>
           </View>
-          <TouchableOpacity 
-            onPress={navigateToAllBlogs}
-            className="px-4 py-2 rounded-lg bg-blue-100" // Added styling for better UX
-          >
-            <Text className="text-lg font-semibold text-blue-600">View All</Text>
+          <TouchableOpacity onPress={navigateToAllBlogs}>
+            <Text className="text-lg font-semibold text-blue-600">
+              View All
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -213,74 +173,68 @@ const BlogList: React.FC = () => {
           showsHorizontalScrollIndicator={false}
           pagingEnabled={false}
           snapToInterval={cardWidth + cardSpacing}
-          snapToAlignment="center"
-          decelerationRate="normal"
+          decelerationRate="fast"
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          contentContainerStyle={{ 
+          contentContainerStyle={{
             paddingHorizontal: (screenWidth - cardWidth) / 2 - cardSpacing,
           }}
           className="pb-8"
         >
-          {blogs.map((blog, index) => (
+          {blogs.map((blog) => (
             <TouchableOpacity
               key={blog._id}
-              className="bg-white rounded-xl shadow-lg mx-2 overflow-hidden relative"
-              style={{ 
-                width: cardWidth,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
+              className="bg-white rounded-xl shadow-md mx-2 overflow-hidden relative"
+              style={{ width: cardWidth }}
               onPress={() => navigateToBlog(blog)}
               activeOpacity={0.9}
             >
-              {/* Gradient Blog Name Badge */}
-              <LinearGradient
-                colors={['#EC4899', '#8B5CF6']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                className="absolute top-3 right-3 z-10 px-3 py-1 rounded-full"
-                style={{
-                  maxWidth: cardWidth * 0.6,
-                }}
-              >
-                <Text 
-                  className="text-white text-xs font-semibold"
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {blog.name}
-                </Text>
-              </LinearGradient>
-
-              <Image
-                source={{ uri: blog.image }} // Fixed trailing space
-                className="w-full h-48"
-                resizeMode="cover"
-              />
-              <View className="p-4">
-                <Text className="text-lg font-bold text-gray-900 mb-2" numberOfLines={2}>
-                  {blog.title}
-                </Text>
-                <Text className="text-sm text-gray-600 mb-3" numberOfLines={3}>
-                  {blog.description}
-                </Text>
-                <View className="flex-row flex-wrap">
-                  {blog.tags.slice(0, 3).map((tag, tagIndex) => (
-                    <View
-                      key={tagIndex} // Changed from index to tagIndex to avoid confusion with outer index
-                      className="bg-blue-100 px-2 py-1 rounded-full mr-2 mb-2"
-                    >
-                      <Text className="text-xs text-blue-800">{tag}</Text>
+              <View className="relative">
+                <Image
+                  source={{
+                    uri: blog.image || "https://via.placeholder.com/300x200",
+                  }}
+                  className="w-full h-48"
+                  resizeMode="cover"
+                />
+                <View className="p-4">
+                  <Text
+                    className="text-lg font-bold text-gray-900 mb-2"
+                    numberOfLines={2}
+                  >
+                    {blog.title}
+                  </Text>
+                  <View className="flex-row flex-wrap">
+                    <View style={{ marginRight: 4 }}>
+                      <Text style={{ fontSize: 18, color: "#2563EB" }}>🏷️</Text>
                     </View>
-                  ))}
+                    {blog.tags.slice(0, 2).map((tag, index) => (
+                      <View
+                        key={index}
+                        className="bg-blue-100 px-2 py-1 rounded-full mr-2 mb-2"
+                      >
+                        <Text className="text-xs text-blue-800">{tag}</Text>
+                      </View>
+                    ))}
+                  </View>
+                  <View className="w-full flex flex-row justify-between items-center gap-2">
+
+                  <Text className="text-xs text-gray-500 mt-2">
+                    {new Date(blog.createdAt).toLocaleDateString()}
+                  </Text>
+                  <LinearGradient
+                    colors={["#2563EB", "#7C3AED"]} // from-blue-600 to-purple-600
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{borderRadius:20, width: 'auto', paddingVertical: 10, paddingHorizontal: 20,}}
+                    className=""
+                  >
+                    <Text className="text-white text-xs font-semibold text-center">
+                      {blog.name}
+                    </Text>
+                  </LinearGradient>
+                  </View>
                 </View>
-                <Text className="text-xs text-gray-500 mt-2">
-                  {new Date(blog.createdAt).toLocaleDateString()}
-                </Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -292,9 +246,9 @@ const BlogList: React.FC = () => {
             <View
               key={index}
               className={`h-2 rounded-full mx-1 ${
-                index === getActiveIndicator() 
-                  ? 'bg-blue-600 w-6 transition-all duration-300' 
-                  : 'bg-gray-300 w-2'
+                index === getActiveIndicator()
+                  ? "bg-blue-600 w-6"
+                  : "bg-gray-300 w-2"
               }`}
             />
           ))}
@@ -305,543 +259,6 @@ const BlogList: React.FC = () => {
 };
 
 export default BlogList;
-// import React, { useEffect, useRef, useState } from 'react';
-// import {
-//   View,
-//   Text,
-//   TouchableOpacity,
-//   Image,
-//   ScrollView,
-//   Dimensions,
-//   NativeSyntheticEvent,
-//   NativeScrollEvent,
-// } from 'react-native';
-// import { useNavigation } from '@react-navigation/native';
-// import { LinearGradient } from 'expo-linear-gradient';
-// import { getAllBlogs } from '../../api/apiMethods'; // Adjust path as needed
-// import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import { RootStackParamList } from '@/src/navigation/AppNavigator';
-
-// // Define the Blog interface based on API response
-// interface Blog {
-//   _id: string;
-//   name: string;
-//   image: string;
-//   title: string;
-//   description: string;
-//   tags: string[];
-//   createdAt: string;
-//   updatedAt: string;
-//   __v: number;
-// }
-
-// // Define the API response interface
-// interface ApiResponse {
-//   success: boolean;
-//   data: Blog[];
-// }
-// type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-// const BlogList: React.FC = () => {
-// const navigation = useNavigation<NavigationProp>();
-//   const [blogs, setBlogs] = useState<Blog[]>([]);
-//   const [loading, setLoading] = useState<boolean>(true);
-//   const [error, setError] = useState<string | null>(null);
-//   const [isPaused, setIsPaused] = useState(false);
-//   const scrollViewRef = useRef<ScrollView>(null);
-//   const screenWidth = Dimensions.get('window').width;
-//   const cardWidth = screenWidth * 0.8; // 80% of screen width
-//   const cardSpacing = 16;
-//   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
-//   const [scrollPosition, setScrollPosition] = useState(0);
-//   const touchTimeout = useRef<NodeJS.Timeout | null>(null);
-
-//   // Fetch blogs on component mount
-//   useEffect(() => {
-//     const fetchBlogs = async () => {
-//       try {
-//         const response: ApiResponse = await getAllBlogs();
-//         if (response.success && Array.isArray(response.data)) {
-//           setBlogs(response.data);
-//         } else {
-//           setError('No blogs found');
-//         }
-//       } catch (err) {
-//         console.error('Error fetching blogs:', err);
-//         setError('Failed to load blogs. Please try again later.');
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchBlogs();
-//   }, []);
-
-//   // Auto-scroll logic with smoother animation
-//   useEffect(() => {
-//     if (isPaused || blogs.length === 0) return;
-
-//     const autoScroll = () => {
-//       if (scrollViewRef.current) {
-//         const currentOffset = scrollPosition;
-//         const maxScroll = (cardWidth + cardSpacing) * (blogs.length - 1);
-        
-//         if (currentOffset >= maxScroll - 1) {
-//           // Smooth scroll back to the beginning
-//           scrollViewRef.current.scrollTo({ x: 0, animated: true });
-//           setScrollPosition(0);
-//         } else {
-//           // Smooth scroll to the next card
-//           const newOffset = currentOffset + cardWidth + cardSpacing;
-//           scrollViewRef.current.scrollTo({ 
-//             x: newOffset, 
-//             animated: true,
-//           });
-//           setScrollPosition(newOffset);
-//         }
-//       }
-//     };
-
-//     // Clear any existing interval
-//     if (scrollInterval.current) {
-//       clearInterval(scrollInterval.current);
-//     }
-
-//     // Set new interval with slower scroll (every 3 seconds)
-//     scrollInterval.current = setInterval(autoScroll, 3000);
-
-//     return () => {
-//       if (scrollInterval.current) {
-//         clearInterval(scrollInterval.current);
-//       }
-//     };
-//   }, [isPaused, blogs, scrollPosition, cardWidth, cardSpacing]);
-
-//   // Handle scroll events
-//   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-//     setScrollPosition(event.nativeEvent.contentOffset.x);
-//   };
-
-//   // Handle touch events for swipe
-//   const handleTouchStart = () => {
-//     setIsPaused(true);
-    
-//     // Clear any existing timeout
-//     if (touchTimeout.current) {
-//       clearTimeout(touchTimeout.current);
-//     }
-    
-//     // Resume auto-scroll after a delay when user stops interacting
-//     touchTimeout.current = setTimeout(() => setIsPaused(false), 3000);
-//   };
-
-//   // Calculate active indicator
-//   const getActiveIndicator = () => {
-//     return Math.floor(scrollPosition / (cardWidth + cardSpacing));
-//   };
-
-//   const navigateToBlog = (blog: Blog) => {
-//     navigation.navigate('BlogDetail', { blog });  // TS-safe now
-//   };
-
-//   const navigateToAllBlogs = () => {
-//     navigation.navigate('AllBlogs');
-//   };
-
-//   // Clean up on unmount
-//   useEffect(() => {
-//     return () => {
-//       if (scrollInterval.current) {
-//         clearInterval(scrollInterval.current);
-//       }
-//       if (touchTimeout.current) {
-//         clearTimeout(touchTimeout.current);
-//       }
-//     };
-//   }, []);
-
-//   if (loading) {
-//     return (
-//       <View className="flex-1 justify-center items-center bg-blue-50">
-//         <Text className="text-gray-600">Loading blogs...</Text>
-//       </View>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <View className="flex-1 justify-center items-center bg-blue-50">
-//         <Text className="text-red-600">{error}</Text>
-//       </View>
-//     );
-//   }
-
-//   if (blogs.length === 0) {
-//     return (
-//       <View className="flex-1 justify-center items-center bg-blue-50">
-//         <Text className="text-gray-600">No blogs available at the moment.</Text>
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <View 
-//       className="flex-1 bg-gradient-to-b from-blue-50 to-purple-50 py-6"
-//       onTouchStart={handleTouchStart}
-//     >
-//       <View className="px-4 mx-auto">
-//         {/* Header */}
-//         <View className="flex-row justify-between items-center mb-6">
-//           <View className="flex-row items-center">
-//             <LinearGradient
-//               colors={['#EC4899', '#8B5CF6']}
-//               start={{ x: 0, y: 0 }}
-//               end={{ x: 1, y: 1 }}
-//               className="w-1 h-12 mr-3 rounded-full"
-//             />
-//             <Text className="text-3xl font-bold text-gray-900">Blogs</Text>
-//           </View>
-//           <TouchableOpacity 
-//           onPress={navigateToAllBlogs}
-//           >
-//             <Text className="text-lg font-semibold text-blue-600">View All</Text>
-//           </TouchableOpacity>
-//         </View>
-
-//         {/* Blog Cards ScrollView */}
-//         <ScrollView
-//           ref={scrollViewRef}
-//           horizontal
-//           showsHorizontalScrollIndicator={false}
-//           pagingEnabled={false}
-//           snapToInterval={cardWidth + cardSpacing}
-//           snapToAlignment="center"
-//           decelerationRate="normal"
-//           onScroll={handleScroll}
-//           scrollEventThrottle={16}
-//           contentContainerStyle={{ 
-//             paddingHorizontal: (screenWidth - cardWidth) / 2 - cardSpacing,
-//           }}
-//           className="pb-8"
-//         >
-//           {blogs.map((blog, index) => (
-//             <TouchableOpacity
-//               key={blog._id}
-//               className="bg-white rounded-xl shadow-lg mx-2 overflow-hidden relative"
-//               style={{ 
-//                 width: cardWidth,
-//                 shadowColor: '#000',
-//                 shadowOffset: { width: 0, height: 2 },
-//                 shadowOpacity: 0.1,
-//                 shadowRadius: 4,
-//                 elevation: 3,
-//               }}
-//               onPress={() => navigateToBlog(blog)}
-//               activeOpacity={0.9}
-//             >
-//               {/* Gradient Blog Name Badge */}
-//               <LinearGradient
-//                 colors={['#EC4899', '#8B5CF6']}
-//                 start={{ x: 0, y: 0 }}
-//                 end={{ x: 1, y: 0 }}
-//                 className="absolute top-3 right-3 z-10 px-3 py-1 rounded-full"
-//                 style={{
-//                   maxWidth: cardWidth * 0.6,
-//                 }}
-//               >
-//                 <Text 
-//                   className="text-white text-xs font-semibold"
-//                   numberOfLines={1}
-//                   ellipsizeMode="tail"
-//                 >
-//                   {blog.name}
-//                 </Text>
-//               </LinearGradient>
-
-//               <Image
-//                 source={{ uri: blog.image  }}
-//                 className="w-full h-48"
-//                 resizeMode="cover"
-//               />
-//               <View className="p-4">
-//                 <Text className="text-lg font-bold text-gray-900 mb-2" numberOfLines={2}>
-//                   {blog.title}
-//                 </Text>
-//                 <Text className="text-sm text-gray-600 mb-3" numberOfLines={3}>
-//                   {blog.description}
-//                 </Text>
-//                 <View className="flex-row flex-wrap">
-//                   {blog.tags.slice(0, 3).map((tag, index) => (
-//                     <View
-//                       key={index}
-//                       className="bg-blue-100 px-2 py-1 rounded-full mr-2 mb-2"
-//                     >
-//                       <Text className="text-xs text-blue-800">{tag}</Text>
-//                     </View>
-//                   ))}
-//                 </View>
-//                 <Text className="text-xs text-gray-500 mt-2">
-//                   {new Date(blog.createdAt).toLocaleDateString()}
-//                 </Text>
-//               </View>
-//             </TouchableOpacity>
-//           ))}
-//         </ScrollView>
-
-//         {/* Indicators */}
-//         <View className="flex-row justify-center mt-4">
-//           {blogs.map((_, index) => (
-//             <View
-//               key={index}
-//               className={`h-2 rounded-full mx-1 ${
-//                 index === getActiveIndicator() 
-//                   ? 'bg-blue-600 w-6 transition-all duration-300' 
-//                   : 'bg-gray-300 w-2'
-//               }`}
-//             />
-//           ))}
-//         </View>
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default BlogList;
-// import React, { useEffect, useRef, useState } from 'react';
-// import {
-//   View,
-//   Text,
-//   TouchableOpacity,
-//   Image,
-//   ScrollView,
-//   Dimensions,
-//   NativeSyntheticEvent,
-//   NativeScrollEvent,
-//   Platform,
-// } from 'react-native';
-// import { useNavigation } from '@react-navigation/native';
-// import { getAllBlogs } from '../../api/apiMethods'; // Adjust path as needed
-
-// // Define the Blog interface based on API response
-// interface Blog {
-//   _id: string;
-//   name: string;
-//   image: string;
-//   title: string;
-//   description: string;
-//   tags: string[];
-//   createdAt: string;
-//   updatedAt: string;
-//   __v: number;
-// }
-
-// // Define the API response interface
-// interface ApiResponse {
-//   success: boolean;
-//   data: Blog[];
-// }
-
-// const BlogList: React.FC = () => {
-//   const navigation = useNavigation();
-//   const [blogs, setBlogs] = useState<Blog[]>([]);
-//   const [loading, setLoading] = useState<boolean>(true);
-//   const [error, setError] = useState<string | null>(null);
-//   const [isPaused, setIsPaused] = useState(false);
-//   const scrollViewRef = useRef<ScrollView>(null);
-//   const screenWidth = Dimensions.get('window').width;
-//   const cardWidth = screenWidth * 0.8; // 80% of screen width
-//   const cardSpacing = 16;
-//   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
-
-//   // Fetch blogs on component mount
-//   useEffect(() => {
-//     const fetchBlogs = async () => {
-//       try {
-//         const response: ApiResponse = await getAllBlogs();
-//         if (response.success && Array.isArray(response.data)) {
-//           setBlogs(response.data);
-//         } else {
-//           setError('No blogs found');
-//         }
-//       } catch (err) {
-//         console.error('Error fetching blogs:', err);
-//         setError('Failed to load blogs. Please try again later.');
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchBlogs();
-//   }, []);
-
-//   // Auto-scroll logic
-//   useEffect(() => {
-//     if (isPaused || blogs.length === 0) return;
-
-//     const autoScroll = () => {
-//       if (scrollViewRef.current) {
-//         const currentOffset = scrollPosition;
-//         const maxScroll = (cardWidth + cardSpacing) * (blogs.length - 1);
-        
-//         if (currentOffset >= maxScroll - 1) {
-//           // Scroll back to the beginning
-//           scrollViewRef.current.scrollTo({ x: 0, animated: true });
-//           setScrollPosition(0);
-//         } else {
-//           // Scroll to the next card
-//           const newOffset = currentOffset + cardWidth + cardSpacing;
-//           scrollViewRef.current.scrollTo({ x: newOffset, animated: true });
-//           setScrollPosition(newOffset);
-//         }
-//       }
-//     };
-
-//     scrollInterval.current = setInterval(autoScroll, 1000);
-
-//     return () => {
-//       if (scrollInterval.current) {
-//         clearInterval(scrollInterval.current);
-//       }
-//     };
-//   }, [isPaused, blogs, scrollPosition]);
-
-//   const [scrollPosition, setScrollPosition] = useState(0);
-
-//   // Handle scroll events
-//   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-//     setScrollPosition(event.nativeEvent.contentOffset.x);
-//   };
-
-//   // Handle touch events for swipe
-//   const handleTouchStart = () => {
-//     setIsPaused(true);
-//     // Resume auto-scroll after a delay when user stops interacting
-//     setTimeout(() => setIsPaused(false), 3000);
-//   };
-
-//   // Calculate active indicator
-//   const getActiveIndicator = () => {
-//     return Math.floor(scrollPosition / (cardWidth + cardSpacing));
-//   };
-
-//   // Navigate to blog detail
-//   const navigateToBlog = (blog: Blog) => {
-//     navigation.navigate('BlogDetail', { blog });
-//   };
-
-//   // Navigate to all blogs
-//   const navigateToAllBlogs = () => {
-//     navigation.navigate('AllBlogs');
-//   };
-
-//   if (loading) {
-//     return (
-//       <View className="flex-1 justify-center items-center bg-blue-50">
-//         <Text className="text-gray-600">Loading blogs...</Text>
-//       </View>
-//     );
-//   }
-
-//   if (error) {
-//     return (
-//       <View className="flex-1 justify-center items-center bg-blue-50">
-//         <Text className="text-red-600">{error}</Text>
-//       </View>
-//     );
-//   }
-
-//   if (blogs.length === 0) {
-//     return (
-//       <View className="flex-1 justify-center items-center bg-blue-50">
-//         <Text className="text-gray-600">No blogs available at the moment.</Text>
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <View 
-//       className="flex-1 bg-blue-50 py-6"
-//       onTouchStart={handleTouchStart}
-//     >
-//       <View className="px-4 mx-auto max-w-7xl">
-//         {/* Header */}
-//         <View className="flex-row justify-between items-center mb-6">
-//           <View className="flex-row items-center">
-//             <View className="w-1 h-12 bg-pink-500 mr-3 rounded-full" />
-//             <Text className="text-3xl font-bold text-gray-900">Blogs</Text>
-//           </View>
-//           <TouchableOpacity onPress={navigateToAllBlogs}>
-//             <Text className="text-lg font-semibold text-blue-600">View All</Text>
-//           </TouchableOpacity>
-//         </View>
-
-//         {/* Blog Cards ScrollView */}
-//         <ScrollView
-//           ref={scrollViewRef}
-//           horizontal
-//           showsHorizontalScrollIndicator={false}
-//           pagingEnabled={false}
-//           snapToInterval={cardWidth + cardSpacing}
-//           decelerationRate="fast"
-//           onScroll={handleScroll}
-//           scrollEventThrottle={16}
-//           contentContainerStyle={{ paddingHorizontal: (screenWidth - cardWidth) / 2 - cardSpacing }}
-//           className="pb-8"
-//         >
-//           {blogs.map((blog) => (
-//             <TouchableOpacity
-//               key={blog._id}
-//               className="bg-white rounded-xl shadow-md mx-2 overflow-hidden relative"
-//               style={{ width: cardWidth }}
-//               onPress={() => navigateToBlog(blog)}
-//               activeOpacity={0.9}
-//             >
-
-//               <View className=' absolute top-1 right-0 z-10'>{blog.name} </View>
-//               <Image
-//                 source={{ uri: blog.image || 'https://via.placeholder.com/300x200' }}
-//                 className="w-full h-48"
-//                 resizeMode="cover"
-//               />
-//               <View className="p-4">
-//                 <Text className="text-lg font-bold text-gray-900 mb-2" numberOfLines={2}>
-//                   {blog.title}
-//                 </Text>
-//                 <View className="flex-row flex-wrap">
-//                   {blog.tags.slice(0, 3).map((tag, index) => (
-//                     <View
-//                       key={index}
-//                       className="bg-blue-100 px-2 py-1 rounded-full mr-2 mb-2"
-//                     >
-//                       <Text className="text-xs text-blue-800">{tag}</Text>
-//                     </View>
-//                   ))}
-//                 </View>
-//                 <Text className="text-xs text-gray-500 mt-2">
-//                   {new Date(blog.createdAt).toLocaleDateString()}
-//                 </Text>
-//               </View>
-//             </TouchableOpacity>
-//           ))}
-//         </ScrollView>
-
-//         {/* Indicators */}
-//         <View className="flex-row justify-center mt-4">
-//           {blogs.map((_, index) => (
-//             <View
-//               key={index}
-//               className={`h-2 rounded-full mx-1 ${
-//                 index === getActiveIndicator() ? 'bg-blue-600 w-6' : 'bg-gray-300 w-2'
-//               }`}
-//             />
-//           ))}
-//         </View>
-//       </View>
-//     </View>
-//   );
-// };
-
-// export default BlogList;
 // import React, { useState, useEffect } from 'react';
 // import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator } from 'react-native';
 // import { Ionicons } from '@expo/vector-icons';
@@ -1002,7 +419,7 @@ export default BlogList;
 //           <Text className="text-xl font-semibold text-blue-600">View All</Text>
 //         </TouchableOpacity>
 //       </View>
-      
+
 //       <FlatList
 //         data={blogs}
 //         renderItem={renderBlogItem}

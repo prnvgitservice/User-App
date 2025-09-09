@@ -1,18 +1,14 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 // ... your screen imports (HomeScreen, etc.)
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import HomeScreen from "../screens/HomeScreen";
 import CategoriesPage from "../components/homescreen/CategoryScreen";
 import CartScreen from "../screens/CartScreen";
 import OnboardingScreen from "../components/homescreen/OnboardingScreen";
 import LoginScreen from "../components/auth/LoginScreen";
 import RegisterScreen from "../components/auth/RegisterScreen";
-import ProfessionalAgreementScreen from "../components/pages/ProfessionalAgreementScreen";
 import TechnicianProfile from "../screens/TechnicianProfile";
 import BlogDetailPage from "../components/blog/BlogDetail";
 import TechniciansScreen from "../screens/TechniciansScreen";
