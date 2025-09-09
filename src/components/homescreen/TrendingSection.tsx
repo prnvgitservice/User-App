@@ -222,16 +222,16 @@ const TrendingSection: React.FC<TrendingSectionProps> = () => {
     <View className="mx-auto mb-12 px-4">
       {trendingCategories.length > 0 ? (
         <View>
-          <LinearGradient
+            <Text className="text-2xl font-bold text-black mb-2 mt-4">
+              Trending Searches
+            </Text>
+          {/* <LinearGradient
             colors={['#4F46E5', '#7C3AED']} // indigo-600 to-purple-600
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             className="rounded-lg px-4 py-2 mb-4"
           >
-            <Text className="text-2xl font-bold text-white">
-              Trending Searches
-            </Text>
-          </LinearGradient>
+          </LinearGradient> */}
           {renderItems()}
         </View>
       ) : (

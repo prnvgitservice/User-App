@@ -103,7 +103,7 @@ const PopularSearchesSection: React.FC = () => {
       end={{ x: 1, y: 1 }}
       className="mb-8 mx-4 p-6 rounded-lg shadow-md"
     >
-      <Text className="text-2xl font-bold mb-4 text-black">
+      <Text className="text-2xl font-bold mb-2 mt-4 text-black">
         Popular Searches
       </Text>
 

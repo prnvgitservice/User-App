@@ -14,6 +14,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrendingSection from "../components/homescreen/TrendingSection";
 import PopularSearchesSection from "../components/homescreen/PopularSearchesSection";
 import BlogList from "../components/homescreen/BlogList";
+import CategoriesPage from "../components/homescreen/CategoryGrid";
+import CategoriesGrid from "../components/homescreen/CategoryGrid";
 
 // Define navigation param list
 type RootStackParamList = {
@@ -62,11 +64,11 @@ const HomeScreen: React.FC = () => {
       <View className="flex-1 bg-white pt-10">
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Header with Logo and Auth Options */}
-          <View className="flex-row justify-between items-center px-5 pt-12 pb-4">
+          <View className="flex-row justify-between items-center px-5 pt-4 pb-4">
             <View className="bg-blue-900 rounded px-1 py-1 self-center">
               <Image
                 source={require("../../assets/prnv_logo.jpg")}
-                className="h-10 w-60"
+                className="h-8 w-52"
                 resizeMode="contain"
               />
             </View>
@@ -77,12 +79,12 @@ const HomeScreen: React.FC = () => {
                 >
                   <Ionicons
                     name="person-circle-outline"
-                    size={40}
+                    size={38}
                     color="#a259ff"
                   />
                 </TouchableOpacity>
               ) : (
-                <View className="flex-row space-x-2 gap-1">
+                <View className="flex-row space-x-2 gap-2">
                   <TouchableOpacity
                     onPress={() => navigation.navigate("Login")}
                   >
@@ -93,14 +95,35 @@ const HomeScreen: React.FC = () => {
                   <TouchableOpacity
                     onPress={() => navigation.navigate("GuestBook")}
                   >
-                    <Text className="text-gray-900 text-sm">Guest</Text>
+                    <Text className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Guest</Text>
                   </TouchableOpacity>
                 </View>
               )}
             </View>
           </View>
 
+          {/* <View className="h-2 bg-gray-100 mb-4" />
+
+          <Text className="text-center text-gray-600 mb-4">
+            Most Popular Categories
+          </Text>
+          <View className="px-5 mb-5">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {categories.map((cat, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  className="bg-gray-100 p-3 rounded-lg mr-2"
+                  onPress={() => navigation.navigate("Category")}
+                >
+                  <Text className="text-center text-gray-900">{cat}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View> */}
+
           <View>
+            <CategoriesGrid />
+
             <TrendingSection />
 
             <PopularSearchesSection />

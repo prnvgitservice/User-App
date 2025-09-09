@@ -6,10 +6,10 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";// RN version of lucide-react
+import { useNavigation } from "@react-navigation/native"; // RN version of lucide-react
 import { getAllBlogs } from "../../api/apiMethods";
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 interface Blog {
   _id: string;
@@ -55,18 +55,22 @@ const AllBlogs: React.FC = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50">
-        <ActivityIndicator size="large" color="#2563eb" />
-        <Text className="text-gray-600 mt-2">Loading...</Text>
-      </View>
+      <SafeAreaView className="flex-1 bg-white py-12">
+        <View className="flex-1 justify-center items-center bg-gray-50">
+          <ActivityIndicator size="large" color="#2563eb" />
+          <Text className="text-gray-600 mt-2">Loading...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50">
-        <Text className="text-red-600">{error}</Text>
-      </View>
+      <SafeAreaView className="flex-1 bg-white py-12">
+        <View className="flex-1 justify-center items-center bg-gray-50">
+          <Text className="text-red-600">{error}</Text>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -86,20 +90,22 @@ const AllBlogs: React.FC = () => {
         </Text>
 
         {/* Date + Button Row */}
-        <View className="flex-row justify-between items-center mt-3">
-          <View className="flex-row items-center">
+        <View className="flex-row w-full gap-3 justify-between items-center mt-3">
+          <View className="flex-row items-center gap-2">
             {/* <Calendar size={16} color="#6b7280" className="mr-2" /> */}
-            <Ionicons name="calendar-outline" color="#000" size={24} />
-            <Text className="text-xs text-gray-500">
+            {/* <Ionicons name="calendar-outline" color="#000" size={16} /> */}
+            <Text className="text-sm text-gray-500">
               {new Date(item.createdAt).toLocaleDateString()}
             </Text>
           </View>
 
           <TouchableOpacity
             onPress={() => navigation.navigate("BlogDetail", { blog: item })}
-            className="px-3 py-1 rounded-lg bg-red-100"
+            className="px-2 py-1 rounded-lg bg-red-100"
           >
-            <Text className="text-red-600 font-semibold text-sm">Read More →</Text>
+            <Text className="text-red-600 font-semibold text-sm">
+              Read More →
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -107,16 +113,18 @@ const AllBlogs: React.FC = () => {
   );
 
   return (
-    <View className="flex-1 bg-gray-50 p-3">
-      <FlatList
-        data={blogs}
-        renderItem={renderItem}
-        keyExtractor={(item) => item._id}
-        numColumns={2}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+    <SafeAreaView className="flex-1 bg-white py-12">
+      <View className="flex-1 bg-gray-50 p-3">
+        <FlatList
+          data={blogs}
+          renderItem={renderItem}
+          keyExtractor={(item) => item._id}
+          numColumns={2}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+    </SafeAreaView>
   );
 };
 
