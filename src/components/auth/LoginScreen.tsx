@@ -151,11 +151,23 @@ const LoginScreen = () => {
               </View>
             </View>
 
+            <View className="flex flex-row w-full justify-center items-center gap-2">
+              <TouchableOpacity
+              className={`rounded-lg py-3 items-center shadow-md bg-green-600 w-1/2`}
+              onPress={()=>{navigation.navigate('Main' as never)}}
+              disabled={isLoading}
+            >
+              <Text className="text-white text-base font-semibold">
+                Guest
+              </Text>
+            </TouchableOpacity>
+
+
             {/* Sign In Button */}
             <TouchableOpacity
               className={`rounded-lg py-3 items-center shadow-md ${
                 isLoading ? 'bg-blue-400' : 'bg-blue-600'
-              }`}
+              }  w-1/2`}
               onPress={handleSubmit}
               disabled={isLoading}
             >
@@ -163,6 +175,7 @@ const LoginScreen = () => {
                 {isLoading ? 'Signing In...' : 'Sign In'}
               </Text>
             </TouchableOpacity>
+            </View>
 
             {/* Sign Up Link */}
             <View className="flex-row justify-center mt-4">
