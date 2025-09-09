@@ -1,11 +1,9 @@
-import React from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
-import TrendingSection from "./TrendingSection";
-import BlogSection from "./BlogSection";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define navigation param list
 type RootStackParamList = {
@@ -30,17 +28,35 @@ const reviews = [
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const isLoginedIn = true; // Replace with actual auth state
+  const [isLoginedIn, setIsLoginedIn] = useState(false); // Replace with actual auth state
+
+  useEffect(() => {
+  const loginConform = async () => {
+    try{
+      const user = await AsyncStorage.getItem('user')
+      if(user){
+        setIsLoginedIn(true)
+      }else{
+        setIsLoginedIn(false)
+      }
+    }catch(err){
+      Alert.alert(err)
+    }
+  }
+
+  loginConform();
+  }, [])
 
   return (
     <View className="flex-1 bg-white">
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header with Logo and Auth Options */}
         <View className="flex-row justify-between items-center px-5 pt-12 pb-4">
-          <View className="bg-blue-600 px-3 py-2 rounded-full">
+          <View className="bg-blue-900 rounded px-1 py-1 self-center">
             <Image
               source={require("../../../assets/prnv_logo.jpg")}
-              className="w-56 h-9"
+              className="h-10 w-60"
+              resizeMode="contain"
             />
           </View>
           <View className="space-x-1">
@@ -70,9 +86,10 @@ const HomeScreen: React.FC = () => {
           </View>
         </View>
 
-
         <View className="h-2 bg-gray-100 mb-4" />
-        <Text className="text-center text-gray-600 mb-4">Most Popular Categories</Text>
+        <Text className="text-center text-gray-600 mb-4">
+          Most Popular Categories
+        </Text>
         <View className="px-5 mb-5">
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {categories.map((cat, idx) => (
@@ -86,7 +103,6 @@ const HomeScreen: React.FC = () => {
             ))}
           </ScrollView>
         </View>
-
 
         <View className="h-2 bg-gray-100 mb-4" />
         <Text className="text-center text-gray-600 mb-4">Other categories</Text>
@@ -104,9 +120,9 @@ const HomeScreen: React.FC = () => {
           </ScrollView>
         </View>
 
-          {/* <BlogSection/> */}
+        {/* <BlogSection/> */}
 
-      {/* Banners
+        {/* Banners
         <View className="mx-5 mb-5 bg-gray-200 h-24 rounded-2xl flex items-center justify-center">
           <Text className="text-gray-900 text-lg">Banners Placeholder</Text>
         </View> */}
@@ -129,8 +145,6 @@ const HomeScreen: React.FC = () => {
           </View>
         </View> */}
 
-
-
         {/* <View className="px-5 mb-5">
           <Text className="text-lg font-bold text-gray-900 mb-2">
             Trending Services
@@ -148,21 +162,12 @@ const HomeScreen: React.FC = () => {
             ))}
           </View>
         </View> */}
-
-        
-
-        
-        
-
-        
       </ScrollView>
     </View>
   );
 };
 
 export default HomeScreen;
-
-
 
 // import React, { useState, useEffect } from "react";
 // import {

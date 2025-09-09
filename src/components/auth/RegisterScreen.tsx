@@ -254,7 +254,6 @@ const RegisterScreen = () => {
 
   // Handle keyboard dismiss on scroll
   const handleScroll = useCallback(() => {
-    Keyboard.dismiss();
   }, []);
 
   const handleSubmit = useCallback(async () => {
