@@ -1,17 +1,18 @@
-import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import AppNavigator from './src/navigation/AppNavigator';
-import "./global.css"
+import * as React from "react";
+import AppNavigator from "./src/navigation/AppNavigator";
+import "./global.css";
+import { CategoryProvider } from "./src/context/CategoryContext";
+import { NavigationContainer } from "@react-navigation/native";
 
 export default function App() {
   return (
     <NavigationContainer>
-      <AppNavigator />
+      <CategoryProvider>
+        <AppNavigator />
+      </CategoryProvider>
     </NavigationContainer>
   );
 }
-
-
 
 // import * as React from 'react';
 // import { NavigationContainer } from '@react-navigation/native';

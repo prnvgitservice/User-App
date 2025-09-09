@@ -57,6 +57,11 @@ const endpoints: any = {
     url: () => `/api/pincodes/allAreas`,
   },
 
+  getAllBlogs: {
+    method: "get",
+    url: () => `/api/blog/getAllBlogs`,
+  },
+
 };
 
 export default endpoints;

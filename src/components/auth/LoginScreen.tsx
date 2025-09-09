@@ -111,7 +111,7 @@ const LoginScreen = () => {
                 Phone Number <Text className="text-red-500">*</Text>
               </Text>
               <View className="flex-row items-center border border-gray-300 rounded-lg px-3 h-12">
-                <Text className="text-xl mr-2.5">✉️</Text>
+                <Text className="text-xl mr-2.5">📞</Text>
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="Enter phone number"
