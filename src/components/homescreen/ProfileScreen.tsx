@@ -1,11 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from '@expo/vector-icons'; // Assuming Expo is used; otherwise, use react-native-vector-icons
 
-const SettingsScreen = () => {
+const ProfileScreen = () => {
   const [user, setUser] = useState(null);
   const [credits, setCredits] = useState(50);
+  const navigation = useNavigation();
 
   useEffect(() => {
     const loadData = async () => {
@@ -31,6 +34,10 @@ const SettingsScreen = () => {
     loadData();
   }, []);
 
+  const handleContact = () => {
+    Linking.openURL("tel:+919603558369");
+  };
+
   const handleLogout = useCallback(() => {
     Alert.alert(
       'Logout',
@@ -43,7 +50,7 @@ const SettingsScreen = () => {
             try {
               await AsyncStorage.clear();
               setUser(null);
-              setCredits(0);
+              navigation.navigate("Login");
             } catch (e) {
               console.error('Error during logout:', e);
             }
@@ -68,9 +75,9 @@ const SettingsScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100 pb-10">
+    <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView
-        contentContainerClassName="px-4 sm:px-6 lg:px-8 py-8"
+        contentContainerClassName="pb-10"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         onScroll={handleScroll}
@@ -78,141 +85,325 @@ const SettingsScreen = () => {
         bounces={false}
       >
         {/* Header */}
-        <View className="flex-row items-center p-4 bg-white shadow">
-          <TouchableOpacity onPress={() => { /* Handle back navigation if needed */ }}>
-            <Text className="text-2xl">←</Text>
+        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="black" />
           </TouchableOpacity>
-          <Text className="flex-1 text-center text-lg font-bold">Settings</Text>
+          <Text className="text-xl font-bold text-gray-900">Settings</Text>
+          <View className="w-6" /> {/* Spacer for symmetry */}
         </View>
 
         {/* User Profile */}
-        <View className="flex-row items-center p-4 bg-white mt-2">
-          <Image
-            source={{ uri: user?.avatar || "https://via.placeholder.com/50" }}
-            className="w-12 h-12 rounded-full mr-3"
-          />
-          <View>
-            <Text className="font-semibold">{user?.name || user?.username || 'User'}</Text>
-            <Text className="text-gray-500">{user?.phone || 'Phone Number'}</Text>
+        <View className="bg-white mx-4 mt-6 rounded-xl shadow-sm overflow-hidden">
+          <View className="flex-row items-center p-4">
+            <Image
+              source={{ uri: user?.profileImage || "https://cdn-icons-png.flaticon.com/512/6596/6596121.png" }}
+              className="w-16 h-16 rounded-full mr-4 border border-gray-200"
+            />
+            <View className="flex-1">
+              <Text className="text-lg font-semibold text-gray-900">{user?.name || user?.username || 'User'}</Text>
+              <Text className="text-sm text-gray-500 mt-1">{user?.phoneNumber || 'Phone Number'}</Text>
+            </View>
           </View>
         </View>
 
         {/* Quick Access Icons */}
-        <View className="flex-row justify-around p-4 bg-white mt-2">
-          <TouchableOpacity className="items-center" onPress={() => { /* Navigate to reviews */ }}>
-            <Text className="text-2xl">📦</Text>
-            <Text className="text-sm">Your Reviews</Text>
+        <View className="flex-row justify-around mx-4 mt-6 bg-white rounded-xl shadow-sm p-4">
+          <TouchableOpacity className="items-center flex-1" onPress={() => { /* Navigate to reviews */ }}>
+            <View className="bg-blue-100 p-3 rounded-full mb-2">
+              <Ionicons name="star-outline" size={24} color="blue" />
+            </View>
+            <Text className="text-sm font-medium text-gray-700">Your Reviews</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center" onPress={() => { /* Navigate to help */ }}>
-            <Text className="text-2xl">💬</Text>
-            <Text className="text-sm">Help & Support</Text>
+          <TouchableOpacity className="items-center flex-1" onPress={handleContact}>
+            <View className="bg-green-100 p-3 rounded-full mb-2">
+              <Ionicons name="headset-outline" size={24} color="green" />
+            </View>
+            <Text className="text-sm font-medium text-gray-700">Help & Support</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center" onPress={() => { /* Navigate to favorites */ }}>
-            <Text className="text-2xl">❤️</Text>
-            <Text className="text-sm">Favorites</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Promotional Banner */}
-        <View className="bg-green-100 p-4 mt-2 flex-row items-center justify-between">
-          <View>
-            <Text className="font-semibold">Unlock PRNV Pro - Save 20%!</Text>
-            <Text className="text-sm text-gray-600">
-              Enhance your experience
-            </Text>
-          </View>
-          <TouchableOpacity className="bg-purple-600 px-4 py-2 rounded" onPress={() => { /* Handle upgrade */ }}>
-            <Text className="text-white">Upgrade Now</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Account Section */}
-        <View className="bg-white p-4 mt-2">
-          <Text className="font-semibold">PRNV Credits</Text>
-          <View className="flex-row justify-between items-center mt-2">
-            <Text>Available Balance: {credits}</Text>
-            <TouchableOpacity className="bg-purple-600 px-3 py-1 rounded" onPress={() => { /* Navigate to add credits page or handle here */ }}>
-              <Text className="text-white">Add Credits</Text>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity className="flex-row justify-between mt-2" onPress={handleAddCredits}>
-            <Text className="text-green-600">Free 5 Credits</Text>
-            <Text className="text-purple-600">₹25</Text>
+          <TouchableOpacity className="items-center flex-1" onPress={() => { /* Navigate to favorites */ }}>
+            <View className="bg-red-100 p-3 rounded-full mb-2">
+              <Ionicons name="heart-outline" size={24} color="red" />
+            </View>
+            <Text className="text-sm font-medium text-gray-700">Favorites</Text>
           </TouchableOpacity>
         </View>
 
         {/* Your Information Section */}
-        <View className="bg-white p-4 mt-2">
-          <Text className="font-semibold">Your Information</Text>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to editProfile */ }}>
-            <Text>Edit Profile</Text>
+        <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+          <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Your Information</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to editProfile */ }}>
+            <Text className="text-base text-gray-800">Edit Profile</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to transactions */ }}>
-            <Text>Transactions</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to transactions */ }}>
+            <Text className="text-base text-gray-800">Transactions</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to reviews */ }}>
-            <Text>Your Reviews</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to reviews */ }}>
+            <Text className="text-base text-gray-800">Your Reviews</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to saved locations */ }}>
-            <Text>Saved Locations</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to saved locations */ }}>
+            <Text className="text-base text-gray-800">Saved Locations</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to navigation history */ }}>
-            <Text>Navigation History</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to navigation history */ }}>
+            <Text className="text-base text-gray-800">Navigation History</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to help */ }}>
-            <Text>Help & Support</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to help */ }}>
+            <Text className="text-base text-gray-800">Help & Support</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to payment management */ }}>
-            <Text>Payment Management</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3" onPress={() => { /* Navigate to payment management */ }}>
+            <Text className="text-base text-gray-800">Payment Management</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
         </View>
 
         {/* Other Information Section */}
-        <View className="bg-white p-4 mt-2">
-          <Text className="font-semibold">Other Information</Text>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to suggest features or FAQ */ }}>
-            <Text>Suggest Features</Text>
+        <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+          <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Other Information</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to suggest features or FAQ */ }}>
+            <Text className="text-base text-gray-800">Suggest Features</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to notifications settings */ }}>
-            <Text>Notifications</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to notifications settings */ }}>
+            <Text className="text-base text-gray-800">Notifications</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to about or general info */ }}>
-            <Text>General Info</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to about or general info */ }}>
+            <Text className="text-base text-gray-800">General Info</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to privacy policy */ }}>
-            <Text>Privacy Policy</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to privacy policy */ }}>
+            <Text className="text-base text-gray-800">Privacy Policy</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to terms & conditions */ }}>
-            <Text>Terms & Conditions</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to terms & conditions */ }}>
+            <Text className="text-base text-gray-800">Terms & Conditions</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to about us */ }}>
-            <Text>About Us</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to about us */ }}>
+            <Text className="text-base text-gray-800">About Us</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to contact us */ }}>
-            <Text>Contact Us</Text>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3" onPress={() => { /* Navigate to contact us */ }}>
+            <Text className="text-base text-gray-800">Contact Us</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity className="bg-white p-4 mt-2" onPress={handleLogout}>
-          <Text className="text-center font-semibold text-red-600">
-            Log Out
-          </Text>
+        <TouchableOpacity className="mx-4 mt-6 bg-red-500 rounded-xl py-4" onPress={handleLogout}>
+          <Text className="text-center text-base font-semibold text-white">Log Out</Text>
         </TouchableOpacity>
 
         {/* Footer-like Info */}
-        <View className="p-4 mt-2">
-          <Text className="text-center text-gray-500">App v2.5.4</Text>
-          <Text className="text-center text-gray-400 text-xs mt-2">
-            © 2025 PRNV Services. All rights reserved.
-          </Text>
+        <View className="mt-8 pb-4">
+          <Text className="text-center text-sm text-gray-500">App v2.5.4</Text>
+          <Text className="text-center text-xs text-gray-400 mt-1">© 2025 PRNV Services. All rights reserved.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-export default SettingsScreen;
+export default ProfileScreen;
+// import React, { useCallback, useEffect, useState } from "react";
+// import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Linking } from "react-native";
+// import { SafeAreaView } from "react-native-safe-area-context";
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { useNavigation } from "@react-navigation/native";
+
+// const ProfileScreen = () => {
+//   const [user, setUser] = useState(null);
+//   const [credits, setCredits] = useState(50);
+//   const navigation = useNavigation()
+
+//   useEffect(() => {
+//     const loadData = async () => {
+//       try {
+//         const storedUser = await AsyncStorage.getItem('user');
+//         if (storedUser) {
+//           const parsedUser = JSON.parse(storedUser);
+//           setUser(parsedUser);
+//         }
+
+//         const storedCredits = await AsyncStorage.getItem('credits');
+//         if (storedCredits) {
+//           setCredits(parseInt(storedCredits));
+//         } else {
+//           setCredits(50);
+//           await AsyncStorage.setItem('credits', '50');
+//         }
+//       } catch (e) {
+//         console.error('Error loading data:', e);
+//       }
+//     };
+
+//     loadData();
+//   }, []);
+
+//    const handleContact = () => {
+//       Linking.openURL("tel:+919603558369");
+//     };
+
+//   const handleLogout = useCallback(() => {
+//     Alert.alert(
+//       'Logout',
+//       'Are you sure you want to logout?',
+//       [
+//         { text: 'Cancel', style: 'cancel' },
+//         {
+//           text: 'Yes',
+//           onPress: async () => {
+//             try {
+//               await AsyncStorage.clear();
+//               setUser(null);
+//               navigation.navigate("Login")
+//             } catch (e) {
+//               console.error('Error during logout:', e);
+//             }
+//           }
+//         }
+//       ]
+//     );
+//   }, []);
+
+//   const handleAddCredits = useCallback(async () => {
+//     const newCredits = credits + 5;
+//     setCredits(newCredits);
+//     try {
+//       await AsyncStorage.setItem('credits', newCredits.toString());
+//     } catch (e) {
+//       console.error('Error adding credits:', e);
+//     }
+//   }, [credits]);
+
+//   const handleScroll = useCallback(() => {
+//     // Add any scroll handling logic here if needed
+//   }, []);
+
+//   return (
+//     <SafeAreaView className="flex-1 bg-gray-100 pb-10">
+//       <ScrollView
+//         contentContainerClassName="px-4 sm:px-6 lg:px-8 py-8"
+//         showsVerticalScrollIndicator={false}
+//         keyboardShouldPersistTaps="handled"
+//         onScroll={handleScroll}
+//         scrollEventThrottle={16}
+//         bounces={false}
+//       >
+//         {/* Header */}
+//         <View className="flex-row items-center p-4 bg-white shadow">
+//           <TouchableOpacity onPress={() => { /* Handle back navigation if needed */ }}>
+//             <Text className="text-2xl">←</Text>
+//           </TouchableOpacity>
+//           <Text className="flex-1 text-center text-lg font-bold">Settings</Text>
+//         </View>
+
+//         {/* User Profile */}
+//         <View className="flex-row items-center p-4 bg-white mt-2">
+//           <Image
+//             source={{ uri: user?.profileImage || "https://cdn-icons-png.flaticon.com/512/6596/6596121.png" }}
+//             className="w-12 h-12 rounded-full mr-3"
+//           />
+//           <View>
+//             <Text className="font-semibold">{user?.name || user?.username || 'User'}</Text>
+//             <Text className="text-gray-500">{user?.phoneNumber || 'Phone Number'}</Text>
+//           </View>
+//         </View>
+
+//         {/* Quick Access Icons */}
+//         <View className="flex-row justify-around p-4 bg-white mt-2">
+//           <TouchableOpacity className="items-center" onPress={() => { /* Navigate to reviews */ }}>
+//             <Text className="text-2xl">📦</Text>
+//             <Text className="text-sm">Your Reviews</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="items-center" onPress={() => {handleContact()}}>
+//             <Text className="text-2xl">📞</Text>
+//             <Text className="text-sm">Help & Support</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="items-center" onPress={() => { /* Navigate to favorites */ }}>
+//             <Text className="text-2xl">❤️</Text>
+//             <Text className="text-sm">Favorites</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Your Information Section */}
+//         <View className="bg-white p-4 mt-2">
+//           <Text className="font-semibold">Your Information</Text>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to editProfile */ }}>
+//             <Text>Edit Profile</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to transactions */ }}>
+//             <Text>Transactions</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to reviews */ }}>
+//             <Text>Your Reviews</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to saved locations */ }}>
+//             <Text>Saved Locations</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to navigation history */ }}>
+//             <Text>Navigation History</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to help */ }}>
+//             <Text>Help & Support</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to payment management */ }}>
+//             <Text>Payment Management</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Other Information Section */}
+//         <View className="bg-white p-4 mt-2">
+//           <Text className="font-semibold">Other Information</Text>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to suggest features or FAQ */ }}>
+//             <Text>Suggest Features</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to notifications settings */ }}>
+//             <Text>Notifications</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to about or general info */ }}>
+//             <Text>General Info</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to privacy policy */ }}>
+//             <Text>Privacy Policy</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to terms & conditions */ }}>
+//             <Text>Terms & Conditions</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to about us */ }}>
+//             <Text>About Us</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2" onPress={() => { /* Navigate to contact us */ }}>
+//             <Text>Contact Us</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Logout Button */}
+//         <TouchableOpacity className="bg-white p-4 mt-2" onPress={handleLogout}>
+//           <Text className="text-center font-semibold text-red-600">
+//             Log Out
+//           </Text>
+//         </TouchableOpacity>
+
+//         {/* Footer-like Info */}
+//         <View className="p-4 mt-2">
+//           <Text className="text-center text-gray-500">App v2.5.4</Text>
+//           <Text className="text-center text-gray-400 text-xs mt-2">
+//             © 2025 PRNV Services. All rights reserved.
+//           </Text>
+//         </View>
+//       </ScrollView>
+//     </SafeAreaView>
+//   );
+// };
+
+// export default ProfileScreen;
 // import React, { useCallback } from "react";
 // import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 // import { SafeAreaView } from "react-native-safe-area-context";

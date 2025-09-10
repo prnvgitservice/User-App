@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +15,10 @@ import TechniciansScreen from "../screens/TechniciansScreen";
 import AllBlogs from "../components/blog/AllBlogs";
 import SearchFilterScreen from "../screens/SearchFilterScreen";
 import TransactionPageScreen from "../screens/TransactionPageScreen";
+import UserProfile from "../components/homescreen/UserProfile";
+import ProfileScreen from "../components/homescreen/ProfileScreen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import GuestBooking from "../components/homescreen/GuestBooking";
 
 // Root Stack Params
 export type RootStackParamList = {
@@ -104,16 +108,34 @@ function MainTabs({ navigation }) {
 
 // AppNavigator
 function AppNavigator() {
+   const [isLoginedIn, setIsLoginedIn] = useState(false); // Replace with actual auth state
+
+  useEffect(() => {
+    const loginConform = async () => {
+      try {
+        const user = await AsyncStorage.getItem("user");
+        if (user) {
+          setIsLoginedIn(true);
+        } else {
+          setIsLoginedIn(false);
+        }
+      } catch (err) {
+        Alert.alert(err);
+      }
+    };
+
+    loginConform();
+  }, []);
   return (
     <Stack.Navigator
-      initialRouteName="Onboarding"
+      initialRouteName={"Onboarding"}
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={RegisterScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
-      <Stack.Screen name="Profile" component={TechnicianProfile} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen
         name="BlogDetail"
         component={BlogDetailPage}
@@ -122,6 +144,8 @@ function AppNavigator() {
         })}
       />
       <Stack.Screen name="AllBlogs" component={AllBlogs} />
+      <Stack.Screen name="GuestBook" component={GuestBooking} />
+
       <Stack.Screen
         name="Technicians"
         component={TechniciansScreen}

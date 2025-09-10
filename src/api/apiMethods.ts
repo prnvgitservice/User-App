@@ -30,3 +30,6 @@ export const getAllTechByAddress = (formData: any) =>
 
 export const getSearchContentByAddress = (formData: any) =>
   apiRequest("getSearchContentByAddress", formData);
+
+export const createGuestBooking = (formData: any) =>
+  apiRequest("createGuestBooking", formData);

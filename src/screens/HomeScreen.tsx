@@ -104,24 +104,6 @@ const HomeScreen: React.FC = () => {
             </View>
           </View>
 
-          {/* <View className="h-2 bg-gray-100 mb-4" />
-
-          <Text className="text-center text-gray-600 mb-4">
-            Most Popular Categories
-          </Text>
-          <View className="px-5 mb-5">
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              {categories.map((cat, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  className="bg-gray-100 p-3 rounded-lg mr-2"
-                  onPress={() => navigation.navigate("Category")}
-                >
-                  <Text className="text-center text-gray-900">{cat}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View> */}
 
           <View>
             <BannerCarousel />
@@ -145,8 +127,26 @@ const HomeScreen: React.FC = () => {
 };
 
 export default HomeScreen;
-{
-  /* <View className="h-2 bg-gray-100 mb-4" />
+{/* <View className="h-2 bg-gray-100 mb-4" />
+
+<Text className="text-center text-gray-600 mb-4">
+  Most Popular Categories
+</Text>
+<View className="px-5 mb-5">
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    {categories.map((cat, idx) => (
+      <TouchableOpacity
+        key={idx}
+        className="bg-gray-100 p-3 rounded-lg mr-2"
+        onPress={() => navigation.navigate("Category")}
+      >
+        <Text className="text-center text-gray-900">{cat}</Text>
+      </TouchableOpacity>
+    ))}
+  </ScrollView>
+</View> */}
+
+{ /* <View className="h-2 bg-gray-100 mb-4" />
 
 {/* <Text className="text-center text-gray-600 mb-4">
   Most Popular Categories
