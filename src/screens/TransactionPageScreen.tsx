@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { ChevronRight } from "lucide-react-native"; 
-import { getOrdersByUserId } from "../api/apiMethods"; // same API call
+import { getOrdersByUserId } from "../api/apiMethods"; 
 import BookingsListScreen from "../components/homescreen/BookingsListScreen";
 
 interface Booking {
@@ -56,14 +56,14 @@ const TransactionPageScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedRole = "user"; // replace with AsyncStorage if needed
+    const storedRole = "user"; 
     setRole(storedRole);
   }, []);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const userId = "123"; // replace with AsyncStorage value
+      const userId = "123"; 
       const response: ApiResponse = await getOrdersByUserId(userId);
       if (response.success) {
         setBookingsData(response.result.bookings);
@@ -84,11 +84,11 @@ const TransactionPageScreen: React.FC = () => {
   return (
     <ScrollView className="flex-1 bg-gray-50 p-4">
       <View className="mb-6">
-        <Text className="text-3xl font-bold text-gray-900 mb-2">My Transactions</Text>
+        {/* <Text className="text-3xl font-bold text-gray-900 mb-2">My Transactions</Text> */}
         <View className="flex-row items-center space-x-2">
           <Text className="text-gray-500">Home</Text>
           <ChevronRight size={16} color="#6b7280" />
-          <Text className="text-gray-500">My Transactions</Text>
+          {/* <Text className="text-gray-500">My Transactions</Text> */}
         </View>
       </View>
 
