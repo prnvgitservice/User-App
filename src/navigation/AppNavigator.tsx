@@ -6,7 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
 import CategoriesPage from "../components/homescreen/CategoryScreen";
 import CartScreen from "../screens/CartScreen";
-import OnboardingScreen from "../components/homescreen/OnboardingScreen";
+import OnboardingScreen from "../screens/OnboardingScreen";
 import LoginScreen from "../components/auth/LoginScreen";
 import RegisterScreen from "../components/auth/RegisterScreen";
 import TechnicianProfile from "../screens/TechnicianProfile";
@@ -14,6 +14,7 @@ import BlogDetailPage from "../components/blog/BlogDetail";
 import TechniciansScreen from "../screens/TechniciansScreen";
 import AllBlogs from "../components/blog/AllBlogs";
 import SearchFilterScreen from "../screens/SearchFilterScreen";
+import TransactionPageScreen from "../screens/TransactionPageScreen";
 
 // Root Stack Params
 export type RootStackParamList = {
@@ -94,7 +95,7 @@ function MainTabs({ navigation }) {
       />
       <Tab.Screen
         name="Transactions"
-        component={CategoriesPage}
+        component={TransactionPageScreen}
         options={{ headerShown: false }}
       />
     </Tab.Navigator>

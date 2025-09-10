@@ -16,9 +16,9 @@ const pages = [
 ];
 
 const images = [
-  require('../../../assets/1.jpg'),
-  require('../../../assets/f2.jpg'),
-  require('../../../assets/f3.jpg'),
+  require('../../assets/1.jpg'),
+  require('../../assets/f2.jpg'),
+  require('../../assets/f3.jpg'),
 ];
 
 const OnboardingScreen: React.FC<Props> = ({ navigation }) => {
