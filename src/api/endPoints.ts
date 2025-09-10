@@ -66,6 +66,17 @@ const endpoints: any = {
     method: "get",
     url: "/api/companyReview/getCompanyReviews",
   },
+
+   getAllTechByAddress: {
+    method: "post",
+    url: "/api/techDetails/getAllTechByAddress",
+  },
+
+  
+  getSearchContentByAddress: {
+    method: "post",
+    url: "/api/searchContentData/getSearchContentByLocation",
+  },
 };
 
 export default endpoints;

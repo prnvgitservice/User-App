@@ -36,7 +36,7 @@ const ads = [
   'https://www.shutterstock.com/image-photo/hvac-technician-performing-air-conditioner-600nw-2488702851.jpg',
 ];
 
-const AdvertisementBanner = () => {
+export const AdvertisementBanner = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const AdvertisementBanner = () => {
   );
 };
 
-const ServiceFilters = ({ onFilterChange }: { onFilterChange: (filter: string) => void }) => (
+export const ServiceFilters = ({ onFilterChange }: { onFilterChange: (filter: string) => void }) => (
   <View className="flex-row justify-around mb-4">
     <TouchableOpacity
       className="bg-blue-500 px-4 py-2 rounded-lg"
@@ -77,8 +77,7 @@ const ServiceFilters = ({ onFilterChange }: { onFilterChange: (filter: string) =
 const TechniciansScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { category } = route.params as { category: Category };
-  const categoryId = category?._id;
+  const { categoryId , category } = route.params as { categoryId: string , category: string};
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [filteredTechnicians, setFilteredTechnicians] = useState<Technician[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(false);
@@ -195,7 +194,7 @@ const TechniciansScreen = () => {
 
     <View className="flex-1 bg-gray-100 px-4">
       <AdvertisementBanner />
-      <Text className="text-xl font-semibold mb-4">{category?.category_name || 'Technicians'}</Text>
+      <Text className="text-xl font-semibold mb-4">{category || 'Technicians'}</Text>
       <ServiceFilters onFilterChange={handleFilterChange} />
       {isDataLoading ? (
           <ActivityIndicator size="large" color="#0000ff" className="mt-4" />

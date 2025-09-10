@@ -13,6 +13,7 @@ import TechnicianProfile from "../screens/TechnicianProfile";
 import BlogDetailPage from "../components/blog/BlogDetail";
 import TechniciansScreen from "../screens/TechniciansScreen";
 import AllBlogs from "../components/blog/AllBlogs";
+import SearchFilterScreen from "../screens/SearchFilterScreen";
 
 // Root Stack Params
 export type RootStackParamList = {
@@ -125,8 +126,8 @@ function AppNavigator() {
         component={TechniciansScreen}
         options={({ route }) => ({
           title:
-            (route.params as { category?: Category })?.category
-              ?.category_name || "Technicians",
+            (route.params as { categoryId: string } | undefined)
+              ?.categoryId || "Technicians",
         })}
       />
       <Stack.Screen
@@ -137,6 +138,18 @@ function AppNavigator() {
             ?.technicianId
             ? `Profile`
             : "TechnicianProfile",
+        })}
+      />
+
+      <Stack.Screen
+        name="SearchFilter"
+        component={SearchFilterScreen}
+        options={({ route }) => ({
+          title:
+            (route.params as { categoryName?: string; pincode?: string })
+              ?.categoryName ||
+            (route.params as { pincode?: string })?.pincode ||
+            "Search Filter",
         })}
       />
     </Stack.Navigator>

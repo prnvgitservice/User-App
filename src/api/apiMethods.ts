@@ -23,4 +23,10 @@ export const getAllPincodes = () => apiRequest("getAllPincodes");
 
 export const getAllBlogs = (data: any) => apiRequest("getAllBlogs", data);
 
-export const  getCompanyReviews = (data: any) => apiRequest("getCompanyReviews", data)
+export const  getCompanyReviews = (data: any) => apiRequest("getCompanyReviews", data);
+
+export const getAllTechByAddress = (formData: any) =>
+  apiRequest("getAllTechByAddress", formData);
+
+export const getSearchContentByAddress = (formData: any) =>
+  apiRequest("getSearchContentByAddress", formData);

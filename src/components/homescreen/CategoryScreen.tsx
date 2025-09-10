@@ -63,7 +63,7 @@ const CategoriesPage = () => {
       >
         <TouchableOpacity
           className="flex flex-col items-center p-4 rounded-2xl border border-gray-200 bg-white shadow-md active:scale-95"
-          onPress={() => navigation.navigate("Technicians", { category: item })}
+          onPress={() => navigation.navigate("Technicians", { categoryId: item._id, category: item.category_name })}
         >
           <View
             className={`w-20 h-20 ${bgColor} rounded-full flex items-center justify-center mb-3 overflow-hidden`}

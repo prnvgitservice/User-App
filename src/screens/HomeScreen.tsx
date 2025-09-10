@@ -17,6 +17,7 @@ import BlogList from "../components/homescreen/BlogList";
 import CategoriesGrid from "../components/homescreen/CategoryGrid";
 import CustomerReviews from "../components/homescreen/CustomerReviews";
 import BannerCarousel from "../components/homescreen/BannerCarousel";
+import SearchBarSection from "../components/homescreen/SearchBarSection";
 
 // Define navigation param list
 type RootStackParamList = {
@@ -124,6 +125,8 @@ const HomeScreen: React.FC = () => {
 
           <View>
             <BannerCarousel />
+
+            <SearchBarSection />
 
             <CategoriesGrid />
 
