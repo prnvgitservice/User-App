@@ -190,7 +190,7 @@ const Services = ({ services, technician }: ServicesProps) => {
   };
 
   return (
-    <View className="border border-gray-300 shadow-xs rounded-xl p-4 max-h-80">
+    <View className="border border-gray-300 shadow-xs rounded-xl p-4 max-h-[45vh]">
       {/* {error && <Text className="mb-3 text-red-600 text-sm">{error}</Text>} */}
 
       {/* Header */}

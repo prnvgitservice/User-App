@@ -16,9 +16,9 @@ interface AllFiltersProps {
   ratings: Rating[];
 }
 
-type TabType = "Overview" | "Photos" | "Services" | "Reviews";
+type TabType =  "Photos" | "Services" | "Reviews";
 
-const FILTERS: TabType[] = ["Overview", "Photos", "Services", "Reviews"];
+const FILTERS: TabType[] = ["Photos", "Services", "Reviews"];
 
 /** Tab Button Component */
 const TabButton = React.memo(
@@ -32,9 +32,8 @@ const TabButton = React.memo(
     onPress: () => void;
   }) => (
     <TouchableOpacity
-      className={`border-2 rounded-xl py-2 px-5 mx-1 ${
-        isActive ? "bg-purple-500 border-purple-600" : "border-gray-400"
-      }`}
+      className={`border-2 rounded-xl py-2 px-5 mx-1 ${isActive ? "bg-purple-500 border-purple-600" : "border-gray-400"
+        }`}
       onPress={onPress}
     >
       <Text className={isActive ? "text-white font-medium" : "text-black"}>
@@ -50,58 +49,64 @@ const AllFilters = ({
   technicianImages,
   ratings,
 }: AllFiltersProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>("Overview");
+  const [activeTab, setActiveTab] = useState<TabType>("Services");
 
   /** Render tab content memoized */
-//   const content = useMemo(() => {
-//     switch (activeTab) {
-//       case "Overview":
-//         return (
-//  <ScrollView 
-//       className="flex-col gap-4" 
-//       showsVerticalScrollIndicator={true}
-//     >
-//       <Photos images={technicianImages} />
-//       <Services services={services} technician={technician} />
-//       <Reviews ratings={ratings} />
-//     </ScrollView>
+  //   const content = useMemo(() => {
+  //     switch (activeTab) {
+  //       case "Overview":
+  //         return (
+  //  <ScrollView 
+  //       className="flex-col gap-4" 
+  //       showsVerticalScrollIndicator={true}
+  //     >
+  //       <Photos images={technicianImages} />
+  //       <Services services={services} technician={technician} />
+  //       <Reviews ratings={ratings} />
+  //     </ScrollView>
 
-          
-//         );
-//       case "Photos":
-//         return <Photos images={technicianImages} />;
-//       case "Services":
-//         return <Services services={services} technician={technician} />;
-//       case "Reviews":
-//         return <Reviews ratings={ratings} />;
-//       default:
-//         return null;
-//     }
-//   }, [activeTab, services, technician, technicianImages, ratings]);
 
-const content = useMemo(() => {
-  switch (activeTab) {
-    case "Overview":
-      return (
-        <ScrollView
-          className="flex-col gap-4" 
-          showsVerticalScrollIndicator={true}
-        >
-          <Photos images={technicianImages} />
-          <Services services={services} technician={technician} />
-          <Reviews ratings={ratings} />
-        </ScrollView>
-      );
-    case "Photos":
-      return <Photos images={technicianImages} />;
-    case "Services":
-      return <Services services={services} technician={technician} />;
-    case "Reviews":
-      return <Reviews ratings={ratings} />;
-    default:
-      return null;
-  }
-}, [activeTab, services, technician, technicianImages, ratings]);
+  //         );
+  //       case "Photos":
+  //         return <Photos images={technicianImages} />;
+  //       case "Services":
+  //         return <Services services={services} technician={technician} />;
+  //       case "Reviews":
+  //         return <Reviews ratings={ratings} />;
+  //       default:
+  //         return null;
+  //     }
+  //   }, [activeTab, services, technician, technicianImages, ratings]);
+
+  const content = useMemo(() => {
+    switch (activeTab) {
+    //   case "Overview":
+    //     return (
+    //       <ScrollView
+    //         className="flex-col gap-4 "
+    //         showsVerticalScrollIndicator={false}
+    //       >
+    //         <Photos images={technicianImages} />
+    //         <Services services={services} technician={technician} />
+    //         <Reviews ratings={ratings} />
+    //       </ScrollView>
+
+    //       // <View className="flex-col gap-4 ">
+    //       //   <Photos images={technicianImages} />
+    //       //   <Services services={services} technician={technician} />
+    //       //   <Reviews ratings={ratings} />
+    //       // </View>
+    //     );
+      case "Photos":
+        return <Photos images={technicianImages} />;
+      case "Services":
+        return <Services services={services} technician={technician} />;
+      case "Reviews":
+        return <Reviews ratings={ratings} />;
+      default:
+        return null;
+    }
+  }, [activeTab, services, technician, technicianImages, ratings]);
 
 
   /** Render Tab Buttons */
@@ -117,8 +122,8 @@ const content = useMemo(() => {
   );
 
   return (
-    <View className=" mt-8  flex-col gap-1 p-2">
-     
+    <View className=" flex-col gap-1 mt-8 max-h-full">
+
       <FlatList
         data={FILTERS}
         renderItem={renderTab}
@@ -128,7 +133,7 @@ const content = useMemo(() => {
         contentContainerStyle={{ paddingHorizontal: 4 }}
       />
 
-      <View className="my-5">{content}</View>
+      <View className="my-5 ">{content}</View>
     </View>
   );
 };
@@ -158,7 +163,7 @@ export default AllFilters;
 //   const renderContent = () => {
 //     if (activeTab === "Overview") {
 //       return (
-//           <View>    
+//           <View>
 //             <Photos images={technicianImages} />
 //             <Services services={services} technician={technician} />
 //             <Reviews ratings={ratings} />
