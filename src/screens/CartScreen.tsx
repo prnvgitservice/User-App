@@ -10,11 +10,11 @@ import {
   Alert,
 } from "react-native";
 import { Minus, Trash2, X } from "lucide-react-native";
-import { GoPlus } from "react-icons/go";
-import { FaRegCalendarAlt } from "react-icons/fa";
+// import { GoPlus } from "react-icons/go";
+// import { FaRegCalendarAlt } from "react-icons/fa";
 import { useNavigation } from "@react-navigation/native";
 
-// Dummy API methods (replace with real API integration)
+
 const getCartItems = async (userId: string) => {
   return {
     success: true,
