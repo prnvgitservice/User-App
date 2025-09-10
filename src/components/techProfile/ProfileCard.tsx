@@ -41,7 +41,7 @@ const ProfileCard = ({ technician}: ProfileCardProps) => {
           </View>
         )}
 
-        <View className="flex-row my-3 items-center">
+        <View className="flex-row items-center">
           <Ionicons name="location-outline" size={27} color="red" />
           <Text className="text-sm font-light ml-2">
             {[
