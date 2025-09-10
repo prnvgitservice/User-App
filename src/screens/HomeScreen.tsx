@@ -14,8 +14,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrendingSection from "../components/homescreen/TrendingSection";
 import PopularSearchesSection from "../components/homescreen/PopularSearchesSection";
 import BlogList from "../components/homescreen/BlogList";
-import CategoriesPage from "../components/homescreen/CategoryGrid";
 import CategoriesGrid from "../components/homescreen/CategoryGrid";
+import CustomerReviews from "../components/homescreen/CustomerReviews";
+import BannerCarousel from "../components/homescreen/BannerCarousel";
 
 // Define navigation param list
 type RootStackParamList = {
@@ -122,6 +123,8 @@ const HomeScreen: React.FC = () => {
           </View> */}
 
           <View>
+            <BannerCarousel />
+
             <CategoriesGrid />
 
             <TrendingSection />
@@ -129,6 +132,8 @@ const HomeScreen: React.FC = () => {
             <PopularSearchesSection />
 
             <BlogList />
+
+            <CustomerReviews/>
           </View>
         </ScrollView>
       </View>

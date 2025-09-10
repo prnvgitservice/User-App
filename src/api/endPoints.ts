@@ -62,6 +62,10 @@ const endpoints: any = {
     url: () => `/api/blog/getAllBlogs`,
   },
 
+   getCompanyReviews: {
+    method: "get",
+    url: "/api/companyReview/getCompanyReviews",
+  },
 };
 
 export default endpoints;
