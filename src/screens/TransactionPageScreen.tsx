@@ -1,9 +1,19 @@
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { ChevronRight } from "lucide-react-native"; 
 import { getOrdersByUserId } from "../api/apiMethods"; 
 import BookingsListScreen from "../components/homescreen/BookingsListScreen";
-
+import UpcomingBookingsScreen from "../components/transaction/UpcomingBookingsScreen";
+import CompletedBookingsScreen from "../components/transaction/CompletedBookingsScreen";
+import CancelledBookingsScreen from "../components/transaction/CancelledBookingsScreen";
 interface Booking {
   _id: string;
   userId: string;

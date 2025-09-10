@@ -1,4 +1,4 @@
-// @ts-ignore: No type definitions for react-native-vector-icons/Ionicons
+
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
