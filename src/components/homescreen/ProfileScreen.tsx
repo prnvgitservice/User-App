@@ -141,23 +141,11 @@ const ProfileScreen = () => {
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to reviews */ }}>
-            <Text className="text-base text-gray-800">Your Reviews</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to saved locations */ }}>
-            <Text className="text-base text-gray-800">Saved Locations</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to navigation history */ }}>
-            <Text className="text-base text-gray-800">Navigation History</Text>
+            <Text className="text-base text-gray-800">Leave a Comment</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to help */ }}>
             <Text className="text-base text-gray-800">Help & Support</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3" onPress={() => { /* Navigate to payment management */ }}>
-            <Text className="text-base text-gray-800">Payment Management</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
         </View>
@@ -165,32 +153,36 @@ const ProfileScreen = () => {
         {/* Other Information Section */}
         <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Other Information</Text>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to suggest features or FAQ */ }}>
-            <Text className="text-base text-gray-800">Suggest Features</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to notifications settings */ }}>
-            <Text className="text-base text-gray-800">Notifications</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to about or general info */ }}>
-            <Text className="text-base text-gray-800">General Info</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to privacy policy */ }}>
-            <Text className="text-base text-gray-800">Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to terms & conditions */ }}>
-            <Text className="text-base text-gray-800">Terms & Conditions</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to about us */ }}>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("AboutUs") }}>
             <Text className="text-base text-gray-800">About Us</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3" onPress={() => { /* Navigate to contact us */ }}>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3" onPress={() => { navigation.navigate("ContactUs") }}>
             <Text className="text-base text-gray-800">Contact Us</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("KeyFeatures")}}>
+            <Text className="text-base text-gray-800">Key Features</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("FAQ")}}>
+            <Text className="text-base text-gray-800">FAQ's</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("PAG") }}>
+            <Text className="text-base text-gray-800">Professional Agreement Details</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("RefundPolicy") }}>
+            <Text className="text-base text-gray-800">PRNV Services Refund Policy</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("PrivacyPolicy") }}>
+            <Text className="text-base text-gray-800">Privacy Policy</Text>
+            <Ionicons name="chevron-forward" size={20} color="gray" />
+          </TouchableOpacity>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("TermsConditions") }}>
+            <Text className="text-base text-gray-800">Terms & Conditions</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
         </View>

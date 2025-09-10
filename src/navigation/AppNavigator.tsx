@@ -19,6 +19,14 @@ import UserProfile from "../components/homescreen/UserProfile";
 import ProfileScreen from "../components/homescreen/ProfileScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import GuestBooking from "../components/homescreen/GuestBooking";
+import AboutUs from "../components/profile/AboutPageScreen";
+import ContactUs from "../components/profile/ContactUsScreen";
+import KeyFeaturesScreen from "../components/profile/KeyFeaturesScreen";
+import FAQ from "../components/profile/FAQScreen";
+import ProfessionalAgreementScreen from "../components/profile/ProfessionalAgreementScreen";
+import RefundPolicyScreen from "../components/profile/RefundPolicyScreen";
+import PrivacyPolicyScreen from "../components/profile/PrivacyPolicyScreen";
+import TermsConditionsScreen from "../components/profile/TermsConditionsScreen";
 
 // Root Stack Params
 export type RootStackParamList = {
@@ -144,7 +152,14 @@ function AppNavigator() {
         })}
       />
       <Stack.Screen name="AllBlogs" component={AllBlogs} />
-      <Stack.Screen name="GuestBook" component={GuestBooking} />
+      <Stack.Screen name="AboutUs" component={AboutUs} />
+      <Stack.Screen name="ContactUs" component={ContactUs} />
+      <Stack.Screen name="KeyFeatures" component={KeyFeaturesScreen} />
+      <Stack.Screen name="FAQ" component={FAQ} />
+      <Stack.Screen name="PAG" component={ProfessionalAgreementScreen} />
+      <Stack.Screen name="RefundPolicy" component={RefundPolicyScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="TermsConditions" component={TermsConditionsScreen} />
 
       <Stack.Screen
         name="Technicians"
