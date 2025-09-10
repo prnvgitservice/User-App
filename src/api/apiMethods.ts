@@ -1,3 +1,4 @@
+import { data } from "autoprefixer";
 import apiRequest from "./apiRequest";
 
 export const login = (data: any) => apiRequest("login", data);
@@ -19,3 +20,7 @@ export const removeFromCart = (data: any) => apiRequest("removeFromCart", data);
 export const createBookService = (data: any) => apiRequest("createBookService", data);
 
 export const getAllPincodes = () => apiRequest("getAllPincodes");
+
+export const getAllBlogs = (data: any) => apiRequest("getAllBlogs", data);
+
+export const  getCompanyReviews = (data: any) => apiRequest("getCompanyReviews", data)

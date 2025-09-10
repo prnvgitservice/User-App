@@ -62,13 +62,14 @@ export interface TechnicianDetailsResponse {
   categoryServices?: CategoryService[];
   services: TechnicianService[];
   technicianImages: TechnicianImages | null;
-  ratings: Rating | Rating[] | null;
+  ratings: Rating[] | null;
 }
 
 const TechnicianProfile = () => {
   const route = useRoute();
   const { technicianId } = (route.params as { technicianId?: string }) || {};
-  const [technicianDetails, setTechnicianDetails] = useState<TechnicianDetailsResponse | null>(null);
+  const [technicianDetails, setTechnicianDetails] =
+    useState<TechnicianDetailsResponse | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -85,23 +86,15 @@ const TechnicianProfile = () => {
         const response = await getAllTechnicianDetails(technicianId);
         console.log("Technician Details Response:", response);
         if (response?.success && response.result) {
-          const result = response.result;
-          // const derivedServices = result.services?.length > 0
-          //   ? result.services
-          //   : (result.technician?.categoryServices || [])
-          //       .filter((c: CategoryService) => c.status && c.details)
-          //       .map((c: CategoryService) => ({
-          //         ...c.details,
-          //         _id: c.details._id || c.categoryServiceId, // Ensure _id is present
-          //       }));
-          
-          setTechnicianDetails(result);
+          setTechnicianDetails(response.result);
           setError("");
         } else {
           setError("Failed to load technician details. Invalid response format.");
         }
       } catch (err: any) {
-        setError(err.message || "An error occurred while fetching technician details.");
+        setError(
+          err.message || "An error occurred while fetching technician details."
+        );
       } finally {
         setLoading(false);
       }
@@ -110,41 +103,189 @@ const TechnicianProfile = () => {
     fetchTechAllDetails();
   }, [technicianId]);
 
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#0000ff" />
-        <Text className="text-center text-lg mt-4 text-blue-600">Loading...</Text>
-      </SafeAreaView>
-    );
-  }
-
-  if (error || !technicianDetails) {
-    return (
-      <SafeAreaView className="flex-1 justify-center items-center bg-white">
-        <Text className="text-red-600 text-center text-lg">
-          {error || "No technician details available."}
-        </Text>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-white pt-10 pb-10">
-      <View className="flex-1 bg-gray-100 px-4 pt-4">
-        <ProfileCard technician={technicianDetails.technician} ratings={technicianDetails.ratings} />
-        <AllFilters
-          services={technicianDetails.services}
-          technician={technicianDetails.technician}
-          technicianImages={technicianDetails.technicianImages?.imageUrl || []}
-          ratings={technicianDetails.ratings}
-        />
-      </View>
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text className="text-center text-lg mt-4 text-blue-600">
+            Loading...
+          </Text>
+        </View>
+      ) : error || !technicianDetails ? (
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-red-600 text-center text-lg">
+            {error || "No technician details available."}
+          </Text>
+        </View>
+      ) : (
+        <View className="flex-1 bg-gray-100 px-4 pt-4">
+          <ProfileCard
+            technician={technicianDetails.technician}
+            ratings={technicianDetails.ratings}
+          />
+          <AllFilters
+            services={technicianDetails.services}
+            technician={technicianDetails.technician}
+            technicianImages={technicianDetails.technicianImages?.imageUrl || []}
+            ratings={technicianDetails.ratings}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 export default TechnicianProfile;
+
+// import React, { useEffect, useState } from "react";
+// import { View, Text, ActivityIndicator, SafeAreaView } from "react-native";
+// import { useRoute } from "@react-navigation/native";
+// import { getAllTechnicianDetails } from "../api/apiMethods";
+// import ProfileCard from "../components/techProfile/ProfileCard";
+// import AllFilters from "../components/techProfile/AllFilters";
+
+// export interface Technician {
+//   _id: string;
+//   username: string;
+//   phoneNumber: string;
+//   service?: string;
+//   city: string;
+//   state: string;
+//   pincode: string;
+//   profileImage: string;
+//   description?: string;
+//   areaName?: string;
+//   buildingName?: string;
+// }
+
+// export interface CategoryService {
+//   _id: string;
+//   categoryId: string;
+//   status: boolean;
+//   details: TechnicianService;
+// }
+
+// export interface TechnicianService {
+//   _id: string;
+//   categoryId: string;
+//   serviceName: string;
+//   serviceImg: string;
+//   servicePrice: number;
+//   createdAt: string;
+//   updatedAt: string;
+//   __v: number;
+// }
+
+// export interface TechnicianImages {
+//   _id: string;
+//   technicianId: string;
+//   imageUrl: string[];
+//   createdAt: string;
+//   updatedAt: string;
+//   __v: number;
+// }
+
+// export interface Rating {
+//   _id: string;
+//   userId: string;
+//   serviceId: string;
+//   review: string;
+//   rating: number;
+//   createdAt: string;
+//   name?: string;
+//   image?: string;
+// }
+
+// export interface TechnicianDetailsResponse {
+//   technician: Technician;
+//   categoryServices?: CategoryService[];
+//   services: TechnicianService[];
+//   technicianImages: TechnicianImages | null;
+//   ratings: Rating | Rating[] | null;
+// }
+
+// const TechnicianProfile = () => {
+//   const route = useRoute();
+//   const { technicianId } = (route.params as { technicianId?: string }) || {};
+//   const [technicianDetails, setTechnicianDetails] = useState<TechnicianDetailsResponse | null>(null);
+//   const [error, setError] = useState<string>("");
+//   const [loading, setLoading] = useState<boolean>(true);
+
+//   useEffect(() => {
+//     const fetchTechAllDetails = async () => {
+//       if (!technicianId) {
+//         setError("Technician ID is missing. Please try again.");
+//         setLoading(false);
+//         return;
+//       }
+
+//       try {
+//         setLoading(true);
+//         const response = await getAllTechnicianDetails(technicianId);
+//         console.log("Technician Details Response:", response);
+//         if (response?.success && response.result) {
+//           const result = response.result;
+//           // const derivedServices = result.services?.length > 0
+//           //   ? result.services
+//           //   : (result.technician?.categoryServices || [])
+//           //       .filter((c: CategoryService) => c.status && c.details)
+//           //       .map((c: CategoryService) => ({
+//           //         ...c.details,
+//           //         _id: c.details._id || c.categoryServiceId, // Ensure _id is present
+//           //       }));
+          
+//           setTechnicianDetails(result);
+//           setError("");
+//         } else {
+//           setError("Failed to load technician details. Invalid response format.");
+//         }
+//       } catch (err: any) {
+//         setError(err.message || "An error occurred while fetching technician details.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchTechAllDetails();
+//   }, [technicianId]);
+
+//   if (loading) {
+//     return (
+//       <SafeAreaView className="flex-1 justify-center items-center bg-white">
+//         <ActivityIndicator size="large" color="#0000ff" />
+//         <Text className="text-center text-lg mt-4 text-blue-600">Loading...</Text>
+//       </SafeAreaView>
+//     );
+//   }
+
+//   if (error || !technicianDetails) {
+//     return (
+//       <SafeAreaView className="flex-1 justify-center items-center bg-white">
+//         <Text className="text-red-600 text-center text-lg">
+//           {error || "No technician details available."}
+//         </Text>
+//       </SafeAreaView>
+//     );
+//   }
+
+//   return (
+//     <SafeAreaView className="flex-1 ">
+//       <View className="flex-1 bg-gray-100 px-4 pt-4">
+//         <ProfileCard technician={technicianDetails.technician} ratings={technicianDetails.ratings} />
+//         <AllFilters
+//           services={technicianDetails.services}
+//           technician={technicianDetails.technician}
+//           technicianImages={technicianDetails.technicianImages?.imageUrl || []}
+//           ratings={technicianDetails.ratings}
+//         />
+//       </View>
+//     </SafeAreaView>
+//   );
+// };
+
+// export default TechnicianProfile;
+
 // import React, { useEffect, useState } from 'react';
 // import { View, Text, ActivityIndicator } from 'react-native';
 // import { useRoute } from '@react-navigation/native';

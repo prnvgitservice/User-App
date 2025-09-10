@@ -9,6 +9,7 @@ interface ProfileCardProps {
 }
 
 const ProfileCard = ({ technician}: ProfileCardProps) => {
+
   // const averageRating = ratings.length > 0
   //   ? (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(1)
   //   : "N/A";
@@ -21,10 +22,10 @@ const ProfileCard = ({ technician}: ProfileCardProps) => {
           source={{ uri: technician.profileImage || "https://via.placeholder.com/150" }}
           className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
         />
+        
       </View>
-      <View className="flex-1 min-w-0">
-        <Text className="text-xl font-semibold truncate">{technician.username || "Unknown Technician"}</Text>
-
+      <View className="">
+ <Text className="text-xl font-semibold truncate">{technician.username || "Unknown Technician"}</Text>
         <View className="flex-row items-center gap-4 my-3">
           <View className="flex-row items-center border border-yellow-500 rounded-lg px-2 py-1">
             <Text>4.5</Text>
@@ -40,7 +41,7 @@ const ProfileCard = ({ technician}: ProfileCardProps) => {
           </View>
         )}
 
-        <View className="flex-row my-3 items-center">
+        <View className="flex-row items-center">
           <Ionicons name="location-outline" size={27} color="red" />
           <Text className="text-sm font-light ml-2">
             {[

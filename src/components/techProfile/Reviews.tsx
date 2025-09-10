@@ -8,6 +8,7 @@ interface ReviewsProps {
 }
 
 const Reviews = ({ ratings }: ReviewsProps) => {
+  console.log("Reviews component ratings:", ratings);
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-IN", {
@@ -45,10 +46,10 @@ const Reviews = ({ ratings }: ReviewsProps) => {
   );
 
   return (
-    <View className="border border-gray-200 shadow-md rounded-xl p-4 max-h-[80vh]">
-      <Text className="text-xl font-light mb-4">Reviews</Text>
+    <View className="border border-gray-300 shadow-xs rounded-xl p-4 max-h-[80vh]">
+      <Text className="text-xl font-bold">Reviews</Text>
 
-      {ratings.length === 0 ? (
+      {ratings?.length === 0 ? (
         <Text className="text-gray-600">No reviews available</Text>
       ) : (
         <FlatList

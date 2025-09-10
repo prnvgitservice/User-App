@@ -1,16 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, ScrollView, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import TrendingSection from "../components/homescreen/TrendingSection";
+import PopularSearchesSection from "../components/homescreen/PopularSearchesSection";
+import BlogList from "../components/homescreen/BlogList";
+import CategoriesGrid from "../components/homescreen/CategoryGrid";
+import CustomerReviews from "../components/homescreen/CustomerReviews";
+import BannerCarousel from "../components/homescreen/BannerCarousel";
 
 // Define navigation param list
 type RootStackParamList = {
   Login: undefined;
   GuestBook: undefined;
   Category: undefined;
-  Blog: { id: string };
+  Blog: { blog: [] };
   Reviews: undefined;
 };
 
@@ -31,143 +44,193 @@ const HomeScreen: React.FC = () => {
   const [isLoginedIn, setIsLoginedIn] = useState(false); // Replace with actual auth state
 
   useEffect(() => {
-  const loginConform = async () => {
-    try{
-      const user = await AsyncStorage.getItem('user')
-      if(user){
-        setIsLoginedIn(true)
-      }else{
-        setIsLoginedIn(false)
+    const loginConform = async () => {
+      try {
+        const user = await AsyncStorage.getItem("user");
+        if (user) {
+          setIsLoginedIn(true);
+        } else {
+          setIsLoginedIn(false);
+        }
+      } catch (err) {
+        Alert.alert(err);
       }
-    }catch(err){
-      Alert.alert(err)
-    }
-  }
+    };
 
-  loginConform();
-  }, [])
+    loginConform();
+  }, []);
 
   return (
-    <View className="flex-1 bg-white">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header with Logo and Auth Options */}
-        <View className="flex-row justify-between items-center px-5 pt-12 pb-4">
-          <View className="bg-blue-900 rounded px-1 py-1 self-center">
-            <Image
-              source={require("../../../assets/prnv_logo.jpg")}
-              className="h-10 w-60"
-              resizeMode="contain"
-            />
-          </View>
-          <View className="space-x-1">
-            {isLoginedIn ? (
-              <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-                <Ionicons
-                  name="person-circle-outline"
-                  size={40}
-                  color="#a259ff"
-                />
-              </TouchableOpacity>
-            ) : (
-              <View className="flex-row space-x-2 gap-1">
-                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                  <Text className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                    Login
-                  </Text>
-                </TouchableOpacity>
+    <>
+      <View className="flex-1 bg-white pt-10">
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header with Logo and Auth Options */}
+          <View className="flex-row justify-between items-center px-5 pt-4 pb-4">
+            <View className="bg-blue-900 rounded px-1 py-1 self-center">
+              <Image
+                source={require("../../assets/prnv_logo.jpg")}
+                className="h-8 w-52"
+                resizeMode="contain"
+              />
+            </View>
+            <View className="space-x-1">
+              {isLoginedIn ? (
                 <TouchableOpacity
-                  onPress={() => navigation.navigate("GuestBook")}
-                  className="bg-gray-300 px-4 py-2 rounded-lg"
+                  onPress={() => navigation.navigate("Profile")}
                 >
-                  <Text className="text-gray-900 text-sm">Guest</Text>
+                  <Ionicons
+                    name="person-circle-outline"
+                    size={38}
+                    color="#a259ff"
+                  />
                 </TouchableOpacity>
-              </View>
-            )}
+              ) : (
+                <View className="flex-row space-x-2 gap-2">
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Login")}
+                  >
+                    <Text className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                      Login
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("GuestBook")}
+                  >
+                    <Text className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Guest</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
 
-        <View className="h-2 bg-gray-100 mb-4" />
-        <Text className="text-center text-gray-600 mb-4">
-          Most Popular Categories
-        </Text>
-        <View className="px-5 mb-5">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {categories.map((cat, idx) => (
-              <TouchableOpacity
-                key={idx}
-                className="bg-gray-100 p-3 rounded-lg mr-2"
-                onPress={() => navigation.navigate("Category")}
-              >
-                <Text className="text-center text-gray-900">{cat}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+          {/* <View className="h-2 bg-gray-100 mb-4" />
 
-        <View className="h-2 bg-gray-100 mb-4" />
-        <Text className="text-center text-gray-600 mb-4">Other categories</Text>
-        <View className="px-5 mb-5">
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {categories.map((cat, idx) => (
-              <TouchableOpacity
-                key={idx}
-                className="bg-gray-100 p-3 rounded-lg mr-2"
-                onPress={() => navigation.navigate("Category")}
-              >
-                <Text className="text-center text-gray-900">{cat}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* <BlogSection/> */}
-
-        {/* Banners
-        <View className="mx-5 mb-5 bg-gray-200 h-24 rounded-2xl flex items-center justify-center">
-          <Text className="text-gray-900 text-lg">Banners Placeholder</Text>
-        </View> */}
-
-        {/* Categories
-        <View className="px-5 mb-5">
-          <Text className="text-lg font-bold text-gray-900 mb-2">
-            Categories
+          <Text className="text-center text-gray-600 mb-4">
+            Most Popular Categories
           </Text>
-          <View className="flex-row flex-wrap justify-between">
-            {categories.map((cat, idx) => (
-              <TouchableOpacity
-                key={idx}
-                className="w-[48%] bg-gray-100 p-3 rounded-lg mb-2"
-                onPress={() => navigation.navigate("Category")}
-              >
-                <Text className="text-center text-gray-900">{cat}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View> */}
+          <View className="px-5 mb-5">
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {categories.map((cat, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  className="bg-gray-100 p-3 rounded-lg mr-2"
+                  onPress={() => navigation.navigate("Category")}
+                >
+                  <Text className="text-center text-gray-900">{cat}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View> */}
 
-        {/* <View className="px-5 mb-5">
-          <Text className="text-lg font-bold text-gray-900 mb-2">
-            Trending Services
-          </Text>
-          <View className="flex-row flex-wrap justify-between">
-            {trendingServices.map((service, idx) => (
-              <View
-                key={idx}
-                className="w-[30%] bg-gray-100 p-2 rounded-lg mb-2"
-              >
-                <Text className="text-center text-gray-900 text-sm">
-                  {service}
-                </Text>
-              </View>
-            ))}
+          <View>
+            <BannerCarousel />
+
+            <CategoriesGrid />
+
+            <TrendingSection />
+
+            <PopularSearchesSection />
+
+            <BlogList />
+
+            <CustomerReviews/>
           </View>
-        </View> */}
-      </ScrollView>
-    </View>
+        </ScrollView>
+      </View>
+    </>
   );
 };
 
 export default HomeScreen;
+{
+  /* <View className="h-2 bg-gray-100 mb-4" />
+
+{/* <Text className="text-center text-gray-600 mb-4">
+  Most Popular Categories
+</Text>
+<View className="px-5 mb-5">
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    {categories.map((cat, idx) => (
+      <TouchableOpacity
+        key={idx}
+        className="bg-gray-100 p-3 rounded-lg mr-2"
+        onPress={() => navigation.navigate("Category")}
+      >
+        <Text className="text-center text-gray-900">{cat}</Text>
+      </TouchableOpacity>
+    ))}
+  </ScrollView>
+</View> */
+}
+
+{
+  /* <View className="h-2 bg-gray-100 mb-4" />
+<Text className="text-center text-gray-600 mb-4">Other categories</Text>
+<View className="px-5 mb-5">
+  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+    {categories.map((cat, idx) => (
+      <TouchableOpacity
+        key={idx}
+        className="bg-gray-100 p-3 rounded-lg mr-2"
+        onPress={() => navigation.navigate("Category")}
+      >
+        <Text className="text-center text-gray-900">{cat}</Text>
+      </TouchableOpacity>
+    ))}
+  </ScrollView>
+</View> */
+}
+
+{
+  /* <BlogSection/> */
+}
+
+{
+  /* Banners
+<View className="mx-5 mb-5 bg-gray-200 h-24 rounded-2xl flex items-center justify-center">
+  <Text className="text-gray-900 text-lg">Banners Placeholder</Text>
+</View> */
+}
+
+{
+  /* Categories
+<View className="px-5 mb-5">
+  <Text className="text-lg font-bold text-gray-900 mb-2">
+    Categories
+  </Text>
+  <View className="flex-row flex-wrap justify-between">
+    {categories.map((cat, idx) => (
+      <TouchableOpacity
+        key={idx}
+        className="w-[48%] bg-gray-100 p-3 rounded-lg mb-2"
+        onPress={() => navigation.navigate("Category")}
+      >
+        <Text className="text-center text-gray-900">{cat}</Text>
+      </TouchableOpacity>
+    ))}
+  </View>
+</View> */
+}
+
+{
+  /* <View className="px-5 mb-5">
+  <Text className="text-lg font-bold text-gray-900 mb-2">
+    Trending Services
+  </Text>
+  <View className="flex-row flex-wrap justify-between">
+    {trendingServices.map((service, idx) => (
+      <View
+        key={idx}
+        className="w-[30%] bg-gray-100 p-2 rounded-lg mb-2"
+      >
+        <Text className="text-center text-gray-900 text-sm">
+          {service}
+        </Text>
+      </View>
+    ))}
+  </View>
+</View> */
+}
 
 // import React, { useState, useEffect } from "react";
 // import {

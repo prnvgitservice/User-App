@@ -8,20 +8,25 @@ interface PhotosProps {
 const Photos = ({ images }: PhotosProps) => {
   const [showAll, setShowAll] = useState(false);
   const visibleImages = showAll ? images : images?.slice(0, 6);
+  console.log("Photos component images:", images);
 
   const renderImage = ({ item }: { item: string }) => (
     <View className="relative">
       <Image
-        source={{ uri: item || "https://via.placeholder.com/150" }}
-        className="w-full h-36 object-cover rounded-lg"
+      // source="https://res.cloudinary.com/dkfjl3blf/image/upload/v1756877369/TechUploadedPhotos/zbqnyxnfil9eyc5rpn7i.jpg"
+        source={{ uri: item || "https://res.cloudinary.com/dkfjl3blf/image/upload/v1756877369/TechUploadedPhotos/zbqnyxnfil9eyc5rpn7i.jpg" }}
+        // className="w-full h-36 object-cover rounded-lg"
+        style={{ width: 100, height: 100, borderRadius: 10 }}
+         resizeMode="cover"
       />
     </View>
   );
 
   return (
-    <View className="border border-gray-200 shadow-md rounded-xl p-4">
-      <Text className="text-xl font-light mb-4">Photos</Text>
-      {visibleImages && visibleImages.length > 0 ? (
+    <View className="border border-gray-300 shadow-xs rounded-xl p-4">
+      <Text className="text-xl font-bold mb-4">Photos</Text>
+      {visibleImages && visibleImages?.length > 0 ? (
+       
         <FlatList
           data={visibleImages}
           renderItem={renderImage}

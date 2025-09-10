@@ -1,9 +1,70 @@
-import React, { useCallback } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, Image, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = () => {
-const handleScroll = useCallback(() => {
+  const [user, setUser] = useState(null);
+  const [credits, setCredits] = useState(50);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('user');
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        }
+
+        const storedCredits = await AsyncStorage.getItem('credits');
+        if (storedCredits) {
+          setCredits(parseInt(storedCredits));
+        } else {
+          setCredits(50);
+          await AsyncStorage.setItem('credits', '50');
+        }
+      } catch (e) {
+        console.error('Error loading data:', e);
+      }
+    };
+
+    loadData();
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              await AsyncStorage.clear();
+              setUser(null);
+              setCredits(0);
+            } catch (e) {
+              console.error('Error during logout:', e);
+            }
+          }
+        }
+      ]
+    );
+  }, []);
+
+  const handleAddCredits = useCallback(async () => {
+    const newCredits = credits + 5;
+    setCredits(newCredits);
+    try {
+      await AsyncStorage.setItem('credits', newCredits.toString());
+    } catch (e) {
+      console.error('Error adding credits:', e);
+    }
+  }, [credits]);
+
+  const handleScroll = useCallback(() => {
+    // Add any scroll handling logic here if needed
   }, []);
 
   return (
@@ -18,7 +79,7 @@ const handleScroll = useCallback(() => {
       >
         {/* Header */}
         <View className="flex-row items-center p-4 bg-white shadow">
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => { /* Handle back navigation if needed */ }}>
             <Text className="text-2xl">←</Text>
           </TouchableOpacity>
           <Text className="flex-1 text-center text-lg font-bold">Settings</Text>
@@ -27,26 +88,26 @@ const handleScroll = useCallback(() => {
         {/* User Profile */}
         <View className="flex-row items-center p-4 bg-white mt-2">
           <Image
-            source={{ uri: "https://via.placeholder.com/50" }}
+            source={{ uri: user?.avatar || "https://via.placeholder.com/50" }}
             className="w-12 h-12 rounded-full mr-3"
           />
           <View>
-            <Text className="font-semibold">Lohitha</Text>
-            <Text className="text-gray-500">9876543212</Text>
+            <Text className="font-semibold">{user?.name || user?.username || 'User'}</Text>
+            <Text className="text-gray-500">{user?.phone || 'Phone Number'}</Text>
           </View>
         </View>
 
         {/* Quick Access Icons */}
         <View className="flex-row justify-around p-4 bg-white mt-2">
-          <TouchableOpacity className="items-center">
+          <TouchableOpacity className="items-center" onPress={() => { /* Navigate to reviews */ }}>
             <Text className="text-2xl">📦</Text>
             <Text className="text-sm">Your Reviews</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center">
+          <TouchableOpacity className="items-center" onPress={() => { /* Navigate to help */ }}>
             <Text className="text-2xl">💬</Text>
             <Text className="text-sm">Help & Support</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="items-center">
+          <TouchableOpacity className="items-center" onPress={() => { /* Navigate to favorites */ }}>
             <Text className="text-2xl">❤️</Text>
             <Text className="text-sm">Favorites</Text>
           </TouchableOpacity>
@@ -60,7 +121,7 @@ const handleScroll = useCallback(() => {
               Enhance your experience
             </Text>
           </View>
-          <TouchableOpacity className="bg-purple-600 px-4 py-2 rounded">
+          <TouchableOpacity className="bg-purple-600 px-4 py-2 rounded" onPress={() => { /* Handle upgrade */ }}>
             <Text className="text-white">Upgrade Now</Text>
           </TouchableOpacity>
         </View>
@@ -69,36 +130,39 @@ const handleScroll = useCallback(() => {
         <View className="bg-white p-4 mt-2">
           <Text className="font-semibold">PRNV Credits</Text>
           <View className="flex-row justify-between items-center mt-2">
-            <Text>Available Balance: 50</Text>
-            <TouchableOpacity className="bg-purple-600 px-3 py-1 rounded">
+            <Text>Available Balance: {credits}</Text>
+            <TouchableOpacity className="bg-purple-600 px-3 py-1 rounded" onPress={() => { /* Navigate to add credits page or handle here */ }}>
               <Text className="text-white">Add Credits</Text>
             </TouchableOpacity>
           </View>
-          <View className="flex-row justify-between mt-2">
+          <TouchableOpacity className="flex-row justify-between mt-2" onPress={handleAddCredits}>
             <Text className="text-green-600">Free 5 Credits</Text>
             <Text className="text-purple-600">₹25</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {/* Your Information Section */}
         <View className="bg-white p-4 mt-2">
           <Text className="font-semibold">Your Information</Text>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to editProfile */ }}>
+            <Text>Edit Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to transactions */ }}>
+            <Text>Transactions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to reviews */ }}>
             <Text>Your Reviews</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to saved locations */ }}>
             <Text>Saved Locations</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to navigation history */ }}>
             <Text>Navigation History</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to help */ }}>
             <Text>Help & Support</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="py-2">
-            <Text>Profile</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to payment management */ }}>
             <Text>Payment Management</Text>
           </TouchableOpacity>
         </View>
@@ -106,27 +170,42 @@ const handleScroll = useCallback(() => {
         {/* Other Information Section */}
         <View className="bg-white p-4 mt-2">
           <Text className="font-semibold">Other Information</Text>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to suggest features or FAQ */ }}>
             <Text>Suggest Features</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to notifications settings */ }}>
             <Text>Notifications</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="py-2">
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to about or general info */ }}>
             <Text>General Info</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to privacy policy */ }}>
+            <Text>Privacy Policy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to terms & conditions */ }}>
+            <Text>Terms & Conditions</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to about us */ }}>
+            <Text>About Us</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-2" onPress={() => { /* Navigate to contact us */ }}>
+            <Text>Contact Us</Text>
           </TouchableOpacity>
         </View>
 
         {/* Logout Button */}
-        <TouchableOpacity className="bg-white p-4 mt-2">
+        <TouchableOpacity className="bg-white p-4 mt-2" onPress={handleLogout}>
           <Text className="text-center font-semibold text-red-600">
             Log Out
           </Text>
         </TouchableOpacity>
 
-        {/* Footer */}
+        {/* Footer-like Info */}
         <View className="p-4 mt-2">
           <Text className="text-center text-gray-500">App v2.5.4</Text>
+          <Text className="text-center text-gray-400 text-xs mt-2">
+            © 2025 PRNV Services. All rights reserved.
+          </Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -134,6 +213,142 @@ const handleScroll = useCallback(() => {
 };
 
 export default SettingsScreen;
+// import React, { useCallback } from "react";
+// import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
+// import { SafeAreaView } from "react-native-safe-area-context";
+
+// const SettingsScreen = () => {
+// const handleScroll = useCallback(() => {
+//   }, []);
+
+//   return (
+//     <SafeAreaView className="flex-1 bg-gray-100 pb-10">
+//       <ScrollView
+//         contentContainerClassName="px-4 sm:px-6 lg:px-8 py-8"
+//         showsVerticalScrollIndicator={false}
+//         keyboardShouldPersistTaps="handled"
+//         onScroll={handleScroll}
+//         scrollEventThrottle={16}
+//         bounces={false}
+//       >
+//         {/* Header */}
+//         <View className="flex-row items-center p-4 bg-white shadow">
+//           <TouchableOpacity>
+//             <Text className="text-2xl">←</Text>
+//           </TouchableOpacity>
+//           <Text className="flex-1 text-center text-lg font-bold">Settings</Text>
+//         </View>
+
+//         {/* User Profile */}
+//         <View className="flex-row items-center p-4 bg-white mt-2">
+//           <Image
+//             source={{ uri: "https://via.placeholder.com/50" }}
+//             className="w-12 h-12 rounded-full mr-3"
+//           />
+//           <View>
+//             <Text className="font-semibold">Lohitha</Text>
+//             <Text className="text-gray-500">9876543212</Text>
+//           </View>
+//         </View>
+
+//         {/* Quick Access Icons */}
+//         <View className="flex-row justify-around p-4 bg-white mt-2">
+//           <TouchableOpacity className="items-center">
+//             <Text className="text-2xl">📦</Text>
+//             <Text className="text-sm">Your Reviews</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="items-center">
+//             <Text className="text-2xl">💬</Text>
+//             <Text className="text-sm">Help & Support</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="items-center">
+//             <Text className="text-2xl">❤️</Text>
+//             <Text className="text-sm">Favorites</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Promotional Banner */}
+//         <View className="bg-green-100 p-4 mt-2 flex-row items-center justify-between">
+//           <View>
+//             <Text className="font-semibold">Unlock PRNV Pro - Save 20%!</Text>
+//             <Text className="text-sm text-gray-600">
+//               Enhance your experience
+//             </Text>
+//           </View>
+//           <TouchableOpacity className="bg-purple-600 px-4 py-2 rounded">
+//             <Text className="text-white">Upgrade Now</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Account Section */}
+//         <View className="bg-white p-4 mt-2">
+//           <Text className="font-semibold">PRNV Credits</Text>
+//           <View className="flex-row justify-between items-center mt-2">
+//             <Text>Available Balance: 50</Text>
+//             <TouchableOpacity className="bg-purple-600 px-3 py-1 rounded">
+//               <Text className="text-white">Add Credits</Text>
+//             </TouchableOpacity>
+//           </View>
+//           <View className="flex-row justify-between mt-2">
+//             <Text className="text-green-600">Free 5 Credits</Text>
+//             <Text className="text-purple-600">₹25</Text>
+//           </View>
+//         </View>
+
+//         {/* Your Information Section */}
+//         <View className="bg-white p-4 mt-2">
+//           <Text className="font-semibold">Your Information</Text>
+//           <TouchableOpacity className="py-2">
+//             <Text>Your Reviews</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2">
+//             <Text>Saved Locations</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2">
+//             <Text>Navigation History</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2">
+//             <Text>Help & Support</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2">
+//             <Text>Profile</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2">
+//             <Text>Payment Management</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Other Information Section */}
+//         <View className="bg-white p-4 mt-2">
+//           <Text className="font-semibold">Other Information</Text>
+//           <TouchableOpacity className="py-2">
+//             <Text>Suggest Features</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2">
+//             <Text>Notifications</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="py-2">
+//             <Text>General Info</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Logout Button */}
+//         <TouchableOpacity className="bg-white p-4 mt-2">
+//           <Text className="text-center font-semibold text-red-600">
+//             Log Out
+//           </Text>
+//         </TouchableOpacity>
+
+//         {/* Footer */}
+//         <View className="p-4 mt-2">
+//           <Text className="text-center text-gray-500">App v1.0.0</Text>
+//         </View>
+//       </ScrollView>
+//     </SafeAreaView>
+//   );
+// };
+
+// export default SettingsScreen;
 // import React, { useState } from 'react';
 // import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 // import { useNavigation, useRoute, NavigationProp, RouteProp } from '@react-navigation/native';
