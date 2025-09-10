@@ -8,12 +8,10 @@ import {
   ScrollView,
   Alert,
   Modal,
-  TextInput,
-  FlatList,
+  Dimensions,
 } from "react-native";
 import { Minus, Plus, Trash2, X, ChevronDown, ChevronUp, Calendar } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface CartItem {
   _id: string;
@@ -22,25 +20,60 @@ interface CartItem {
   serviceImg?: string;
   servicePrice: number;
   quantity: number;
-  category: string;
   isSelected: boolean;
   bookingDate: string;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  isExpanded: boolean;
+interface Day {
+  date: Date;
+  day: number;
+  month: string;
+  dayName: string;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  isSelected: boolean;
 }
 
 const CartScreen = () => {
   const navigation = useNavigation<any>();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerItemId, setDatePickerItemId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedWeek, setSelectedWeek] = useState<Date>(new Date());
+  const [weekDays, setWeekDays] = useState<Day[]>([]);
+
+  // Generate week days
+  const generateWeekDays = (startDate: Date) => {
+    const days: Day[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startDate);
+      date.setDate(startDate.getDate() + i);
+      date.setHours(0, 0, 0, 0);
+      
+      days.push({
+        date,
+        day: date.getDate(),
+        month: date.toLocaleString('default', { month: 'short' }),
+        dayName: date.toLocaleString('default', { weekday: 'short' }),
+        isCurrentMonth: true,
+        isToday: date.getTime() === today.getTime(),
+        isSelected: false,
+      });
+    }
+    
+    return days;
+  };
+
+  // Initialize week days
+  useEffect(() => {
+    const startOfWeek = new Date(selectedWeek);
+    startOfWeek.setDate(selectedWeek.getDate() - selectedWeek.getDay());
+    setWeekDays(generateWeekDays(startOfWeek));
+  }, [selectedWeek]);
 
   // Sample data - replace with your actual data fetching logic
   useEffect(() => {
@@ -58,18 +91,16 @@ const CartScreen = () => {
           serviceImg: "https://via.placeholder.com/64",
           servicePrice: 399,
           quantity: 1,
-          category: "Cleaning",
           isSelected: false,
           bookingDate: "",
         },
         {
           _id: "2",
           serviceId: "srv2",
-          serviceName: "Foam-jet AC service (2 ACs)",
+          serviceName: "Foam-jet AC service (2 ACs) ₹500 per AC",
           serviceImg: "https://via.placeholder.com/64",
           servicePrice: 999,
           quantity: 1,
-          category: "AC Service",
           isSelected: false,
           bookingDate: "",
         },
@@ -80,7 +111,6 @@ const CartScreen = () => {
           serviceImg: "https://via.placeholder.com/64",
           servicePrice: 1498,
           quantity: 1,
-          category: "AC Service",
           isSelected: false,
           bookingDate: "",
         },
@@ -91,7 +121,6 @@ const CartScreen = () => {
           serviceImg: "https://via.placeholder.com/64",
           servicePrice: 1997,
           quantity: 1,
-          category: "AC Service",
           isSelected: false,
           bookingDate: "",
         },
@@ -102,24 +131,12 @@ const CartScreen = () => {
           serviceImg: "https://via.placeholder.com/64",
           servicePrice: 2496,
           quantity: 1,
-          category: "AC Service",
           isSelected: false,
           bookingDate: "",
         },
       ];
 
       setCartItems(sampleItems);
-      
-      // Extract unique categories
-      const uniqueCategories = Array.from(
-        new Set(sampleItems.map(item => item.category))
-      ).map((category, index) => ({
-        id: `cat-${index}`,
-        name: category,
-        isExpanded: true,
-      }));
-      
-      setCategories(uniqueCategories);
       setLoading(false);
     }, 500);
   };
@@ -146,26 +163,17 @@ const CartScreen = () => {
     );
   };
 
-  const toggleCategory = (categoryId: string) => {
-    setCategories(prevCategories =>
-      prevCategories.map(category =>
-        category.id === categoryId
-          ? { ...category, isExpanded: !category.isExpanded }
-          : category
-      )
-    );
-  };
-
-  const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(false);
-    if (selectedDate && datePickerItemId) {
+  const handleDateSelect = (date: Date) => {
+    if (datePickerItemId) {
+      const formattedDate = date.toISOString().split('T')[0];
       setCartItems(prevItems =>
         prevItems.map(item =>
           item._id === datePickerItemId
-            ? { ...item, bookingDate: selectedDate.toISOString().split('T')[0] }
+            ? { ...item, bookingDate: formattedDate }
             : item
         )
       );
+      setShowDatePicker(false);
       setDatePickerItemId(null);
     }
   };
@@ -173,6 +181,12 @@ const CartScreen = () => {
   const openDatePicker = (itemId: string) => {
     setDatePickerItemId(itemId);
     setShowDatePicker(true);
+  };
+
+  const navigateWeek = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedWeek);
+    newDate.setDate(selectedWeek.getDate() + (direction === 'next' ? 7 : -7));
+    setSelectedWeek(newDate);
   };
 
   const calculateItemTotal = (item: CartItem) => {
@@ -238,109 +252,84 @@ const CartScreen = () => {
         </View>
       ) : (
         <ScrollView className="flex-1 p-4">
-          {categories.map(category => {
-            const categoryItems = cartItems.filter(
-              item => item.category === category.name
-            );
-            
-            if (categoryItems.length === 0) return null;
-            
-            return (
-              <View key={category.id} className="mb-4 bg-white rounded-xl shadow">
+          {/* Display all cart items without categories */}
+          <View className="mb-4 bg-white rounded-xl shadow">
+            {cartItems.map((item, index) => (
+              <View
+                key={item._id}
+                className={`flex-row items-center p-4 ${index < cartItems.length - 1 ? 'border-b border-gray-100' : ''}`}
+              >
+                {/* Checkbox */}
                 <TouchableOpacity
-                  onPress={() => toggleCategory(category.id)}
-                  className="flex-row justify-between items-center p-4 border-b border-gray-200"
+                  onPress={() => handleCheckboxChange(item._id)}
+                  className={`w-5 h-5 rounded-md mr-3 border-2 ${
+                    item.isSelected
+                      ? "bg-fuchsia-500 border-fuchsia-500"
+                      : "border-gray-300"
+                  }`}
                 >
-                  <Text className="font-bold text-lg">{category.name}</Text>
-                  {category.isExpanded ? (
-                    <ChevronUp size={20} color="#4B5563" />
-                  ) : (
-                    <ChevronDown size={20} color="#4B5563" />
+                  {item.isSelected && (
+                    <View className="w-full h-full items-center justify-center">
+                      <Text className="text-white text-xs">✓</Text>
+                    </View>
                   )}
                 </TouchableOpacity>
-                
-                {category.isExpanded && (
-                  <View>
-                    {categoryItems.map(item => (
-                      <View
-                        key={item._id}
-                        className="flex-row items-center p-4 border-b border-gray-100"
-                      >
-                        {/* Checkbox */}
-                        <TouchableOpacity
-                          onPress={() => handleCheckboxChange(item._id)}
-                          className={`w-5 h-5 rounded-md mr-3 border-2 ${
-                            item.isSelected
-                              ? "bg-fuchsia-500 border-fuchsia-500"
-                              : "border-gray-300"
-                          }`}
-                        >
-                          {item.isSelected && (
-                            <View className="w-full h-full items-center justify-center">
-                              <Text className="text-white text-xs">✓</Text>
-                            </View>
-                          )}
-                        </TouchableOpacity>
 
-                        {/* Image */}
-                        <Image
-                          source={{ uri: item.serviceImg }}
-                          className="w-16 h-16 rounded-lg"
-                        />
+                {/* Image */}
+                <Image
+                  source={{ uri: item.serviceImg }}
+                  className="w-16 h-16 rounded-lg"
+                />
 
-                        {/* Info */}
-                        <View className="flex-1 ml-3">
-                          <Text className="font-semibold text-gray-800">
-                            {item.serviceName}
-                          </Text>
-                          <Text className="text-gray-500">
-                            ₹{item.servicePrice} per unit
-                          </Text>
-                          
-                          {/* Date Picker */}
-                          <TouchableOpacity
-                            onPress={() => openDatePicker(item._id)}
-                            className="flex-row items-center mt-1"
-                          >
-                            <Calendar size={14} color="#6B7280" />
-                            <Text className="text-gray-600 ml-1 text-sm">
-                              {item.bookingDate || "Select date"}
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
+                {/* Info */}
+                <View className="flex-1 ml-3">
+                  <Text className="font-semibold text-gray-800">
+                    {item.serviceName}
+                  </Text>
+                  <Text className="text-gray-500">
+                    ₹{item.servicePrice} per unit
+                  </Text>
+                  
+                  {/* Date Picker */}
+                  <TouchableOpacity
+                    onPress={() => openDatePicker(item._id)}
+                    className="flex-row items-center mt-1"
+                  >
+                    <Calendar size={14} color="#6B7280" />
+                    <Text className="text-gray-600 ml-1 text-sm">
+                      {item.bookingDate || "Select date"}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
-                        {/* Quantity Controls */}
-                        <View className="flex-row items-center">
-                          {item.quantity === 1 ? (
-                            <TouchableOpacity
-                              onPress={() => handleRemove(item._id)}
-                              className="p-1"
-                            >
-                              <Trash2 size={18} color="#EF4444" />
-                            </TouchableOpacity>
-                          ) : (
-                            <TouchableOpacity
-                              onPress={() => handleQuantityChange(item._id, -1)}
-                              className="p-1"
-                            >
-                              <Minus size={18} color="#6B7280" />
-                            </TouchableOpacity>
-                          )}
-                          <Text className="mx-2 font-medium">{item.quantity}</Text>
-                          <TouchableOpacity
-                            onPress={() => handleQuantityChange(item._id, 1)}
-                            className="p-1"
-                          >
-                            <Plus size={18} color="#6B7280" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                )}
+                {/* Quantity Controls */}
+                <View className="flex-row items-center">
+                  {item.quantity === 1 ? (
+                    <TouchableOpacity
+                      onPress={() => handleRemove(item._id)}
+                      className="p-1"
+                    >
+                      <Trash2 size={18} color="#EF4444" />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => handleQuantityChange(item._id, -1)}
+                      className="p-1"
+                    >
+                      <Minus size={18} color="#6B7280" />
+                    </TouchableOpacity>
+                  )}
+                  <Text className="mx-2 font-medium">{item.quantity}</Text>
+                  <TouchableOpacity
+                    onPress={() => handleQuantityChange(item._id, 1)}
+                    className="p-1"
+                  >
+                    <Plus size={18} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
               </View>
-            );
-          })}
+            ))}
+          </View>
 
           {/* Cart Summary */}
           <View className="bg-white p-4 rounded-xl shadow mt-4">
@@ -401,16 +390,80 @@ const CartScreen = () => {
         </ScrollView>
       )}
 
-      {/* Date Picker Modal */}
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-          minimumDate={new Date()}
-        />
-      )}
+      {/* One Week Calendar Modal */}
+      <Modal
+        visible={showDatePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-xl p-5 w-11/12">
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-lg font-bold">Select Date</Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                <X size={24} color="#4B5563" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Week Navigation */}
+            <View className="flex-row justify-between items-center mb-4">
+              <TouchableOpacity 
+                onPress={() => navigateWeek('prev')}
+                className="p-2"
+              >
+                <ChevronDown size={20} color="#4B5563" style={{ transform: [{ rotate: '90deg' }] }} />
+              </TouchableOpacity>
+              
+              <Text className="text-lg font-semibold">
+                {weekDays[0]?.month} {weekDays[0]?.day} - {weekDays[6]?.month} {weekDays[6]?.day}
+              </Text>
+              
+              <TouchableOpacity 
+                onPress={() => navigateWeek('next')}
+                className="p-2"
+              >
+                <ChevronDown size={20} color="#4B5563" style={{ transform: [{ rotate: '-90deg' }] }} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Week Days */}
+            <View className="flex-row justify-between mb-4">
+              {weekDays.map((day, index) => {
+                const isSelected = cartItems.find(item => 
+                  item._id === datePickerItemId && 
+                  item.bookingDate === day.date.toISOString().split('T')[0]
+                );
+                
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => handleDateSelect(day.date)}
+                    className={`items-center justify-center p-2 rounded-full ${
+                      day.isToday ? "bg-fuchsia-100" : ""
+                    } ${isSelected ? "bg-fuchsia-500" : ""}`}
+                    style={{ width: Dimensions.get('window').width / 8 }}
+                  >
+                    <Text className={`text-xs ${isSelected ? "text-white" : "text-gray-500"}`}>
+                      {day.dayName}
+                    </Text>
+                    <Text className={`text-lg font-semibold ${isSelected ? "text-white" : day.isToday ? "text-fuchsia-600" : "text-gray-800"}`}>
+                      {day.day}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(false)}
+              className="bg-fuchsia-500 py-3 rounded-xl mt-4"
+            >
+              <Text className="text-center text-white font-semibold">Confirm Date</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
