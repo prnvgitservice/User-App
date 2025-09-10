@@ -19,3 +19,6 @@ export const removeFromCart = (data: any) => apiRequest("removeFromCart", data);
 export const createBookService = (data: any) => apiRequest("createBookService", data);
 
 export const getAllPincodes = () => apiRequest("getAllPincodes");
+
+export const getAllBlogs = (data: any) => apiRequest("getAllBlogs", data);
+

@@ -56,6 +56,7 @@ const LoginScreen = () => {
         // For cart update event, you can use a global event emitter or context
         // Here we'll just log it for now
         console.log('Login successful - Cart updated event dispatched');
+        Alert.alert('Login Successfully')
         
         navigation.replace('Main');
       } else {
@@ -110,7 +111,7 @@ const LoginScreen = () => {
                 Phone Number <Text className="text-red-500">*</Text>
               </Text>
               <View className="flex-row items-center border border-gray-300 rounded-lg px-3 h-12">
-                <Text className="text-xl mr-2.5">✉️</Text>
+                <Text className="text-xl mr-2.5">📞</Text>
                 <TextInput
                   className="flex-1 text-base text-gray-800"
                   placeholder="Enter phone number"
@@ -150,11 +151,23 @@ const LoginScreen = () => {
               </View>
             </View>
 
+            <View className="flex flex-row w-full justify-center items-center gap-2">
+              <TouchableOpacity
+              className={`rounded-lg py-3 items-center shadow-md bg-green-600 w-1/2`}
+              onPress={()=>{navigation.navigate('Main' as never)}}
+              disabled={isLoading}
+            >
+              <Text className="text-white text-base font-semibold">
+                Guest
+              </Text>
+            </TouchableOpacity>
+
+
             {/* Sign In Button */}
             <TouchableOpacity
               className={`rounded-lg py-3 items-center shadow-md ${
                 isLoading ? 'bg-blue-400' : 'bg-blue-600'
-              }`}
+              }  w-1/2`}
               onPress={handleSubmit}
               disabled={isLoading}
             >
@@ -162,6 +175,7 @@ const LoginScreen = () => {
                 {isLoading ? 'Signing In...' : 'Sign In'}
               </Text>
             </TouchableOpacity>
+            </View>
 
             {/* Sign Up Link */}
             <View className="flex-row justify-center mt-4">
