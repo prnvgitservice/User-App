@@ -1,166 +1,215 @@
 // screens/CartScreen.tsx
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Image,
   ScrollView,
-  TextInput,
   Alert,
+  Modal,
+  TextInput,
+  FlatList,
 } from "react-native";
-import { Minus, Trash2, X } from "lucide-react-native";
-// import { GoPlus } from "react-icons/go";
-// import { FaRegCalendarAlt } from "react-icons/fa";
+import { Minus, Plus, Trash2, X, ChevronDown, ChevronUp, Calendar } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
-
-
-const getCartItems = async (userId: string) => {
-  return {
-    success: true,
-    result: {
-      user: { _id: "1", username: "Soujanya" },
-      cart: {
-        _id: "cart1",
-        userId,
-        items: [
-          {
-            _id: "item1",
-            serviceId: "srv1",
-            serviceName: "AC Repair",
-            serviceImg: "https://via.placeholder.com/64",
-            servicePrice: 500,
-            quantity: 1,
-            technicianId: "tech1",
-            bookingDate: "",
-            isSelected: false,
-          },
-          {
-            _id: "item2",
-            serviceId: "srv2",
-            serviceName: "Cleaning",
-            serviceImg: "https://via.placeholder.com/64",
-            servicePrice: 300,
-            quantity: 2,
-            technicianId: "tech2",
-            bookingDate: "",
-            isSelected: false,
-          },
-        ],
-      },
-    },
-  };
-};
-const addToCart = async (payload: any) => console.log("addToCart", payload);
-const removeFromCart = async (payload: any) =>
-  console.log("removeFromCart", payload);
-const createBookService = async (bookings: any) => {
-  console.log("createBookService", bookings);
-  return { success: true };
-};
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 interface CartItem {
   _id: string;
-  technicianId: string;
   serviceId: string;
   serviceName: string;
   serviceImg?: string;
-  servicePrice?: number;
+  servicePrice: number;
   quantity: number;
-  bookingDate: string;
+  category: string;
   isSelected: boolean;
+  bookingDate: string;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  isExpanded: boolean;
 }
 
 const CartScreen = () => {
   const navigation = useNavigation<any>();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [datePickerItemId, setDatePickerItemId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedItems, setSelectedItems] = useState<CartItem[]>([]);
-  const [isBooking, setIsBooking] = useState(false);
 
+  // Sample data - replace with your actual data fetching logic
   useEffect(() => {
     fetchCartData();
   }, []);
 
   const fetchCartData = async () => {
-    setLoading(true);
-    const userId = "1"; // replace with real logged in user id
-    const response = await getCartItems(userId);
-    if (response.success) {
-      setCartItems(response.result.cart.items);
-    }
-    setLoading(false);
+    // Simulate API call
+    setTimeout(() => {
+      const sampleItems: CartItem[] = [
+        {
+          _id: "1",
+          serviceId: "srv1",
+          serviceName: "Iohitha",
+          serviceImg: "https://via.placeholder.com/64",
+          servicePrice: 399,
+          quantity: 1,
+          category: "Cleaning",
+          isSelected: false,
+          bookingDate: "",
+        },
+        {
+          _id: "2",
+          serviceId: "srv2",
+          serviceName: "Foam-jet AC service (2 ACs)",
+          serviceImg: "https://via.placeholder.com/64",
+          servicePrice: 999,
+          quantity: 1,
+          category: "AC Service",
+          isSelected: false,
+          bookingDate: "",
+        },
+        {
+          _id: "3",
+          serviceId: "srv3",
+          serviceName: "Foam-jet AC service (3 ACs)",
+          serviceImg: "https://via.placeholder.com/64",
+          servicePrice: 1498,
+          quantity: 1,
+          category: "AC Service",
+          isSelected: false,
+          bookingDate: "",
+        },
+        {
+          _id: "4",
+          serviceId: "srv4",
+          serviceName: "Foam-jet AC service (4 ACs)",
+          serviceImg: "https://via.placeholder.com/64",
+          servicePrice: 1997,
+          quantity: 1,
+          category: "AC Service",
+          isSelected: false,
+          bookingDate: "",
+        },
+        {
+          _id: "5",
+          serviceId: "srv5",
+          serviceName: "Foam-jet service (5 ACs)",
+          serviceImg: "https://via.placeholder.com/64",
+          servicePrice: 2496,
+          quantity: 1,
+          category: "AC Service",
+          isSelected: false,
+          bookingDate: "",
+        },
+      ];
+
+      setCartItems(sampleItems);
+      
+      // Extract unique categories
+      const uniqueCategories = Array.from(
+        new Set(sampleItems.map(item => item.category))
+      ).map((category, index) => ({
+        id: `cat-${index}`,
+        name: category,
+        isExpanded: true,
+      }));
+      
+      setCategories(uniqueCategories);
+      setLoading(false);
+    }, 500);
   };
 
-  const handleQuantityChange = async (itemId: string, delta: number) => {
-    const updated = cartItems.map((item) =>
-      item._id === itemId
-        ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-        : item
+  const handleQuantityChange = (itemId: string, delta: number) => {
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item._id === itemId
+          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
+          : item
+      )
     );
-    setCartItems(updated);
-    const changedItem = updated.find((i) => i._id === itemId);
-    if (changedItem) {
-      await addToCart({
-        userId: "1",
-        serviceId: changedItem.serviceId,
-        technicianId: changedItem.technicianId,
-        quantity: changedItem.quantity,
-      });
-    }
   };
 
-  const handleRemove = async (itemId: string) => {
-    setCartItems(cartItems.filter((i) => i._id !== itemId));
-    await removeFromCart({ userId: "1", serviceId: itemId });
+  const handleRemove = (itemId: string) => {
+    setCartItems(prevItems => prevItems.filter(item => item._id !== itemId));
   };
 
   const handleCheckboxChange = (itemId: string) => {
-    const updated = cartItems.map((i) =>
-      i._id === itemId ? { ...i, isSelected: !i.isSelected } : i
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item._id === itemId ? { ...item, isSelected: !item.isSelected } : item
+      )
     );
-    setCartItems(updated);
-    setSelectedItems(updated.filter((i) => i.isSelected));
   };
 
-  const handleDateChange = (itemId: string, date: string) => {
-    const updated = cartItems.map((i) =>
-      i._id === itemId ? { ...i, bookingDate: date } : i
+  const toggleCategory = (categoryId: string) => {
+    setCategories(prevCategories =>
+      prevCategories.map(category =>
+        category.id === categoryId
+          ? { ...category, isExpanded: !category.isExpanded }
+          : category
+      )
     );
-    setCartItems(updated);
-    setSelectedItems(updated.filter((i) => i.isSelected));
+  };
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(false);
+    if (selectedDate && datePickerItemId) {
+      setCartItems(prevItems =>
+        prevItems.map(item =>
+          item._id === datePickerItemId
+            ? { ...item, bookingDate: selectedDate.toISOString().split('T')[0] }
+            : item
+        )
+      );
+      setDatePickerItemId(null);
+    }
+  };
+
+  const openDatePicker = (itemId: string) => {
+    setDatePickerItemId(itemId);
+    setShowDatePicker(true);
   };
 
   const calculateItemTotal = (item: CartItem) => {
-    const price = item.servicePrice || 0;
-    const subtotal = price * item.quantity;
+    const subtotal = item.servicePrice * item.quantity;
     const gst = Math.round(subtotal * 0.18);
     const total = subtotal + gst;
     return { subtotal, gst, total };
   };
 
-  const handleBookNow = async () => {
+  const calculateCartTotal = () => {
+    const selectedItems = cartItems.filter(item => item.isSelected);
+    const subtotal = selectedItems.reduce(
+      (sum, item) => sum + item.servicePrice * item.quantity,
+      0
+    );
+    const gst = Math.round(subtotal * 0.18);
+    const total = subtotal + gst;
+    return { subtotal, gst, total };
+  };
+
+  const handleBookNow = () => {
+    const selectedItems = cartItems.filter(item => item.isSelected);
     if (selectedItems.length === 0) {
-      Alert.alert("Error", "No items selected");
+      Alert.alert("Error", "Please select at least one item to proceed");
       return;
     }
-    setIsBooking(true);
-    const bookings = selectedItems.map((item) => ({
-      userId: "1",
-      serviceId: item.serviceId,
-      technicianId: item.technicianId,
-      quantity: item.quantity.toString(),
-      bookingDate: item.bookingDate,
-      servicePrice: ((item.servicePrice || 0) * item.quantity).toString(),
-    }));
-    const res = await createBookService(bookings);
-    setIsBooking(false);
-    if (res.success) {
-      Alert.alert("Success", "Booking confirmed!");
-      navigation.navigate("Transactions");
-    } else {
-      Alert.alert("Error", "Booking failed");
+    
+    // Check if all selected items have a booking date
+    const itemsWithoutDate = selectedItems.filter(item => !item.bookingDate);
+    if (itemsWithoutDate.length > 0) {
+      Alert.alert("Error", "Please select a date for all selected services");
+      return;
     }
+    
+    // Proceed with booking
+    Alert.alert("Success", "Booking confirmed!");
+    navigation.navigate("Transactions");
   };
 
   if (loading) {
@@ -172,11 +221,13 @@ const CartScreen = () => {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-100 p-4">
-      <Text className="text-2xl font-bold text-gray-800 mb-4">Your Cart</Text>
+    <View className="flex-1 bg-gray-100">
+      <View className="p-4 bg-white shadow-sm">
+        <Text className="text-2xl font-bold text-gray-800">Your Cart</Text>
+      </View>
 
       {cartItems.length === 0 ? (
-        <View className="items-center mt-10">
+        <View className="flex-1 items-center justify-center mt-10">
           <Text className="text-gray-500 mb-3">Your cart is empty</Text>
           <TouchableOpacity
             className="bg-fuchsia-500 px-4 py-2 rounded-lg"
@@ -186,99 +237,181 @@ const CartScreen = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <>
-          {cartItems.map((item) => (
-            <View
-              key={item._id}
-              className="flex-row justify-between items-center bg-white rounded-xl p-3 mb-3 shadow"
-            >
-              {/* Checkbox */}
-              <TouchableOpacity
-                onPress={() => handleCheckboxChange(item._id)}
-                className={`w-5 h-5 border rounded mr-2 ${
-                  item.isSelected ? "bg-fuchsia-500" : "bg-white"
-                }`}
-              />
-
-              {/* Image */}
-              <Image
-                source={{ uri: item.serviceImg }}
-                className="w-16 h-16 rounded-lg"
-              />
-
-              {/* Info */}
-              <View className="flex-1 ml-3">
-                <Text className="font-semibold">{item.serviceName}</Text>
-                <Text className="text-gray-500">
-                  ₹{item.servicePrice} per unit
-                </Text>
-              </View>
-
-              {/* Quantity */}
-              <View className="flex-row items-center space-x-2">
-                {item.quantity === 1 ? (
-                  <TouchableOpacity
-                    onPress={() => handleRemove(item._id)}
-                    className="p-1"
-                  >
-                    <Trash2 size={18} color="red" />
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() => handleQuantityChange(item._id, -1)}
-                    className="p-1"
-                  >
-                    <Minus size={18} />
-                  </TouchableOpacity>
-                )}
-                <Text className="mx-2">{item.quantity}</Text>
+        <ScrollView className="flex-1 p-4">
+          {categories.map(category => {
+            const categoryItems = cartItems.filter(
+              item => item.category === category.name
+            );
+            
+            if (categoryItems.length === 0) return null;
+            
+            return (
+              <View key={category.id} className="mb-4 bg-white rounded-xl shadow">
                 <TouchableOpacity
-                  onPress={() => handleQuantityChange(item._id, 1)}
-                  className="p-1"
+                  onPress={() => toggleCategory(category.id)}
+                  className="flex-row justify-between items-center p-4 border-b border-gray-200"
                 >
-                  <Text className="text-lg font-bold text-fuchsia-600">+</Text>
+                  <Text className="font-bold text-lg">{category.name}</Text>
+                  {category.isExpanded ? (
+                    <ChevronUp size={20} color="#4B5563" />
+                  ) : (
+                    <ChevronDown size={20} color="#4B5563" />
+                  )}
                 </TouchableOpacity>
-              </View>
-            </View>
-          ))}
+                
+                {category.isExpanded && (
+                  <View>
+                    {categoryItems.map(item => (
+                      <View
+                        key={item._id}
+                        className="flex-row items-center p-4 border-b border-gray-100"
+                      >
+                        {/* Checkbox */}
+                        <TouchableOpacity
+                          onPress={() => handleCheckboxChange(item._id)}
+                          className={`w-5 h-5 rounded-md mr-3 border-2 ${
+                            item.isSelected
+                              ? "bg-fuchsia-500 border-fuchsia-500"
+                              : "border-gray-300"
+                          }`}
+                        >
+                          {item.isSelected && (
+                            <View className="w-full h-full items-center justify-center">
+                              <Text className="text-white text-xs">✓</Text>
+                            </View>
+                          )}
+                        </TouchableOpacity>
 
-          {/* Selected Items Summary */}
-          {selectedItems.length > 0 && (
-            <View className="bg-white p-4 rounded-lg mt-4 shadow">
-              <Text className="text-lg font-semibold mb-2">Summary</Text>
-              {selectedItems.map((item) => {
+                        {/* Image */}
+                        <Image
+                          source={{ uri: item.serviceImg }}
+                          className="w-16 h-16 rounded-lg"
+                        />
+
+                        {/* Info */}
+                        <View className="flex-1 ml-3">
+                          <Text className="font-semibold text-gray-800">
+                            {item.serviceName}
+                          </Text>
+                          <Text className="text-gray-500">
+                            ₹{item.servicePrice} per unit
+                          </Text>
+                          
+                          {/* Date Picker */}
+                          <TouchableOpacity
+                            onPress={() => openDatePicker(item._id)}
+                            className="flex-row items-center mt-1"
+                          >
+                            <Calendar size={14} color="#6B7280" />
+                            <Text className="text-gray-600 ml-1 text-sm">
+                              {item.bookingDate || "Select date"}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+
+                        {/* Quantity Controls */}
+                        <View className="flex-row items-center">
+                          {item.quantity === 1 ? (
+                            <TouchableOpacity
+                              onPress={() => handleRemove(item._id)}
+                              className="p-1"
+                            >
+                              <Trash2 size={18} color="#EF4444" />
+                            </TouchableOpacity>
+                          ) : (
+                            <TouchableOpacity
+                              onPress={() => handleQuantityChange(item._id, -1)}
+                              className="p-1"
+                            >
+                              <Minus size={18} color="#6B7280" />
+                            </TouchableOpacity>
+                          )}
+                          <Text className="mx-2 font-medium">{item.quantity}</Text>
+                          <TouchableOpacity
+                            onPress={() => handleQuantityChange(item._id, 1)}
+                            className="p-1"
+                          >
+                            <Plus size={18} color="#6B7280" />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+            );
+          })}
+
+          {/* Cart Summary */}
+          <View className="bg-white p-4 rounded-xl shadow mt-4">
+            <Text className="text-lg font-semibold mb-2">Order Summary</Text>
+            
+            {cartItems
+              .filter(item => item.isSelected)
+              .map(item => {
                 const { subtotal, gst, total } = calculateItemTotal(item);
                 return (
                   <View key={item._id} className="mb-3">
-                    <Text>
+                    <Text className="text-gray-800">
                       {item.serviceName} ({item.quantity}) - ₹{subtotal}
                     </Text>
                     <Text className="text-sm text-gray-600">
                       GST: ₹{gst}, Total: ₹{total}
                     </Text>
+                    {item.bookingDate && (
+                      <Text className="text-sm text-gray-500 mt-1">
+                        Date: {item.bookingDate}
+                      </Text>
+                    )}
                   </View>
                 );
               })}
-            </View>
-          )}
+            
+            {cartItems.filter(item => item.isSelected).length > 0 && (
+              <View className="border-t border-gray-200 pt-3 mt-2">
+                <View className="flex-row justify-between mb-1">
+                  <Text className="font-medium">Subtotal:</Text>
+                  <Text>₹{calculateCartTotal().subtotal}</Text>
+                </View>
+                <View className="flex-row justify-between mb-1">
+                  <Text className="font-medium">GST (18%):</Text>
+                  <Text>₹{calculateCartTotal().gst}</Text>
+                </View>
+                <View className="flex-row justify-between mt-2">
+                  <Text className="font-bold">Total:</Text>
+                  <Text className="font-bold">₹{calculateCartTotal().total}</Text>
+                </View>
+              </View>
+            )}
+          </View>
 
-          {/* Book Now */}
+          {/* Book Now Button */}
           <TouchableOpacity
-            disabled={isBooking || selectedItems.length === 0}
             onPress={handleBookNow}
-            className={`mt-6 py-3 rounded-xl ${
-              selectedItems.length === 0
+            className={`py-3 rounded-xl mt-6 mb-8 ${
+              cartItems.filter(item => item.isSelected).length === 0
                 ? "bg-gray-300"
-                : "bg-fuchsia-500 hover:bg-fuchsia-600"
+                : "bg-fuchsia-500"
             }`}
           >
             <Text className="text-center text-white font-semibold text-lg">
-              {isBooking ? "Processing..." : "Book Now"}
+              Book Now
             </Text>
           </TouchableOpacity>
-        </>
+        </ScrollView>
       )}
-    </ScrollView>
+
+      {/* Date Picker Modal */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+          minimumDate={new Date()}
+        />
+      )}
+    </View>
   );
 };
 
