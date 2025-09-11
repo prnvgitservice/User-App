@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-// ... your screen imports (HomeScreen, etc.)
 import HomeScreen from "../screens/HomeScreen";
 import CategoriesPage from "../components/homescreen/CategoryScreen";
 import CartScreen from "../screens/CartScreen";
@@ -15,7 +14,6 @@ import TechniciansScreen from "../screens/TechniciansScreen";
 import AllBlogs from "../components/blog/AllBlogs";
 import SearchFilterScreen from "../screens/SearchFilterScreen";
 import TransactionPageScreen from "../screens/TransactionPageScreen";
-import UserProfile from "../components/homescreen/UserProfile";
 import ProfileScreen from "../components/homescreen/ProfileScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import GuestBooking from "../components/homescreen/GuestBooking";
@@ -152,6 +150,7 @@ function AppNavigator() {
         })}
       />
       <Stack.Screen name="AllBlogs" component={AllBlogs} />
+      <Stack.Screen name="GuestBook" component={GuestBooking} />
       <Stack.Screen name="AboutUs" component={AboutUs} />
       <Stack.Screen name="ContactUs" component={ContactUs} />
       <Stack.Screen name="KeyFeatures" component={KeyFeaturesScreen} />
