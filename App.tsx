@@ -9,7 +9,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <CategoryProvider>
-        <SafeAreaView className="flex-1 bg-white py-14">
+        <SafeAreaView className="flex-1 bg-white pb-14 pt-10">
           <AppNavigator />
         </SafeAreaView>
       </CategoryProvider>
