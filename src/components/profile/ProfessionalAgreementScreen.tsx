@@ -1,6 +1,5 @@
 import React from "react";
 import { ScrollView, View, Text } from "react-native";
-import { tw } from "nativewind";
 
 const ProfessionalAgreementScreen: React.FC = () => {
   return (

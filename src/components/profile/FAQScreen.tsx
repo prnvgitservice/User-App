@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { ChevronDownIcon } from "react-native-heroicons/outline"; 
+// import { ChevronDownIcon } from "react-native-heroicons/outline";
+import { Ionicons } from "@expo/vector-icons"; // Assuming Expo is used; otherwise, use react-native-vector-icons
 
 interface FAQItem {
   question: string;
@@ -20,7 +21,8 @@ const FAQ: React.FC = () => {
         'Other companies are taking the amount directly from customers. In this amount, the major share will be retained by companies and the minor share to the professionals (technicians/service providers). With this huge amount, they can give a toll-free number, call center, guarantee, and special offers. Whereas in "PRNV Services", we are connecting professionals (technicians/service providers) and customers and we won’t take anything from professionals in work amount. Because of this "PRNV Services" doesn’t provide any toll-free number, call center, guarantee, and special offers. For security purposes, "PRNV Services" obtained an agreement with the professionals to give a work guarantee of 1 week to customers...',
     },
     {
-      question: "What ratio of commission does PRNV Services charge from professionals?",
+      question:
+        "What ratio of commission does PRNV Services charge from professionals?",
       answer:
         '"PRNV Services" doesn’t charge any commission from the professional, as we are following the slogan "No Commission from Professionals & Customers". We only take the subscription plan amount.',
     },
@@ -53,11 +55,18 @@ const FAQ: React.FC = () => {
                 <Text className="text-md font-medium text-gray-800 flex-1">
                   {index + 1}. {faq.question}
                 </Text>
-                <ChevronDownIcon
+                <Ionicons
+                  name="chevron-forward"
                   size={20}
                   color="gray"
                   className={openIndex === index ? "rotate-180" : ""}
                 />
+                ;
+                {/* <
+                  size={20}
+                  color="gray"
+                  className={openIndex === index ? "rotate-180" : ""}
+                /> */}
               </TouchableOpacity>
               {openIndex === index && (
                 <View className="p-4 pt-0 border-t border-gray-200">
