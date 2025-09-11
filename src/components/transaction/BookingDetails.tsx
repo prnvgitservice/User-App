@@ -4,7 +4,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import UpcomingBookingsScreen from './UpcomingBookingsScreen';
+import CompletedBookingsScreen from './CompletedBookingsScreen';
+import CancelledBookingsScreen from './CancelledBookingsScreen';
 type BookingDetailsRouteParams = {
   tech: {
     name: 'Vel';

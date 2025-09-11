@@ -11,9 +11,7 @@ import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "rea
 import { ChevronRight } from "lucide-react-native"; 
 import { getOrdersByUserId } from "../api/apiMethods"; 
 import BookingsListScreen from "../components/homescreen/BookingsListScreen";
-import UpcomingBookingsScreen from "../components/transaction/UpcomingBookingsScreen";
-import CompletedBookingsScreen from "../components/transaction/CompletedBookingsScreen";
-import CancelledBookingsScreen from "../components/transaction/CancelledBookingsScreen";
+
 interface Booking {
   _id: string;
   userId: string;
