@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
+  ActivityIndicator,
   FlatList,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -15,8 +16,7 @@ import { TechnicianService, Technician } from "../../screens/TechnicianProfile";
 
 type RootStackParamList = {
   Login: undefined;
-  Cart: undefined;
-  // Add other screens as needed
+  Cart: undefined; // Added Cart screen to navigation
 };
 
 interface CartItem {
@@ -37,14 +37,15 @@ interface ServicesProps {
 const Services = ({ services, technician }: ServicesProps) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<{ [key: string]: boolean }>({});
+  const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imageErrors, setImageErrors] = useState<{ [key: string]: boolean }>({});
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   /** Fetch Cart Items */
-  const fetchCartItems = useCallback(async () => {
+  const fetchCartItems = async () => {
+    setIsFetching(true);
     try {
       const userId = await AsyncStorage.getItem("userId");
       if (!userId) {
@@ -72,31 +73,32 @@ const Services = ({ services, technician }: ServicesProps) => {
     } catch (err: any) {
       console.error("Error fetching cart items:", err);
       setError("Failed to fetch cart items. Please try again.");
+    } finally {
+      setIsFetching(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
     fetchCartItems();
-  }, [fetchCartItems]);
+  }, []);
 
   /** Add or Remove from Cart */
-  const handleCartToggle = async (categoryServiceId: string) => {
+  const handleCartToggle = async (serviceId: string) => {
     try {
       const userId = await AsyncStorage.getItem("userId");
-      const technicianId = technician?._id;
       if (!userId) {
         setError("Please log in to manage your cart.");
         navigation.navigate("Login");
         return;
       }
 
-      setLoading((prev) => ({ ...prev, [categoryServiceId]: true }));
-      const isInCart = cartItems.some((item) => item.id === categoryServiceId);
+      setLoading((prev) => ({ ...prev, [serviceId]: true }));
+      const isInCart = cartItems.some((item) => item.serviceId === serviceId);
 
       if (isInCart) {
-        const response = await removeFromCart({ userId, serviceId: categoryServiceId });
+        const response = await removeFromCart({ userId, serviceId ,technicianId: technician._id,});
         if (response.success) {
-          setCartItems((prev) => prev.filter((item) => item.id !== categoryServiceId));
+          setCartItems((prev) => prev.filter((item) => item.serviceId !== serviceId));
         } else {
           throw new Error(
             response.errors?.join(", ") || "Failed to remove item from cart."
@@ -104,28 +106,35 @@ const Services = ({ services, technician }: ServicesProps) => {
         }
       } else {
         const service = technician?.categoryServices?.find(
-          (s) => s.categoryServiceId === categoryServiceId && s.status === true
+          (s) => s.categoryServiceId === serviceId && s.status === true
         );
         if (!service) {
           setError("Service is not available.");
           return;
         }
 
-        const payload = { technicianId, userId, serviceId: categoryServiceId, quantity: 1 };
+        const payload = {
+          userId,
+          serviceId,
+          technicianId: technician._id,
+          quantity: 1,
+        };
         const response = await addToCart(payload);
         if (response.success) {
-          setCartItems((prev) => [
-            ...prev,
-            {
-              id: service.categoryServiceId,
-              serviceId: service.categoryServiceId,
-              serviceName: service.details.serviceName,
-              servicePrice: service.details.servicePrice,
-              serviceImg: service.details.serviceImg,
-              quantity: 1,
-              technicianId,
-            },
-          ]);
+          if (!cartItems.some((item) => item.serviceId === serviceId )) {
+            setCartItems((prev) => [
+              ...prev,
+              {
+                id: service.categoryServiceId,
+                serviceId: service.categoryServiceId,
+                serviceName: service.details?.serviceName || "Unknown Service",
+                servicePrice: service.details?.servicePrice || 0,
+                serviceImg: service.details?.serviceImg || "https://via.placeholder.com/150",
+                quantity: 1,
+                technicianId: technician._id,
+              },
+            ]);
+          }
         } else {
           throw new Error(
             response.errors?.join(", ") || "Failed to add item to cart."
@@ -136,13 +145,8 @@ const Services = ({ services, technician }: ServicesProps) => {
       console.error("Error toggling cart item:", err);
       setError(err.message || "An error occurred while updating the cart.");
     } finally {
-      setLoading((prev) => ({ ...prev, [categoryServiceId]: false }));
+      setLoading((prev) => ({ ...prev, [serviceId]: false }));
     }
-  };
-
-  /** Handle Image Error */
-  const handleImageError = (serviceId: string) => {
-    setImageErrors((prev) => ({ ...prev, [serviceId]: true }));
   };
 
   /** Render each service */
@@ -151,47 +155,46 @@ const Services = ({ services, technician }: ServicesProps) => {
       (cartItem) => cartItem.id === item.categoryServiceId
     );
     const isLoading = loading[item.categoryServiceId];
-    const imageUri = imageErrors[item.categoryServiceId]
-      ? "https://via.placeholder.com/150"
-      : item.details?.serviceImg || "https://via.placeholder.com/150";
 
     return (
       <View
         key={item.categoryServiceId}
-        className="flex-1 border border-gray-300 rounded-xl p-4 m-2 shadow-sm"
+        className="flex-row justify-between items-center border border-gray-300 rounded-xl p-4 mb-3"
       >
-        <View className="flex-1">
-          <Text className="text-md font-semibold">{item.details?.serviceName}</Text>
+        <View className="flex-1 flex-col gap-2 pr-3">
+          <Text className="text-lg font-bold">
+            {item.details?.serviceName}
+          </Text>
           <Text className="text-sm text-gray-700">
             ₹ <Text className="text-blue-600">{item.details?.servicePrice}</Text>{" "}
             per Unit
           </Text>
-          <View className="flex-row items-center mt-1">
+          <View className="flex-row items-center">
             <MaterialCommunityIcons name="star-outline" size={18} color="#ffc71b" />
-            <Text className="text-sm text-gray-700 ml-1">
+            <Text className="ml-1 text-sm text-gray-700">
               4.5 <Text className="text-gray-400">(25 Reviews)</Text>
             </Text>
           </View>
         </View>
-        <View className="flex-col items-center gap-2 mt-2">
+
+        <View className="flex-col items-center gap-2">
           <Image
-            source={{ uri: imageUri }}
+            source={{
+              uri: item.details?.serviceImg || "https://via.placeholder.com/150",
+            }}
             className="w-28 h-28 object-cover rounded-md"
-            onError={() => handleImageError(item.categoryServiceId)}
           />
           <TouchableOpacity
-            className={`rounded-md px-3 py-1 flex-row items-center justify-center text-sm font-medium ${
+            className={`rounded-md px-2 py-1 flex-row items-center justify-center text-sm font-medium ${
               isInCart
                 ? "text-red-600 border border-red-600"
                 : "bg-red-600 text-white"
             } ${isLoading ? "opacity-50" : ""}`}
-            onPress={() =>
-              !isLoading && handleCartToggle(item.categoryServiceId)
-            }
+            onPress={() => !isLoading && handleCartToggle(item.categoryServiceId)}
             disabled={isLoading}
           >
             {isLoading ? (
-              <Text className="text-white">Processing...</Text>
+              <ActivityIndicator size="small" color="#fff" />
             ) : isInCart ? (
               <>
                 <MaterialCommunityIcons name="cart-remove" size={16} color="red" />
@@ -210,43 +213,44 @@ const Services = ({ services, technician }: ServicesProps) => {
   };
 
   return (
-    <View className="border border-gray-200 shadow-md rounded-xl p-4 my-4 max-h-[calc(100vh-220px)]">
+    <View className="border border-gray-300 shadow-xs rounded-xl p-4 max-h-[45vh]">
       {error && (
         <View className="mb-3 flex-row items-center">
           <Text className="text-red-600 text-sm">{error}</Text>
           {error.includes("log in") && (
             <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text className="ml-2 text-blue-600 underline">Log in</Text>
+              <Text className="ml-2 text-blue-600 underline text-sm">Log in</Text>
             </TouchableOpacity>
           )}
         </View>
       )}
 
       {/* Header */}
-      <View className="flex-row justify-between items-center mb-3 p-2">
-        <Text className="text-2xl font-semibold">Services</Text>
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-xl font-bold">Services</Text>
         <TouchableOpacity
-          className="flex-row items-center bg-green-600 px-3 py-1 rounded"
-          onPress={() => navigation.navigate("Cart")}
+          className={`flex-row items-center bg-green-600 px-2 py-1 rounded ${
+            isFetching ? "opacity-50" : ""
+          }`}
+          onPress={() => !isFetching && navigation.navigate("Cart")}
+          disabled={isFetching}
         >
           <MaterialCommunityIcons name="eye" size={18} color="white" />
-          <Text className="text-white ml-2 text-sm">View Cart</Text>
+          <Text className="text-white ml-2">View Cart</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Services List (grid) */}
+      {/* Services List (scrollable) */}
       <FlatList
         data={technician?.categoryServices?.filter(
           (service) => service.status === true && service.details
         )}
         renderItem={renderService}
         keyExtractor={(item) => item.categoryServiceId}
-        numColumns={2}
         ListEmptyComponent={
           <Text className="text-gray-700">No services available</Text>
         }
         showsVerticalScrollIndicator={false}
-        columnWrapperStyle={{ justifyContent: "space-between" }}
       />
     </View>
   );

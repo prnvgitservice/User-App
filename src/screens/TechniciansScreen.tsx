@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, FlatList, TouchableOpacity, Linking, ActivityIndicator, SafeAreaView } from 'react-native';
+import { View, Text, Image, FlatList, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { getTechByCategorie } from '../api/apiMethods';
@@ -190,7 +190,6 @@ const TechniciansScreen = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white pt-10 pb-10">
 
     <View className="flex-1 bg-gray-100 px-4">
       <AdvertisementBanner />
@@ -211,7 +210,6 @@ const TechniciansScreen = () => {
             <Text className="text-gray-500 text-center mt-4">No technicians found.</Text>
         )}
     </View>
-        </SafeAreaView>
     );
 }
 

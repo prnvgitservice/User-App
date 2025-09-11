@@ -82,6 +82,13 @@ const endpoints: any = {
     method: "post",
     url: "/api/guestBooking/addGuestBooking",
   },
+
+  getOrdersByUserId: {
+    method: "get",
+    url: (id: string) => {
+      return `/api/bookingServices/getBookServiceByUserId/${id}`;
+    },
+  },
 };
 
 export default endpoints;

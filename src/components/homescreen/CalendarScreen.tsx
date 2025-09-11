@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert ,Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Calendar } from 'react-native-calendars';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const slots = [
@@ -124,7 +123,6 @@ const CalendarScreen = () => {
           {renderSlots()}
         </View>
       </ScrollView>
-      <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.continueBtn}
           onPress={() => setShowModal(true)}
@@ -151,7 +149,6 @@ const CalendarScreen = () => {
           </View>
         </View>
       </Modal>
-      </SafeAreaView>
       
     </View>
   );

@@ -3,7 +3,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { RouteProp, useRoute, useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import UpcomingBookingsScreen from './UpcomingBookingsScreen';
 import CompletedBookingsScreen from './CompletedBookingsScreen';
 import CancelledBookingsScreen from './CancelledBookingsScreen';
@@ -97,13 +96,11 @@ const BookingDetails = () => {
           </View>
         )}
       </ScrollView>
-      <SafeAreaView edges={['bottom']} style={styles.bottomBar}>
       {status === 'Upcoming' && (
         <TouchableOpacity style={styles.submitBtn} onPress={() => navigation.goBack()}>
           <Text style={styles.submitBtnText}>Submit</Text>
         </TouchableOpacity>
         )}
-      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 };

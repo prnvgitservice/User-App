@@ -33,3 +33,6 @@ export const getSearchContentByAddress = (formData: any) =>
 
 export const createGuestBooking = (formData: any) =>
   apiRequest("createGuestBooking", formData);
+
+export const getOrdersByUserId = (id: string) =>
+  apiRequest("getOrdersByUserId", null, id);

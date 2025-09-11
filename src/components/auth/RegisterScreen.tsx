@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   TextInput,
@@ -515,7 +514,6 @@ const RegisterScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white py-10">
         <ScrollView 
           contentContainerClassName="px-4 sm:px-6 lg:px-8 py-8"
           showsVerticalScrollIndicator={false}
@@ -642,7 +640,6 @@ const RegisterScreen = () => {
             </Text>
           </View>
         </ScrollView>
-    </SafeAreaView>
   );
 };
 

@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
-  SafeAreaView,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import {
@@ -214,7 +213,6 @@ const SearchFilterScreen = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 py-10">
       <View className="flex-1 bg-gray-100">
         {/* Header content outside FlatList */}
         <View className="p-4">
@@ -252,7 +250,6 @@ const SearchFilterScreen = () => {
           </Text>
         )}
       </View>
-    </SafeAreaView>
   );
 };
 

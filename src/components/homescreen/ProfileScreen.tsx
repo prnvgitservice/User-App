@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Linking } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from '@expo/vector-icons'; // Assuming Expo is used; otherwise, use react-native-vector-icons
@@ -75,7 +74,6 @@ const ProfileScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView
         contentContainerClassName="pb-10"
         showsVerticalScrollIndicator={false}
@@ -198,7 +196,6 @@ const ProfileScreen = () => {
           <Text className="text-center text-xs text-gray-400 mt-1">© 2025 PRNV Services. All rights reserved.</Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 };
 

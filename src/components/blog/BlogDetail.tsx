@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Linking,
   Dimensions,
-  SafeAreaView,
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -74,7 +73,6 @@ const BlogDetailPage: React.FC = () => {
     : [];
 
   return (
-    <SafeAreaView className="flex-1 bg-white py-14">
       <ScrollView className="flex-1 ">
         {/* Hero Image Section */}
         <View className="relative w-full h-80 mb-6">
@@ -189,7 +187,6 @@ const BlogDetailPage: React.FC = () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 };
 

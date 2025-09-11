@@ -63,7 +63,7 @@ const HomeScreen: React.FC = () => {
 
   return (
     <>
-      <View className="flex-1 bg-white pt-10">
+      <View className="flex-1 bg-white">
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Header with Logo and Auth Options */}
           <View className="flex-row justify-between items-center px-5 pt-4 pb-4">

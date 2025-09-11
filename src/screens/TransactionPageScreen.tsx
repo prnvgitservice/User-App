@@ -1,16 +1,9 @@
-
-
-
-
-
-
-
-
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { ChevronRight } from "lucide-react-native"; 
 import { getOrdersByUserId } from "../api/apiMethods"; 
-import BookingsListScreen from "../components/homescreen/BookingsListScreen";
+import BookingsListScreen from "../components/transaction/BookingsListScreen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Booking {
   _id: string;
@@ -71,7 +64,7 @@ const TransactionPageScreen: React.FC = () => {
   const fetchBookings = async () => {
     try {
       setLoading(true);
-      const userId = "123"; 
+      const userId = await AsyncStorage.getItem('userId'); 
       const response: ApiResponse = await getOrdersByUserId(userId);
       if (response.success) {
         setBookingsData(response.result.bookings);

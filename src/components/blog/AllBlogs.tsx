@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
-  SafeAreaView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // RN version of lucide-react
 import { getAllBlogs } from "../../api/apiMethods";
@@ -55,22 +54,18 @@ const AllBlogs: React.FC = () => {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white py-12">
         <View className="flex-1 justify-center items-center bg-gray-50">
           <ActivityIndicator size="large" color="#2563eb" />
           <Text className="text-gray-600 mt-2">Loading...</Text>
         </View>
-      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-white py-12">
         <View className="flex-1 justify-center items-center bg-gray-50">
           <Text className="text-red-600">{error}</Text>
         </View>
-      </SafeAreaView>
     );
   }
 
@@ -113,7 +108,6 @@ const AllBlogs: React.FC = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white py-12">
       <View className="flex-1 bg-gray-50 p-3">
         <FlatList
           data={blogs}
@@ -124,7 +118,6 @@ const AllBlogs: React.FC = () => {
           showsVerticalScrollIndicator={false}
         />
       </View>
-    </SafeAreaView>
   );
 };
 
