@@ -77,6 +77,11 @@ const endpoints: any = {
     method: "post",
     url: "/api/searchContentData/getSearchContentByLocation",
   },
+
+   createGuestBooking: {
+    method: "post",
+    url: "/api/guestBooking/addGuestBooking",
+  },
 };
 
 export default endpoints;

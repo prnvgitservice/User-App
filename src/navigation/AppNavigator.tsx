@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +15,18 @@ import TechniciansScreen from "../screens/TechniciansScreen";
 import AllBlogs from "../components/blog/AllBlogs";
 import SearchFilterScreen from "../screens/SearchFilterScreen";
 import TransactionPageScreen from "../screens/TransactionPageScreen";
+import UserProfile from "../components/homescreen/UserProfile";
+import ProfileScreen from "../components/homescreen/ProfileScreen";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import GuestBooking from "../components/homescreen/GuestBooking";
+import AboutUs from "../components/profile/AboutPageScreen";
+import ContactUs from "../components/profile/ContactUsScreen";
+import KeyFeaturesScreen from "../components/profile/KeyFeaturesScreen";
+import FAQ from "../components/profile/FAQScreen";
+import ProfessionalAgreementScreen from "../components/profile/ProfessionalAgreementScreen";
+import RefundPolicyScreen from "../components/profile/RefundPolicyScreen";
+import PrivacyPolicyScreen from "../components/profile/PrivacyPolicyScreen";
+import TermsConditionsScreen from "../components/profile/TermsConditionsScreen";
 
 // Root Stack Params
 export type RootStackParamList = {
@@ -104,16 +116,34 @@ function MainTabs({ navigation }) {
 
 // AppNavigator
 function AppNavigator() {
+   const [isLoginedIn, setIsLoginedIn] = useState(false); // Replace with actual auth state
+
+  useEffect(() => {
+    const loginConform = async () => {
+      try {
+        const user = await AsyncStorage.getItem("user");
+        if (user) {
+          setIsLoginedIn(true);
+        } else {
+          setIsLoginedIn(false);
+        }
+      } catch (err) {
+        Alert.alert(err);
+      }
+    };
+
+    loginConform();
+  }, []);
   return (
     <Stack.Navigator
-      initialRouteName="Onboarding"
+      initialRouteName={"Onboarding"}
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={RegisterScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
-      <Stack.Screen name="Profile" component={TechnicianProfile} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen
         name="BlogDetail"
         component={BlogDetailPage}
@@ -122,6 +152,15 @@ function AppNavigator() {
         })}
       />
       <Stack.Screen name="AllBlogs" component={AllBlogs} />
+      <Stack.Screen name="AboutUs" component={AboutUs} />
+      <Stack.Screen name="ContactUs" component={ContactUs} />
+      <Stack.Screen name="KeyFeatures" component={KeyFeaturesScreen} />
+      <Stack.Screen name="FAQ" component={FAQ} />
+      <Stack.Screen name="PAG" component={ProfessionalAgreementScreen} />
+      <Stack.Screen name="RefundPolicy" component={RefundPolicyScreen} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+      <Stack.Screen name="TermsConditions" component={TermsConditionsScreen} />
+
       <Stack.Screen
         name="Technicians"
         component={TechniciansScreen}

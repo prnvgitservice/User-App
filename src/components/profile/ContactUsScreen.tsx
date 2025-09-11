@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import { getAllCategories } from "@/src/api/apiMethods";
 // import Ionicons from "react-native-vector-icons/Ionicons";
 // import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 // import { getAllCategories, createGuestBooking } from "../api/apiMethods"; 
@@ -86,7 +87,7 @@ const ContactUs: React.FC = () => {
 
           {/* Name Input */}
           <View className="flex-row items-center px-3 py-3 border border-gray-400 rounded-lg mb-4">
-            <Ionicons name="person" size={20} color="#aaa" />
+            {/* <Ionicons name="person" size={20} color="#aaa" /> */}
             <TextInput
               value={formData.name}
               onChangeText={(text) => handleChange("name", text)}
@@ -97,7 +98,7 @@ const ContactUs: React.FC = () => {
 
           {/* Phone Input */}
           <View className="flex-row items-center px-3 py-3 border border-gray-400 rounded-lg mb-4">
-            <Ionicons name="call" size={20} color="#aaa" />
+            {/* <Ionicons name="call" size={20} color="#aaa" /> */}
             <TextInput
               value={formData.phoneNumber}
               onChangeText={(text) => handleChange("phoneNumber", text)}
@@ -110,7 +111,7 @@ const ContactUs: React.FC = () => {
 
           {/* Category Picker */}
           <View className="flex-row items-center px-3 py-3 border border-gray-400 rounded-lg mb-4">
-            <MaterialIcons name="category" size={20} color="#aaa" />
+            {/* <MaterialIcons name="category" size={20} color="#aaa" /> */}
             <Picker
               selectedValue={formData.categoryId}
               onValueChange={(value) => handleChange("categoryId", value)}
@@ -144,7 +145,7 @@ const ContactUs: React.FC = () => {
                 <Text className="text-white font-semibold text-base me-2">
                   Submit
                 </Text>
-                <MaterialIcons name="keyboard-double-arrow-right" size={24} color="white" />
+                {/* <MaterialIcons name="keyboard-double-arrow-right" size={24} color="white" /> */}
               </>
             )}
           </TouchableOpacity>
