@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, ActivityIndicator } from "react-native";
 import { ChevronRight } from "lucide-react-native"; 
