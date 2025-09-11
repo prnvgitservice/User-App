@@ -104,7 +104,7 @@ const TechnicianProfile = () => {
   }, [technicianId]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white pt-10 pb-10">
+    <SafeAreaView className="flex-1 bg-white py-10">
       {loading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
@@ -119,7 +119,7 @@ const TechnicianProfile = () => {
           </Text>
         </View>
       ) : (
-        <View className="flex-1 bg-gray-100 px-4 pt-4">
+        <View className=" bg-gray-100 px-4 pt-4 flex-1">
           <ProfileCard
             technician={technicianDetails.technician}
             ratings={technicianDetails.ratings}
