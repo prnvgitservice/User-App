@@ -33,7 +33,7 @@ const PopularSearchesSection: React.FC = () => {
     .slice(0, 6);
 
   const handleCategoryPress = (category: Category) => {
-    navigation.navigate("Technicians", { category });
+    navigation.navigate("Technicians", { categoryId: category._id, category: category.category_name })
   };
   const renderPopularItem = ({
     item,

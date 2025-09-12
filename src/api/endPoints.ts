@@ -62,6 +62,11 @@ const endpoints: any = {
     url: () => `/api/blog/getAllBlogs`,
   },
 
+  createCompanyReview: {
+    method: "post",
+    url: "/api/companyReview/createReview",
+  },
+
    getCompanyReviews: {
     method: "get",
     url: "/api/companyReview/getCompanyReviews",
@@ -88,6 +93,25 @@ const endpoints: any = {
     url: (id: string) => {
       return `/api/bookingServices/getBookServiceByUserId/${id}`;
     },
+  },
+
+  addReviewByUser: {
+    method: "post",
+    url: "/api/techReview/addReviewByUser",
+  },
+
+  bookingCancleByUser: {
+    method: "put",
+    url: () => `/api/bookingServices/BookingCancleByUser`,
+  },
+
+  userGetProfile: {
+    method: "get",
+    url: (userId: string) => `/api/userAuth/profile/${userId}`,
+  },
+  userEditProfile: {
+    method: "put",
+    url: () => `/api/userAuth/editProfile`,
   },
 };
 

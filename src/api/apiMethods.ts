@@ -23,16 +23,23 @@ export const getAllPincodes = () => apiRequest("getAllPincodes");
 
 export const getAllBlogs = (data: any) => apiRequest("getAllBlogs", data);
 
+export const createCompanyReview = (formData: any) =>  apiRequest("createCompanyReview", formData);
+
 export const  getCompanyReviews = (data: any) => apiRequest("getCompanyReviews", data);
 
-export const getAllTechByAddress = (formData: any) =>
-  apiRequest("getAllTechByAddress", formData);
+export const getAllTechByAddress = (formData: any) =>  apiRequest("getAllTechByAddress", formData);
 
-export const getSearchContentByAddress = (formData: any) =>
-  apiRequest("getSearchContentByAddress", formData);
+export const getSearchContentByAddress = (formData: any) =>  apiRequest("getSearchContentByAddress", formData);
 
-export const createGuestBooking = (formData: any) =>
-  apiRequest("createGuestBooking", formData);
+export const createGuestBooking = (formData: any) =>  apiRequest("createGuestBooking", formData);
 
-export const getOrdersByUserId = (id: string) =>
-  apiRequest("getOrdersByUserId", null, id);
+export const getOrdersByUserId = (id: string) =>  apiRequest("getOrdersByUserId", null, id);
+
+export const addReviewByUser = (formData: any) =>  apiRequest("addReviewByUser", formData);
+
+export const bookingCancleByUser = (data: any) =>  apiRequest("bookingCancleByUser", data);
+
+export const userGetProfile = (userId: string) => apiRequest("userGetProfile", null, userId);
+
+export const userEditProfile = (data: any) =>  apiRequest("userEditProfile", data);
+

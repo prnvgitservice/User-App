@@ -489,7 +489,7 @@ const CartScreen = () => {
       </View>
 
       <TouchableOpacity
-        className={`w-full mt-6 py-4 rounded-xl ${isBookingDisabled ? "bg-gray-200" : "bg-fuchsia-500"} ${isBooking ? "opacity-70" : ""}`}
+        className={`w-full mt-6 mb-10 py-4 rounded-xl ${isBookingDisabled ? "bg-gray-200" : "bg-fuchsia-500"} ${isBooking ? "opacity-70" : ""}`}
         disabled={isBookingDisabled || isBooking}
         onPress={handleBookNow}
       >

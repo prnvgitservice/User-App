@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
-import { getAllCategories } from "@/src/api/apiMethods";
+import { CategoryContext } from "@/src/context/CategoryContext";
 
 interface Category {
   _id: string;
@@ -30,28 +30,7 @@ const getRandomBgColor = () => {
 
 const CategoriesPage = () => {
   const navigation = useNavigation<any>();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await getAllCategories();
-      if (response.success && Array.isArray(response.data)) {
-        setCategories(response.data);
-      } else {
-        setError("Invalid response format");
-      }
-    } catch (err: any) {
-      setError(err?.message || "Failed to fetch categories");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
+  const { categories, loading, error } = useContext(CategoryContext);
 
   const renderCategory = (item: Category, index: number) => {
     const bgColor = getRandomBgColor();
@@ -94,11 +73,11 @@ const CategoriesPage = () => {
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center bg-white ">
+      <View className="flex-1 justify-center items-center bg-white">
         <Text className="text-red-500 text-base font-semibold">{error}</Text>
         <TouchableOpacity
           className="mt-4 bg-blue-500 px-4 py-2 rounded-xl"
-          onPress={fetchCategories}
+          onPress={() => {/* Optionally add retry logic here if needed */}}
         >
           <Text className="text-white">Retry</Text>
         </TouchableOpacity>
@@ -107,7 +86,7 @@ const CategoriesPage = () => {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 py-10" showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1 bg-white px-4" showsVerticalScrollIndicator={false}>
       {/* Most Popular */}
       <Text className="text-xl font-bold text-gray-900 mb-3 mt-2">Most Popular Categories</Text>
       <View className="flex-row flex-wrap -mx-2">
@@ -130,7 +109,6 @@ const CategoriesPage = () => {
 };
 
 export default CategoriesPage;
-
 
 // import React, { useEffect } from 'react';
 // import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';

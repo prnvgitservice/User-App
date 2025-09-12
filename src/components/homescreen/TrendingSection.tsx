@@ -33,7 +33,8 @@ const TrendingItem: React.FC<TrendingItemProps> = ({ item, index }) => {
   const textColor = useSharedValue('rgb(55, 65, 81)'); // text-gray-800
 
   const handleCategoryPress = useCallback(() => {
-    navigation.navigate('Technicians', { category: item });
+    navigation.navigate("Technicians", { categoryId: item._id, category: item.category_name })
+
   }, [item, navigation]);
 
   const handlePressIn = () => {

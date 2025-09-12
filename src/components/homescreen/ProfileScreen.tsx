@@ -130,22 +130,22 @@ const ProfileScreen = () => {
         {/* Your Information Section */}
         <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Your Information</Text>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to editProfile */ }}>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("EditProfile") }}>
             <Text className="text-base text-gray-800">Edit Profile</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to transactions */ }}>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("Transactions") }}>
             <Text className="text-base text-gray-800">Transactions</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to reviews */ }}>
+          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("CompanyReview") }}>
             <Text className="text-base text-gray-800">Leave a Comment</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
           </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { /* Navigate to help */ }}>
+          {/* <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { }}>
             <Text className="text-base text-gray-800">Help & Support</Text>
             <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Other Information Section */}

@@ -25,6 +25,8 @@ import ProfessionalAgreementScreen from "../components/profile/ProfessionalAgree
 import RefundPolicyScreen from "../components/profile/RefundPolicyScreen";
 import PrivacyPolicyScreen from "../components/profile/PrivacyPolicyScreen";
 import TermsConditionsScreen from "../components/profile/TermsConditionsScreen";
+import CompanyReviewScreen from "../components/profile/CompanyReviewScreen";
+import ProfileEditPage from "../components/profile/EditProfile";
 
 // Root Stack Params
 export type RootStackParamList = {
@@ -139,6 +141,9 @@ function AppNavigator() {
     >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Cart" component={CartScreen} />
+      <Stack.Screen name="Transactions" component={TransactionPageScreen} />
+      <Stack.Screen name="Category" component={CategoriesPage} />
       <Stack.Screen name="Signup" component={RegisterScreen} />
       <Stack.Screen name="Main" component={MainTabs} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
@@ -152,6 +157,7 @@ function AppNavigator() {
       <Stack.Screen name="AllBlogs" component={AllBlogs} />
       <Stack.Screen name="GuestBook" component={GuestBooking} />
       <Stack.Screen name="AboutUs" component={AboutUs} />
+      <Stack.Screen name="EditProfile" component={ProfileEditPage} />
       <Stack.Screen name="ContactUs" component={ContactUs} />
       <Stack.Screen name="KeyFeatures" component={KeyFeaturesScreen} />
       <Stack.Screen name="FAQ" component={FAQ} />
@@ -159,6 +165,7 @@ function AppNavigator() {
       <Stack.Screen name="RefundPolicy" component={RefundPolicyScreen} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="TermsConditions" component={TermsConditionsScreen} />
+      <Stack.Screen name="CompanyReview" component={CompanyReviewScreen} />
 
       <Stack.Screen
         name="Technicians"
