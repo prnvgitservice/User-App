@@ -113,6 +113,11 @@ const endpoints: any = {
     method: "put",
     url: () => `/api/userAuth/editProfile`,
   },
+
+  createGetInTouch: {
+    method: "post",
+    url: "/api/getInTouch/addGetInTouch",
+  },
 };
 
 export default endpoints;

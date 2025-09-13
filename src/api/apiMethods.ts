@@ -43,3 +43,5 @@ export const userGetProfile = (userId: string) => apiRequest("userGetProfile", n
 
 export const userEditProfile = (data: any) =>  apiRequest("userEditProfile", data);
 
+export const createGetInTouch = (formData: any) =>  apiRequest("createGetInTouch", formData);
+

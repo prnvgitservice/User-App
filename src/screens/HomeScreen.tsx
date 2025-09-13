@@ -70,7 +70,7 @@ const HomeScreen: React.FC = () => {
             <View className="bg-blue-900 rounded px-1 py-1 self-center">
               <Image
                 source={require("../../assets/prnv_logo.jpg")}
-                className="h-8 w-52"
+                className="h-10 w-52"
                 resizeMode="contain"
               />
             </View>

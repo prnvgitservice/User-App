@@ -96,7 +96,7 @@ const CustomerReviewCarousel: React.FC = () => {
   const renderReview = ({ item, index }: { item: Review; index: number }) => (
     <View
       key={`${item._id}-${index}`}
-      className="bg-white p-6 rounded-2xl shadow-lg mx-4 my-4 w-[90%] items-center"
+      className="shadow-md border-gray-300 border bg-white p-6 rounded-2xl mx-3 my-4 w-[90%] items-center"
       style={{ width: width * 0.9 }}
     >
       <View className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center mb-4">

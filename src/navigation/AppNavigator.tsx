@@ -187,7 +187,7 @@ function AppNavigator() {
         })}
       />
 
-      <Stack.Screen
+      {/* <Stack.Screen
         name="SearchFilter"
         component={SearchFilterScreen}
         options={({ route }) => ({
@@ -197,7 +197,31 @@ function AppNavigator() {
             (route.params as { pincode?: string })?.pincode ||
             "Search Filter",
         })}
-      />
+      /> */}
+      {/* <Stack.Screen
+        name="SearchFilter"
+        component={SearchFilterScreen}
+        options={({ route }) => {
+          const { path, category, pincode } = route.params;
+          // Parse path to extract segments for dynamic title
+          const pathSegments = path.split('/').filter(Boolean);
+          const categoryName = category || pathSegments[0] || 'Search';
+          const areaPincode = pathSegments[2] || pincode || '';
+          const title = areaPincode ? `${categoryName} in ${areaPincode}` : categoryName;
+
+          return {
+            title: title || 'Search Filter',
+            headerStyle: {
+              backgroundColor: '#f8f8f8',
+            },
+            headerTintColor: '#333',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+          };
+        }}
+      /> */}
+      <Stack.Screen name="SearchFilter" component={SearchFilterScreen} options={{ title: 'Technicians' }} />
     </Stack.Navigator>
   );
 }

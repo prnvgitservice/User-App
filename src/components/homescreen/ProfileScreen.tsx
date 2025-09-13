@@ -1,32 +1,71 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Linking } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  Alert,
+  Linking,
+  Pressable,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from '@expo/vector-icons'; // Assuming Expo is used; otherwise, use react-native-vector-icons
+import { Ionicons } from "@expo/vector-icons"; // Assuming Expo is used
+
+const socials = [
+  {
+    name: "logo-facebook",
+    url: "https://www.facebook.com/prnvservices/",
+    color: "#2563EB", // blue-600 (pressed)
+    lightColor: "#93C5FD", // blue-300 (default)
+  },
+  {
+    name: "logo-twitter",
+    url: "https://x.com/prnvserviceshyd",
+    color: "#60A5FA", // blue-400
+    lightColor: "#BFDBFE", // blue-300
+  },
+  {
+    name: "logo-youtube",
+    url: "https://www.youtube.com/channel/UCGNrnML4lA3ix6WYUtcUw3A",
+    color: "#DC2626", // red-600
+    lightColor: "#FCA5A5", // red-300
+  },
+  {
+    name: "logo-linkedin",
+    url: "https://www.linkedin.com/company/prnvservices/posts/?feedView=all",
+    color: "#1D4ED8", // blue-700
+    lightColor: "#93C5FD", // blue-300
+  },
+  {
+    name: "logo-instagram",
+    url: "https://www.instagram.com/prnv.services/",
+    color: "#EC4899", // pink-500
+    lightColor: "#F9A8D4", // pink-300
+  },
+  {
+    name: "logo-pinterest",
+    url: "https://in.pinterest.com/prnv_services/",
+    color: "#EF4444", // red-500
+    lightColor: "#FCA5A5", // red-300
+  },
+];
 
 const ProfileScreen = () => {
   const [user, setUser] = useState(null);
-  const [credits, setCredits] = useState(50);
   const navigation = useNavigation();
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem('user');
+        const storedUser = await AsyncStorage.getItem("user");
         if (storedUser) {
           const parsedUser = JSON.parse(storedUser);
           setUser(parsedUser);
         }
-
-        const storedCredits = await AsyncStorage.getItem('credits');
-        if (storedCredits) {
-          setCredits(parseInt(storedCredits));
-        } else {
-          setCredits(50);
-          await AsyncStorage.setItem('credits', '50');
-        }
       } catch (e) {
-        console.error('Error loading data:', e);
+        console.error("Error loading data:", e);
       }
     };
 
@@ -38,168 +77,464 @@ const ProfileScreen = () => {
   };
 
   const handleLogout = useCallback(() => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            try {
-              await AsyncStorage.clear();
-              setUser(null);
-              navigation.navigate("Login");
-            } catch (e) {
-              console.error('Error during logout:', e);
-            }
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Yes",
+        onPress: async () => {
+          try {
+            await AsyncStorage.clear();
+            setUser(null);
+            navigation.navigate("Login");
+          } catch (e) {
+            console.error("Error during logout:", e);
           }
-        }
-      ]
-    );
-  }, []);
-
-  const handleAddCredits = useCallback(async () => {
-    const newCredits = credits + 5;
-    setCredits(newCredits);
-    try {
-      await AsyncStorage.setItem('credits', newCredits.toString());
-    } catch (e) {
-      console.error('Error adding credits:', e);
-    }
-  }, [credits]);
+        },
+      },
+    ]);
+  }, [navigation]);
 
   const handleScroll = useCallback(() => {
     // Add any scroll handling logic here if needed
   }, []);
 
   return (
-      <ScrollView
-        contentContainerClassName="pb-10"
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        bounces={false}
-      >
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">Settings</Text>
-          <View className="w-6" /> {/* Spacer for symmetry */}
-        </View>
+    <ScrollView
+      contentContainerClassName="pb-10"
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
+      bounces={false}
+    >
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </TouchableOpacity>
+        <Text className="text-xl font-bold text-gray-900">Settings</Text>
+        <View className="w-6" /> {/* Spacer for symmetry */}
+      </View>
 
-        {/* User Profile */}
-        <View className="bg-white mx-4 mt-6 rounded-xl shadow-sm overflow-hidden">
-          <View className="flex-row items-center p-4">
-            <Image
-              source={{ uri: user?.profileImage || "https://cdn-icons-png.flaticon.com/512/6596/6596121.png" }}
-              className="w-16 h-16 rounded-full mr-4 border border-gray-200"
-            />
-            <View className="flex-1">
-              <Text className="text-lg font-semibold text-gray-900">{user?.name || user?.username || 'User'}</Text>
-              <Text className="text-sm text-gray-500 mt-1">{user?.phoneNumber || 'Phone Number'}</Text>
-            </View>
+      {/* User Profile */}
+      <View className="bg-white mx-4 mt-6 rounded-xl shadow-sm overflow-hidden">
+        <View className="flex-row items-center p-4">
+          <Image
+            source={{
+              uri:
+                user?.profileImage ||
+                "https://cdn-icons-png.flaticon.com/512/6596/6596121.png",
+            }}
+            className="w-16 h-16 rounded-full mr-4 border border-gray-200"
+          />
+          <View className="flex-1">
+            <Text className="text-lg font-semibold text-gray-900">
+              {user?.name || user?.username || "User"}
+            </Text>
+            <Text className="text-sm text-gray-500 mt-1">
+              {user?.phoneNumber || "Phone Number"}
+            </Text>
           </View>
         </View>
+      </View>
 
-        {/* Quick Access Icons */}
-        <View className="flex-row justify-around mx-4 mt-6 bg-white rounded-xl shadow-sm p-4">
-          <TouchableOpacity className="items-center flex-1" onPress={() => { /* Navigate to reviews */ }}>
-            <View className="bg-blue-100 p-3 rounded-full mb-2">
-              <Ionicons name="star-outline" size={24} color="blue" />
-            </View>
-            <Text className="text-sm font-medium text-gray-700">Your Reviews</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center flex-1" onPress={handleContact}>
-            <View className="bg-green-100 p-3 rounded-full mb-2">
-              <Ionicons name="headset-outline" size={24} color="green" />
-            </View>
-            <Text className="text-sm font-medium text-gray-700">Help & Support</Text>
-          </TouchableOpacity>
-          <TouchableOpacity className="items-center flex-1" onPress={() => { /* Navigate to favorites */ }}>
-            <View className="bg-red-100 p-3 rounded-full mb-2">
-              <Ionicons name="heart-outline" size={24} color="red" />
-            </View>
-            <Text className="text-sm font-medium text-gray-700">Favorites</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Quick Access Icons */}
+      <View className="flex-row justify-around mx-4 mt-6 bg-white rounded-xl shadow p-4">
+        {socials.map((item, idx) => (
+          <Pressable
+            key={idx}
+            className="w-12 h-12 rounded-full items-center justify-center "
+            onPress={() => Linking.openURL(item.url)}
+            style={{
+              borderRadius: 24,
+              borderWidth: 1,
+              borderColor: item.lightColor, // <- brown border
+            }}
 
-        {/* Your Information Section */}
-        <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
-          <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Your Information</Text>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("EditProfile") }}>
-            <Text className="text-base text-gray-800">Edit Profile</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("Transactions") }}>
-            <Text className="text-base text-gray-800">Transactions</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("CompanyReview") }}>
-            <Text className="text-base text-gray-800">Leave a Comment</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          {/* <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { }}>
-            <Text className="text-base text-gray-800">Help & Support</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity> */}
-        </View>
-
-        {/* Other Information Section */}
-        <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
-          <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Other Information</Text>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("AboutUs") }}>
-            <Text className="text-base text-gray-800">About Us</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3" onPress={() => { navigation.navigate("ContactUs") }}>
-            <Text className="text-base text-gray-800">Contact Us</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("KeyFeatures")}}>
-            <Text className="text-base text-gray-800">Key Features</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("FAQ")}}>
-            <Text className="text-base text-gray-800">FAQ's</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("PAG") }}>
-            <Text className="text-base text-gray-800">Professional Agreement Details</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("RefundPolicy") }}>
-            <Text className="text-base text-gray-800">PRNV Services Refund Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("PrivacyPolicy") }}>
-            <Text className="text-base text-gray-800">Privacy Policy</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-          <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("TermsConditions") }}>
-            <Text className="text-base text-gray-800">Terms & Conditions</Text>
-            <Ionicons name="chevron-forward" size={20} color="gray" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Logout Button */}
-        <TouchableOpacity className="mx-4 mt-6 bg-red-500 rounded-xl py-4" onPress={handleLogout}>
-          <Text className="text-center text-base font-semibold text-white">Log Out</Text>
+            //   ({ pressed }) => [
+            //   {
+            //     backgroundColor: pressed ? item.color : "#E5E7EB", // gray-300 fallback
+            //     transform: [{ scale: pressed ? 0.9 : 1 }],
+            //   },
+            // ]
+          >
+            {({ pressed }) => (
+              <Ionicons name={item.name as any} size={25} color={item.color} />
+            )}
+          </Pressable>
+        ))}
+      </View>
+      {/* <TouchableOpacity
+          key="booking"
+          className="items-center flex-1"
+          onPress={() => {
+          }}
+        >
+          <View className="bg-blue-100 p-3 rounded-full mb-2">
+            <Ionicons name="phone-portrait-outline" size={24} color="blue" />
+          </View>
+          <Text className="text-sm font-medium text-gray-700">
+            Your Booking
+          </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          key="support"
+          className="items-center flex-1"
+          onPress={handleContact}
+        >
+          <View className="bg-green-100 p-3 rounded-full mb-2">
+            <Ionicons name="headset-outline" size={24} color="green" />
+          </View>
+          <Text className="text-sm font-medium text-gray-700">
+            Help & Support
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="favorites"
+          className="items-center flex-1"
+          onPress={() => {
+          }}
+        >
+          <View className="bg-red-100 p-3 rounded-full mb-2">
+            <Ionicons name="heart-outline" size={24} color="red" />
+          </View>
+          <Text className="text-sm font-medium text-gray-700">Favorites</Text>
+        </TouchableOpacity> */}
 
-        {/* Footer-like Info */}
-        <View className="mt-8 pb-4">
-          <Text className="text-center text-sm text-gray-500">App v2.5.4</Text>
-          <Text className="text-center text-xs text-gray-400 mt-1">© 2025 PRNV Services. All rights reserved.</Text>
-        </View>
-      </ScrollView>
+      {/* Your Information Section */}
+      <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+        <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">
+          Your Information
+        </Text>
+        <TouchableOpacity
+          key="edit-profile"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("EditProfile");
+          }}
+        >
+          <Text className="text-base text-gray-800">Edit Profile</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="transactions"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("Transactions");
+          }}
+        >
+          <Text className="text-base text-gray-800">Transactions</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="company-review"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("CompanyReview");
+          }}
+        >
+          <Text className="text-base text-gray-800">Leave a Comment</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Other Information Section */}
+      <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+        <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">
+          Other Information
+        </Text>
+        <TouchableOpacity
+          key="about-us"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("AboutUs");
+          }}
+        >
+          <Text className="text-base text-gray-800">About Us</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="contact-us"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("ContactUs");
+          }}
+        >
+          <Text className="text-base text-gray-800">Contact Us</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="key-features"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("KeyFeatures");
+          }}
+        >
+          <Text className="text-base text-gray-800">Key Features</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="faq"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("FAQ");
+          }}
+        >
+          <Text className="text-base text-gray-800">FAQ's</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="professional-agreement"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("PAG");
+          }}
+        >
+          <Text className="text-base text-gray-800">
+            Professional Agreement Details
+          </Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="refund-policy"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("RefundPolicy");
+          }}
+        >
+          <Text className="text-base text-gray-800">
+            PRNV Services Refund Policy
+          </Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="privacy-policy"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("PrivacyPolicy");
+          }}
+        >
+          <Text className="text-base text-gray-800">Privacy Policy</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          key="terms-conditions"
+          className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200"
+          onPress={() => {
+            navigation.navigate("TermsConditions");
+          }}
+        >
+          <Text className="text-base text-gray-800">Terms & Conditions</Text>
+          <Ionicons name="chevron-forward" size={20} color="gray" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Logout Button */}
+      <TouchableOpacity
+        className="mx-4 mt-6 bg-red-500 rounded-xl py-4"
+        onPress={handleLogout}
+      >
+        <Text className="text-center text-base font-semibold text-white">
+          Log Out
+        </Text>
+      </TouchableOpacity>
+
+      {/* Footer-like Info */}
+      <View className="mt-8 pb-4">
+        <Text className="text-center text-sm text-gray-500">App v2.5.4</Text>
+        <Text className="text-center text-xs text-gray-400 mt-1">
+          © 2025 PRNV Services. All rights reserved.
+        </Text>
+      </View>
+    </ScrollView>
   );
 };
 
 export default ProfileScreen;
+// import React, { useCallback, useEffect, useState } from "react";
+// import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Linking } from "react-native";
+// import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { useNavigation } from "@react-navigation/native";
+// import { Ionicons } from '@expo/vector-icons'; // Assuming Expo is used; otherwise, use react-native-vector-icons
+
+// const ProfileScreen = () => {
+//   const [user, setUser] = useState(null);
+//   const navigation = useNavigation();
+
+//   useEffect(() => {
+//     const loadData = async () => {
+//       try {
+//         const storedUser = await AsyncStorage.getItem('user');
+//         if (storedUser) {
+//           const parsedUser = JSON.parse(storedUser);
+//           setUser(parsedUser);
+//         }
+
+//       } catch (e) {
+//         console.error('Error loading data:', e);
+//       }
+//     };
+
+//     loadData();
+//   }, []);
+
+//   const handleContact = () => {
+//     Linking.openURL("tel:+919603558369");
+//   };
+
+//   const handleLogout = useCallback(() => {
+//     Alert.alert(
+//       'Logout',
+//       'Are you sure you want to logout?',
+//       [
+//         { text: 'Cancel', style: 'cancel' },
+//         {
+//           text: 'Yes',
+//           onPress: async () => {
+//             try {
+//               await AsyncStorage.clear();
+//               setUser(null);
+//               navigation.navigate("Login");
+//             } catch (e) {
+//               console.error('Error during logout:', e);
+//             }
+//           }
+//         }
+//       ]
+//     );
+//   }, []);
+
+//   const handleScroll = useCallback(() => {
+//     // Add any scroll handling logic here if needed
+//   }, []);
+
+//   return (
+//       <ScrollView
+//         contentContainerClassName="pb-10"
+//         showsVerticalScrollIndicator={false}
+//         keyboardShouldPersistTaps="handled"
+//         onScroll={handleScroll}
+//         scrollEventThrottle={16}
+//         bounces={false}
+//       >
+//         {/* Header */}
+//         <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+//           <TouchableOpacity onPress={() => navigation.goBack()}>
+//             <Ionicons name="arrow-back" size={24} color="black" />
+//           </TouchableOpacity>
+//           <Text className="text-xl font-bold text-gray-900">Settings</Text>
+//           <View className="w-6" /> {/* Spacer for symmetry */}
+//         </View>
+
+//         {/* User Profile */}
+//         <View className="bg-white mx-4 mt-6 rounded-xl shadow-sm overflow-hidden">
+//           <View className="flex-row items-center p-4">
+//             <Image
+//               source={{ uri: user?.profileImage || "https://cdn-icons-png.flaticon.com/512/6596/6596121.png" }}
+//               className="w-16 h-16 rounded-full mr-4 border border-gray-200"
+//             />
+//             <View className="flex-1">
+//               <Text className="text-lg font-semibold text-gray-900">{user?.name || user?.username || 'User'}</Text>
+//               <Text className="text-sm text-gray-500 mt-1">{user?.phoneNumber || 'Phone Number'}</Text>
+//             </View>
+//           </View>
+//         </View>
+
+//         {/* Quick Access Icons */}
+//         <View className="flex-row justify-around mx-4 mt-6 bg-white rounded-xl shadow-sm p-4">
+//           <TouchableOpacity className="items-center flex-1" onPress={() => { /* Navigate to reviews */ }}>
+//             <View className="bg-blue-100 p-3 rounded-full mb-2">
+//               <Ionicons name="phone-portrait-outline" size={24} color="blue" />
+//             </View>
+//             <Text className="text-sm font-medium text-gray-700">Your Booking</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="items-center flex-1" onPress={handleContact}>
+//             <View className="bg-green-100 p-3 rounded-full mb-2">
+//               <Ionicons name="headset-outline" size={24} color="green" />
+//             </View>
+//             <Text className="text-sm font-medium text-gray-700">Help & Support</Text>
+//           </TouchableOpacity>
+//           <TouchableOpacity className="items-center flex-1" onPress={() => { /* Navigate to favorites */ }}>
+//             <View className="bg-red-100 p-3 rounded-full mb-2">
+//               <Ionicons name="heart-outline" size={24} color="red" />
+//             </View>
+//             <Text className="text-sm font-medium text-gray-700">Favorites</Text>
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Your Information Section */}
+//         <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+//           <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Your Information</Text>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("EditProfile") }}>
+//             <Text className="text-base text-gray-800">Edit Profile</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("Transactions") }}>
+//             <Text className="text-base text-gray-800">Transactions</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("CompanyReview") }}>
+//             <Text className="text-base text-gray-800">Leave a Comment</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           {/* <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { }}>
+//             <Text className="text-base text-gray-800">Help & Support</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity> */}
+//         </View>
+
+//         {/* Other Information Section */}
+//         <View className="mx-4 mt-6 bg-white rounded-xl shadow-sm overflow-hidden">
+//           <Text className="px-4 py-3 text-lg font-semibold text-gray-900 border-b border-gray-200">Other Information</Text>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("AboutUs") }}>
+//             <Text className="text-base text-gray-800">About Us</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3" onPress={() => { navigation.navigate("ContactUs") }}>
+//             <Text className="text-base text-gray-800">Contact Us</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("KeyFeatures")}}>
+//             <Text className="text-base text-gray-800">Key Features</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("FAQ")}}>
+//             <Text className="text-base text-gray-800">FAQ's</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("PAG") }}>
+//             <Text className="text-base text-gray-800">Professional Agreement Details</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("RefundPolicy") }}>
+//             <Text className="text-base text-gray-800">PRNV Services Refund Policy</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => {navigation.navigate("PrivacyPolicy") }}>
+//             <Text className="text-base text-gray-800">Privacy Policy</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <TouchableOpacity className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200" onPress={() => { navigation.navigate("TermsConditions") }}>
+//             <Text className="text-base text-gray-800">Terms & Conditions</Text>
+//             <Ionicons name="chevron-forward" size={20} color="gray" />
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Logout Button */}
+//         <TouchableOpacity className="mx-4 mt-6 bg-red-500 rounded-xl py-4" onPress={handleLogout}>
+//           <Text className="text-center text-base font-semibold text-white">Log Out</Text>
+//         </TouchableOpacity>
+
+//         {/* Footer-like Info */}
+//         <View className="mt-8 pb-4">
+//           <Text className="text-center text-sm text-gray-500">App v2.5.4</Text>
+//           <Text className="text-center text-xs text-gray-400 mt-1">© 2025 PRNV Services. All rights reserved.</Text>
+//         </View>
+//       </ScrollView>
+//   );
+// };
+
+// export default ProfileScreen;
 // import React, { useCallback, useEffect, useState } from "react";
 // import { View, Text, TouchableOpacity, Image, ScrollView, Alert, Linking } from "react-native";
 // import { SafeAreaView } from "react-native-safe-area-context";

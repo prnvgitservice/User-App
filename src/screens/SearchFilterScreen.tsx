@@ -16,7 +16,6 @@ import {
 } from "@expo/vector-icons";
 import {
   getAllTechByAddress,
-  getSearchContentByAddress,
 } from "../api/apiMethods";
 import { AdvertisementBanner, ServiceFilters } from "./TechniciansScreen";
 
@@ -63,21 +62,22 @@ const SearchFilterScreen = () => {
   const [errorContent, setErrorContent] = useState<string | null>(null);
 
   // Access route parameters
-  const { path, categoryId, pincode, Area, city, state ,category } = route.params as {
+  const { path, categoryId, pincode, Area,subArea, city, state ,category } = route.params as {
     path?: string;
     categoryId?: string;
     pincode?: string;
     Area?: string | null;
+    subArea?:string | null,
     city?: String;
     state?: string;
     category: string;
   };
 
-  const formData = { categoryId, areaName: Area, pincode, city, state };
+  const formData = { categoryId, areaName: Area,subAreaName: subArea, pincode, city, state };
 
   const fetchTechBySearch = async () => {
-    if (!categoryId || !Area || !pincode) {
-      setError("Missing required search parameters");
+    if (!categoryId || !city) {
+      setError("category and city required search parameters");
       return;
     }
     setIsLoading(true);
