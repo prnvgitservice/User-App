@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,15 +6,14 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
   Platform,
-  TextInput,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { removeFromCart, addToCart, getCartItems, createBookService } from "../api/apiMethods"; // Assume this is adapted for RN
+import { removeFromCart, addToCart, getCartItems, createBookService } from "../api/apiMethods";
 
 interface CartItem {
   _id: string;
@@ -28,6 +27,8 @@ interface CartItem {
   bookingDate: string;
   otp?: number;
   isSelected: boolean;
+  ratings?: number;
+  reviews?: number;
 }
 
 interface CartData {
@@ -56,10 +57,8 @@ const CartScreen = () => {
   const [error, setError] = useState<string | null>(null);
   const [processingItems, setProcessingItems] = useState<{ [key: string]: boolean }>({});
   const [isBooking, setIsBooking] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<CartItem[]>([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [currentItemId, setCurrentItemId] = useState<string | null>(null);
-  const [tempDate, setTempDate] = useState(new Date());
 
   useEffect(() => {
     fetchCartData();
@@ -70,7 +69,7 @@ const CartScreen = () => {
       setLoading(true);
       const userId = await AsyncStorage.getItem("userId");
       if (!userId) {
-        setError("User not logged in");
+        setError("Please log in to view your cart");
         return;
       }
       const response = await getCartItems(userId);
@@ -83,18 +82,15 @@ const CartScreen = () => {
           servicePrice: item?.servicePrice,
           quantity: item.quantity,
           technicianId: item.technicianId,
-          bookingDate: item.bookingDate,
+          bookingDate: item.bookingDate || "",
           isSelected: false,
+          ratings: item?.ratings,
+          reviews: item?.reviews,
         }));
-        const updatedCartData = {
+        setCartData({
           user: response.result.user,
-          cart: {
-            ...response.result.cart,
-            items: formattedItems,
-          },
-        };
-        setCartData(updatedCartData);
-        setSelectedItems([]);
+          cart: { ...response.result.cart, items: formattedItems },
+        });
       } else {
         setError("Failed to fetch cart data");
       }
@@ -121,17 +117,11 @@ const CartScreen = () => {
           },
         };
       });
-      setSelectedItems((prev) =>
-        prev.map((item) =>
-          item._id === currentItemId ? { ...item, bookingDate: dateString } : item
-        )
-      );
     }
   };
 
-  const showDatePickerForItem = (itemId: string, currentDate: string) => {
+  const showDatePickerForItem = (itemId: string) => {
     setCurrentItemId(itemId);
-    setTempDate(currentDate ? new Date(currentDate) : new Date());
     setShowDatePicker(true);
   };
 
@@ -148,18 +138,16 @@ const CartScreen = () => {
         },
       };
     });
-    setSelectedItems((prev) =>
-      prev.map((item) =>
-        item._id === itemId ? { ...item, bookingDate: "" } : item
-      )
-    );
   };
 
   const handleQuantityChange = async (itemId: string, delta: number) => {
     try {
       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
       const userId = await AsyncStorage.getItem("userId");
-      if (!userId) return;
+      if (!userId) {
+        setError("User not logged in");
+        return;
+      }
       const item = cartData?.cart.items.find((item) => item._id === itemId);
       if (!item) return;
       const newQuantity = Math.max(1, item.quantity + delta);
@@ -175,11 +163,6 @@ const CartScreen = () => {
           },
         };
       });
-      setSelectedItems((prev) =>
-        prev.map((item) =>
-          item._id === itemId ? { ...item, quantity: newQuantity } : item
-        )
-      );
       const payload = {
         userId,
         serviceId: item.serviceId,
@@ -199,7 +182,10 @@ const CartScreen = () => {
     try {
       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
       const userId = await AsyncStorage.getItem("userId");
-      if (!userId) return;
+      if (!userId) {
+        setError("User not logged in");
+        return;
+      }
       const item = cartData?.cart.items.find((item) => item._id === itemId);
       if (!item) return;
       setCartData((prev) => {
@@ -212,7 +198,6 @@ const CartScreen = () => {
           },
         };
       });
-      setSelectedItems((prev) => prev.filter((item) => item._id !== itemId));
       await removeFromCart({ userId, serviceId: item.serviceId, technicianId: item.technicianId });
     } catch (err: any) {
       setError("Failed to remove item");
@@ -225,25 +210,13 @@ const CartScreen = () => {
   const handleCheckboxChange = (itemId: string) => {
     setCartData((prev) => {
       if (!prev) return null;
-      const updatedItems = prev.cart.items.map((item) => {
-        if (item._id === itemId) {
-          const newSelectedState = !item.isSelected;
-          setSelectedItems((prevSelected) => {
-            if (newSelectedState) {
-              return [...prevSelected, { ...item, isSelected: true }];
-            } else {
-              return prevSelected.filter((selected) => selected._id !== itemId);
-            }
-          });
-          return { ...item, isSelected: newSelectedState };
-        }
-        return item;
-      });
       return {
         ...prev,
         cart: {
           ...prev.cart,
-          items: updatedItems,
+          items: prev.cart.items.map((item) =>
+            item._id === itemId ? { ...item, isSelected: !item.isSelected } : item
+          ),
         },
       };
     });
@@ -254,11 +227,16 @@ const CartScreen = () => {
       setIsBooking(true);
       const userId = await AsyncStorage.getItem("userId");
       if (!userId) {
-        setError("User not logged in");
+        setError("Please log in to proceed");
         return;
       }
+      const selectedItems = cartData?.cart.items.filter((item) => item.isSelected) || [];
       if (selectedItems.length === 0) {
         setError("No items selected for booking");
+        return;
+      }
+      if (selectedItems.some((item) => !item.bookingDate)) {
+        setError("Please select dates for all selected items");
         return;
       }
       const bookings = selectedItems.map((item) => ({
@@ -273,8 +251,10 @@ const CartScreen = () => {
       }));
       const response = await createBookService(bookings);
       if (response.success) {
+        Alert.alert("Success", "Booking confirmed!", [
+          { text: "OK", onPress: () => navigation.navigate("Transactions") },
+        ]);
         await fetchCartData();
-        navigation.navigate("Transactions");
       } else {
         setError(response.message || "Booking failed");
       }
@@ -302,33 +282,36 @@ const CartScreen = () => {
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#d946ef" />
+      <View className="flex-1 justify-center items-center bg-gray-50">
+        <ActivityIndicator size="large" color="#8b5cf6" />
+        <Text className="mt-4 text-gray-600 text-lg">Loading your cart...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center bg-white p-6">
-        <Text className="text-red-500 text-center mb-4">{error}</Text>
-        <View className="flex-row justify-center gap-4">
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <Text className="text-red-600 text-lg text-center mb-6">{error}</Text>
+        <View className="flex-row gap-4">
           {error.includes("log in") && (
             <TouchableOpacity
-              className="bg-fuchsia-500 px-4 py-2 rounded-lg"
+              className="bg-violet-600 px-6 py-3 rounded-full shadow-md"
               onPress={() => navigation.navigate("Login")}
+              accessibilityLabel="Log in to continue"
             >
-              <Text className="text-white font-semibold">Log In</Text>
+              <Text className="text-white font-semibold text-base">Log In</Text>
             </TouchableOpacity>
           )}
           <TouchableOpacity
-            className="bg-fuchsia-500 px-4 py-2 rounded-lg"
+            className="bg-violet-600 px-6 py-3 rounded-full shadow-md"
             onPress={() => {
               setError(null);
               fetchCartData();
             }}
+            accessibilityLabel="Retry loading cart"
           >
-            <Text className="text-white font-semibold">Try Again</Text>
+            <Text className="text-white font-semibold text-base">Try Again</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -337,176 +320,206 @@ const CartScreen = () => {
 
   if (!cartData || !cartData.cart?.items || cartData.cart?.items?.length === 0) {
     return (
-      <View className="flex-1 justify-center items-center bg-white p-6">
-        <Text className="text-gray-500 text-lg mb-4">Your cart is empty</Text>
+      <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+        <Text className="text-gray-600 text-lg mb-6">Your cart is empty</Text>
         <TouchableOpacity
-          className="bg-fuchsia-500 px-6 py-3 rounded-lg"
+          className="bg-violet-600 px-8 py-4 rounded-full shadow-md"
           onPress={() => navigation.navigate("Category")}
+          accessibilityLabel="Browse services"
         >
-          <Text className="text-white font-semibold">Browse Services</Text>
+          <Text className="text-white font-semibold text-base">Browse Services</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  const isBookingDisabled =
-    selectedItems.length === 0 || selectedItems.some((item) => !item.bookingDate);
+  const selectedItems = cartData.cart.items.filter((item) => item.isSelected);
+  const isBookingDisabled = selectedItems.length === 0 || selectedItems.some((item) => !item.bookingDate);
 
   return (
-    <ScrollView className="flex-1 bg-white px-4 py-6">
-      <Text className="text-2xl font-bold text-gray-800 mb-6">Your Cart</Text>
+    <View className="flex-1 bg-gray-50">
+      <ScrollView className="px-4 py-6 pb-20">
+        <Text className="text-3xl font-bold text-gray-900 mb-6">Your Cart</Text>
 
-      {cartData.cart?.items?.map((item) => {
-        const isProcessing = processingItems[item._id];
-        const { subtotal } = calculateItemTotal(item);
-        return (
-          <View
-            key={item._id}
-            className={`flex-row items-center justify-between border border-gray-300 p-4 rounded-xl bg-white shadow-md mb-4 ${isProcessing ? "opacity-70" : ""}`}
-          >
-            <TouchableOpacity
-              className="mr-3"
-              onPress={() => handleCheckboxChange(item._id)}
-              disabled={isProcessing}
+        {cartData.cart.items.map((item) => {
+          const isProcessing = processingItems[item._id];
+          const { subtotal } = calculateItemTotal(item);
+          return (
+            <View
+              key={item._id}
+              className={`flex-row items-center bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-200 ${isProcessing ? "opacity-60" : ""}`}
             >
-              <Ionicons
-                name={item.isSelected ? "checkbox" : "square-outline"}
-                size={24}
-                color="#d946ef"
+              <TouchableOpacity
+                className="mr-4"
+                onPress={() => handleCheckboxChange(item._id)}
+                disabled={isProcessing}
+                accessibilityLabel={`Select ${item.serviceName}`}
+              >
+                <Ionicons
+                  name={item.isSelected ? "checkbox" : "square-outline"}
+                  size={26}
+                  color="#8b5cf6"
+                />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: item?.serviceImg || "https://via.placeholder.com/64" }}
+                className="w-16 h-16 rounded-lg"
+                resizeMode="cover"
               />
-            </TouchableOpacity>
-            <Image
-              source={{ uri: item?.serviceImg || "https://via.placeholder.com/64" }}
-              className="w-16 h-16 rounded-xl"
-              resizeMode="cover"
-            />
-            <View className="flex-1 ml-4">
-              <Text className="text-lg font-semibold">{item?.serviceName}</Text>
-              <Text className="text-gray-600">
-                ₹ <Text className="text-blue-600">{item?.servicePrice}</Text> per unit
-              </Text>
-              {/* Assuming ratings and reviews are optional and not in interface */}
-            </View>
-            <View className="items-end">
-              <View className="flex-row items-center bg-fuchsia-100 rounded-lg px-2 border border-fuchsia-400 mb-2">
-                {item.quantity === 1 ? (
-                  <TouchableOpacity
-                    className="p-1"
-                    onPress={() => !isProcessing && handleRemove(item._id)}
-                    disabled={isProcessing}
-                  >
-                    <MaterialIcons name="delete" size={16} color="red" />
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    className="p-1"
-                    onPress={() => !isProcessing && handleQuantityChange(item._id, -1)}
-                    disabled={isProcessing}
-                  >
-                    <Ionicons name="remove" size={16} color="#a21caf" />
-                  </TouchableOpacity>
-                )}
-                <Text className="text-sm text-black w-8 text-center">
-                  {isProcessing ? "..." : item.quantity}
+              <View className="flex-1 ml-4">
+                <Text className="text-lg font-semibold text-gray-900">{item.serviceName}</Text>
+                <Text className="text-gray-600 text-sm">
+                  ₹ <Text className="text-violet-600">{item.servicePrice}</Text> per unit
                 </Text>
-                <TouchableOpacity
-                  className="p-1"
-                  onPress={() => !isProcessing && handleQuantityChange(item._id, 1)}
-                  disabled={isProcessing}
-                >
-                  <Ionicons name="add" size={16} color="#a21caf" />
-                </TouchableOpacity>
-              </View>
-              <Text className="font-semibold text-gray-800">₹ {subtotal}</Text>
-              <View className="flex-row items-center mt-2">
-                {item.bookingDate ? (
-                  <>
-                    <TouchableOpacity
-                      className="flex-row items-center"
-                      onPress={() => showDatePickerForItem(item._id, item.bookingDate)}
-                    >
-                      <FontAwesome5 name="calendar-alt" size={20} color="blue" />
-                      <Text className="text-sm text-blue-600 ml-1">{item.bookingDate}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className="ml-2"
-                      onPress={() => handleClearDate(item._id)}
-                    >
-                      <Ionicons name="close" size={16} color="gray" />
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() => showDatePickerForItem(item._id, "")}
-                  >
-                    <FontAwesome5 name="calendar-alt" size={20} color="blue" />
-                  </TouchableOpacity>
+                {item.ratings && (
+                  <View className="flex-row items-center gap-1 mt-1">
+                    <Text className="text-sm text-yellow-500">★</Text>
+                    <Text className="text-sm text-gray-600">{item.ratings}</Text>
+                    <Text className="text-sm text-gray-500">({item.reviews} reviews)</Text>
+                  </View>
                 )}
               </View>
+              <View className="items-end">
+                <View className="flex-row items-center bg-violet-50 rounded-lg px-1 py-1 border border-violet-200 mb-2">
+                  {item.quantity === 1 ? (
+                    <TouchableOpacity
+                      className="p-2"
+                      onPress={() => !isProcessing && handleRemove(item._id)}
+                      disabled={isProcessing}
+                      accessibilityLabel={`Remove ${item.serviceName}`}
+                    >
+                      <MaterialIcons name="delete" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      className="p-2"
+                      onPress={() => !isProcessing && handleQuantityChange(item._id, -1)}
+                      disabled={isProcessing}
+                      accessibilityLabel={`Decrease quantity of ${item.serviceName}`}
+                    >
+                      <Ionicons name="remove" size={18} color="#8b5cf6" />
+                    </TouchableOpacity>
+                  )}
+                  <Text className="text-sm text-gray-900 w-10 text-center">
+                    {isProcessing ? "..." : item.quantity}
+                  </Text>
+                  <TouchableOpacity
+                    className="p-2"
+                    onPress={() => !isProcessing && handleQuantityChange(item._id, 1)}
+                    disabled={isProcessing}
+                    accessibilityLabel={`Increase quantity of ${item.serviceName}`}
+                  >
+                    <Ionicons name="add" size={18} color="#8b5cf6" />
+                  </TouchableOpacity>
+                </View>
+                <Text className="font-semibold text-gray-900">₹ {subtotal}</Text>
+                <View className="flex-row items-center mt-2">
+                  {item.bookingDate ? (
+                    <>
+                      <TouchableOpacity
+                        className="flex-row items-center"
+                        onPress={() => showDatePickerForItem(item._id)}
+                        accessibilityLabel={`Change booking date for ${item.serviceName}`}
+                      >
+                        <FontAwesome5 name="calendar-alt" size={20} color="#3b82f6" />
+                        <Text className="text-sm text-blue-600 ml-2">{item.bookingDate}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="ml-3"
+                        onPress={() => handleClearDate(item._id)}
+                        accessibilityLabel={`Clear booking date for ${item.serviceName}`}
+                      >
+                        <Ionicons name="close" size={18} color="#6b7280" />
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => showDatePickerForItem(item._id)}
+                      accessibilityLabel={`Set booking date for ${item.serviceName}`}
+                    >
+                      {/* <Text className="text-sm text-blue-600">Set Date</Text> */}
+                      <Text>📅</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            </View>
+          );
+        })}
+
+        {selectedItems.length > 0 && (
+          <View className="mt-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <Text className="text-xl font-semibold text-gray-900 mb-4">Order Summary</Text>
+            {selectedItems.map((item) => {
+              const { subtotal, gst, total } = calculateItemTotal(item);
+              return (
+                <View key={item._id} className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <View className="flex-row justify-between">
+                    <Text className="text-gray-900">{item.serviceName} (x{item.quantity})</Text>
+                    <Text className="text-gray-900">₹{subtotal}</Text>
+                  </View>
+                  <View className="flex-row justify-between text-sm text-gray-600 mt-1">
+                    <Text>Booking Date</Text>
+                    <Text>{item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}</Text>
+                  </View>
+                  <View className="flex-row justify-between text-sm text-gray-600 mt-1">
+                    <Text>GST (18%)</Text>
+                    <Text>₹{gst}</Text>
+                  </View>
+                  <View className="flex-row justify-between font-semibold text-gray-900 mt-2">
+                    <Text>Total</Text>
+                    <Text>₹{total}</Text>
+                  </View>
+                </View>
+              );
+            })}
+            <View className="flex-row justify-between font-bold text-lg text-gray-900 mt-4">
+              <Text>Grand Total</Text>
+              <Text>
+                ₹{selectedItems.reduce((sum, item) => sum + calculateItemTotal(item).total, 0)}
+              </Text>
             </View>
           </View>
-        );
-      })}
+        )}
 
-      {selectedItems.length > 0 && (
-        <View className="mt-6 border-t pt-4">
-          <Text className="text-lg font-semibold mb-4">Selected Items</Text>
-          {selectedItems.map((item) => {
-            const { subtotal, gst, total } = calculateItemTotal(item);
-            return (
-              <View key={item._id} className="mb-4 px-4 py-3 border rounded-lg bg-gray-50">
-                <View className="flex-row justify-between">
-                  <Text>{item.serviceName} ({item.quantity})</Text>
-                  <Text>₹{subtotal}</Text>
-                </View>
-                <View className="flex-row justify-between text-sm text-gray-600 mt-1">
-                  <Text>Booking Date</Text>
-                  <Text>{item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}</Text>
-                </View>
-                <View className="flex-row justify-between text-sm text-gray-600 mt-1">
-                  <Text>GST (18%)</Text>
-                  <Text>₹{gst}</Text>
-                </View>
-                <View className="flex-row justify-between font-semibold mt-2">
-                  <Text>Total</Text>
-                  <Text>₹{total}</Text>
-                </View>
-              </View>
-            );
-          })}
+        <View className="flex-row justify-between items-center mt-6 mb-14">
+          <Text className="text-gray-600 text-base">Need more services?</Text>
+          <TouchableOpacity
+            className="bg-red-500 flex-row items-center px-4 py-2 rounded-full shadow-md"
+            onPress={() => navigation.navigate("Category")}
+            accessibilityLabel="Add more items to cart"
+          >
+            <Ionicons name="add" size={20} color="white" />
+            <Text className="text-white font-semibold ml-2">Add Items</Text>
+          </TouchableOpacity>
         </View>
-      )}
+      </ScrollView>
 
-      <View className="flex-row justify-between items-center mt-6">
-        <Text className="text-gray-800 font-medium">Missed Something?</Text>
+      <View className="p-4 bg-white border-t border-gray-200">
         <TouchableOpacity
-          className="bg-red-600 flex-row items-center text-white px-3 py-1.5 rounded-lg"
-          onPress={() => navigation.navigate("Category")}
+          className={`w-full py-4 rounded-xl shadow-md ${isBookingDisabled || isBooking ? "bg-gray-300" : "bg-violet-600"}`}
+          disabled={isBookingDisabled || isBooking}
+          onPress={handleBookNow}
+          accessibilityLabel="Book selected items"
         >
-          <Ionicons name="add" size={20} color="white" className="mr-1" />
-          <Text className="text-white font-medium">Add More Items</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        className={`w-full mt-6 mb-10 py-4 rounded-xl ${isBookingDisabled ? "bg-gray-200" : "bg-fuchsia-500"} ${isBooking ? "opacity-70" : ""}`}
-        disabled={isBookingDisabled || isBooking}
-        onPress={handleBookNow}
-      >
-        <Text className={`text-center text-white font-semibold text-lg ${isBookingDisabled ? "text-gray-500" : ""}`}>
-          {isBooking ? "Processing..." :
-            isBookingDisabled
+          <Text
+            className={`text-center font-semibold text-lg ${isBookingDisabled || isBooking ? "text-gray-500" : "text-white"}`}
+          >
+            {isBooking
+              ? "Processing..."
+              : isBookingDisabled
               ? selectedItems.length === 0
                 ? "Select at least one item"
-                : "Select dates for all selected items"
-              : "Book Now"}
-        </Text>
-      </TouchableOpacity>
+                : "Select dates for all items"
+              : `Book Now (${selectedItems.length} items)`}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {showDatePicker && (
         <DateTimePicker
           testID="dateTimePicker"
-          value={tempDate}
+          value={new Date()}
           mode="date"
           is24Hour={true}
           display={Platform.OS === "ios" ? "spinner" : "default"}
@@ -515,11 +528,1047 @@ const CartScreen = () => {
           maximumDate={getMaxDate()}
         />
       )}
-    </ScrollView>
+    </View>
   );
 };
 
 export default CartScreen;
+// import React, { useEffect, useState, useRef } from "react";
+// import {
+//   View,
+//   Text,
+//   Image,
+//   TouchableOpacity,
+//   ScrollView,
+//   ActivityIndicator,
+//   Platform,
+//   Alert,
+// } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
+// import DateTimePicker from "@react-native-community/datetimepicker";
+// import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { removeFromCart, addToCart, getCartItems, createBookService } from "../api/apiMethods";
+
+// interface CartItem {
+//   _id: string;
+//   technicianId: string;
+//   serviceId: string;
+//   serviceName: string;
+//   serviceImg?: string;
+//   servicePrice?: number;
+//   price?: number;
+//   quantity: number;
+//   bookingDate: string;
+//   otp?: number;
+//   isSelected: boolean;
+// }
+
+// interface CartData {
+//   user: {
+//     _id: string;
+//     username: string;
+//     phoneNumber: string;
+//     role: string;
+//     buildingName: string;
+//     areaName: string;
+//     city: string;
+//     state: string;
+//     pincode: string;
+//   };
+//   cart: {
+//     _id: string;
+//     userId: string;
+//     items: CartItem[];
+//   };
+// }
+
+// const CartScreen = () => {
+//   const navigation = useNavigation();
+//   const [cartData, setCartData] = useState<CartData | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [processingItems, setProcessingItems] = useState<{ [key: string]: boolean }>({});
+//   const [isBooking, setIsBooking] = useState(false);
+//   const [showDatePicker, setShowDatePicker] = useState(false);
+//   const [currentItemId, setCurrentItemId] = useState<string | null>(null);
+//   const [tempDate, setTempDate] = useState(new Date());
+
+//   useEffect(() => {
+//     fetchCartData();
+//   }, []);
+
+//   const fetchCartData = async () => {
+//     try {
+//       setLoading(true);
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         setError("Please log in to view your cart");
+//         return;
+//       }
+//       const response = await getCartItems(userId);
+//       if (response.success && response.result.cart) {
+//         const formattedItems = response.result.cart.map((item: any) => ({
+//           _id: item?._id,
+//           serviceId: item?.serviceId,
+//           serviceName: item?.serviceName,
+//           serviceImg: item?.serviceImg,
+//           servicePrice: item?.servicePrice,
+//           quantity: item.quantity,
+//           technicianId: item.technicianId,
+//           bookingDate: item.bookingDate,
+//           isSelected: false,
+//         }));
+//         setCartData({
+//           user: response.result.user,
+//           cart: { ...response.result.cart, items: formattedItems },
+//         });
+//       } else {
+//         setError("Failed to fetch cart data");
+//       }
+//     } catch (err: any) {
+//       setError(err?.message || "Failed to fetch cart data");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleDateChange = (event: any, selectedDate?: Date) => {
+//     setShowDatePicker(Platform.OS === "ios");
+//     if (selectedDate && currentItemId) {
+//       const dateString = selectedDate.toISOString().split("T")[0];
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         const updatedItems = prev.cart.items.map((item) =>
+//           item._id === currentItemId ? { ...item, bookingDate: dateString } : item
+//         );
+//         return {
+//           ...prev,
+//           cart: { ...prev.cart, items: updatedItems },
+//         };
+//       });
+//     }
+//   };
+
+//   const showDatePickerForItem = (itemId: string, currentDate: string) => {
+//     setCurrentItemId(itemId);
+//     setTempDate(currentDate ? new Date(currentDate) : new Date());
+//     setShowDatePicker(true);
+//   };
+
+//   const handleClearDate = (itemId: string) => {
+//     setCartData((prev) => {
+//       if (!prev) return null;
+//       const updatedItems = prev.cart.items.map((item) =>
+//         item._id === itemId ? { ...item, bookingDate: "" } : item
+//       );
+//       return {
+//         ...prev,
+//         cart: { ...prev.cart, items: updatedItems },
+//       };
+//     });
+//   };
+
+//   const handleQuantityChange = async (itemId: string, delta: number) => {
+//     try {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) return;
+//       const item = cartData?.cart.items.find((item) => item._id === itemId);
+//       if (!item) return;
+//       const newQuantity = Math.max(1, item.quantity + delta);
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.map((cartItem) =>
+//               cartItem._id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem
+//             ),
+//           },
+//         };
+//       });
+//       const payload = {
+//         userId,
+//         serviceId: item.serviceId,
+//         technicianId: item.technicianId,
+//         quantity: newQuantity,
+//       };
+//       await addToCart(payload);
+//     } catch (err: any) {
+//       setError("Failed to update quantity");
+//       await fetchCartData();
+//     } finally {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
+//     }
+//   };
+
+//   const handleRemove = async (itemId: string) => {
+//     try {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) return;
+//       const item = cartData?.cart.items.find((item) => item._id === itemId);
+//       if (!item) return;
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.filter((cartItem) => cartItem._id !== itemId),
+//           },
+//         };
+//       });
+//       await removeFromCart({ userId, serviceId: item.serviceId, technicianId: item.technicianId });
+//     } catch (err: any) {
+//       setError("Failed to remove item");
+//       await fetchCartData();
+//     } finally {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
+//     }
+//   };
+
+//   const handleCheckboxChange = (itemId: string) => {
+//     setCartData((prev) => {
+//       if (!prev) return null;
+//       const updatedItems = prev.cart.items.map((item) =>
+//         item._id === itemId ? { ...item, isSelected: !item.isSelected } : item
+//       );
+//       return {
+//         ...prev,
+//         cart: { ...prev.cart, items: updatedItems },
+//       };
+//     });
+//   };
+
+//   const handleBookNow = async () => {
+//     try {
+//       setIsBooking(true);
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         setError("Please log in to proceed");
+//         return;
+//       }
+//       const selectedItems = cartData?.cart.items.filter((item) => item.isSelected) || [];
+//       if (selectedItems.length === 0) {
+//         setError("No items selected for booking");
+//         return;
+//       }
+//       if (selectedItems.some((item) => !item.bookingDate)) {
+//         setError("Please select dates for all selected items");
+//         return;
+//       }
+//       const bookings = selectedItems.map((item) => ({
+//         userId,
+//         serviceId: item.serviceId,
+//         technicianId: item.technicianId,
+//         quantity: item.quantity.toString(),
+//         bookingDate: item.bookingDate,
+//         servicePrice: ((item.servicePrice || item.price || 0) * item.quantity).toString(),
+//         gst: Math.round((item.servicePrice || item.price || 0) * item.quantity * 0.18).toString(),
+//         totalPrice: Math.round((item.servicePrice || item.price || 0) * item.quantity * 1.18).toString(),
+//       }));
+//       const response = await createBookService(bookings);
+//       if (response.success) {
+//         Alert.alert("Success", "Booking confirmed!", [
+//           { text: "OK", onPress: () => navigation.navigate("Transactions") },
+//         ]);
+//         await fetchCartData();
+//       } else {
+//         setError(response.message || "Booking failed");
+//       }
+//     } catch (err: any) {
+//       setError(err?.message || "Failed to create bookings");
+//     } finally {
+//       setIsBooking(false);
+//     }
+//   };
+
+//   const getMinDate = () => new Date();
+//   const getMaxDate = () => {
+//     const max = new Date();
+//     max.setDate(max.getDate() + 7);
+//     return max;
+//   };
+
+//   const calculateItemTotal = (item: CartItem) => {
+//     const price = item.servicePrice || item.price || 0;
+//     const subtotal = price * item.quantity;
+//     const gst = Math.round(subtotal * 0.18);
+//     const total = subtotal + gst;
+//     return { subtotal, gst, total };
+//   };
+
+//   if (loading) {
+//     return (
+//       <View className="flex-1 justify-center items-center bg-gray-50">
+//         <ActivityIndicator size="large" color="#8b5cf6" />
+//         <Text className="mt-4 text-gray-600 text-lg">Loading your cart...</Text>
+//       </View>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+//         <Text className="text-red-600 text-lg text-center mb-6">{error}</Text>
+//         <View className="flex-row gap-4">
+//           {error.includes("log in") && (
+//             <TouchableOpacity
+//               className="bg-violet-600 px-6 py-3 rounded-full shadow-md"
+//               onPress={() => navigation.navigate("Login")}
+//               accessibilityLabel="Log in to continue"
+//             >
+//               <Text className="text-white font-semibold text-base">Log In</Text>
+//             </TouchableOpacity>
+//           )}
+//           <TouchableOpacity
+//             className="bg-violet-600 px-6 py-3 rounded-full shadow-md"
+//             onPress={() => {
+//               setError(null);
+//               fetchCartData();
+//             }}
+//             accessibilityLabel="Retry loading cart"
+//           >
+//             <Text className="text-white font-semibold text-base">Try Again</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     );
+//   }
+
+//   if (!cartData || !cartData.cart?.items || cartData.cart?.items?.length === 0) {
+//     return (
+//       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
+//         <Text className="text-gray-600 text-lg mb-6">Your cart is empty</Text>
+//         <TouchableOpacity
+//           className="bg-violet-600 px-8 py-4 rounded-full shadow-md"
+//           onPress={() => navigation.navigate("Category")}
+//           accessibilityLabel="Browse services"
+//         >
+//           <Text className="text-white font-semibold text-base">Browse Services</Text>
+//         </TouchableOpacity>
+//       </View>
+//     );
+//   }
+
+//   const selectedItems = cartData.cart.items.filter((item) => item.isSelected);
+//   const isBookingDisabled = selectedItems.length === 0 || selectedItems.some((item) => !item.bookingDate);
+
+//   return (
+//     <View className="flex-1 bg-gray-50">
+//       <ScrollView className="px-4 py-6 pb-20">
+//         <Text className="text-3xl font-bold text-gray-900 mb-6">Your Cart</Text>
+
+//         {cartData.cart.items.map((item) => {
+//           const isProcessing = processingItems[item._id];
+//           const { subtotal } = calculateItemTotal(item);
+//           return (
+//             <View
+//               key={item._id}
+//               className={`flex-row items-center bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-200 ${isProcessing ? "opacity-60" : ""}`}
+//             >
+//               <TouchableOpacity
+//                 className="mr-4"
+//                 onPress={() => handleCheckboxChange(item._id)}
+//                 disabled={isProcessing}
+//                 accessibilityLabel={`Select ${item.serviceName}`}
+//               >
+//                 <Ionicons
+//                   name={item.isSelected ? "checkbox" : "square-outline"}
+//                   size={26}
+//                   color="#8b5cf6"
+//                 />
+//               </TouchableOpacity>
+//               <Image
+//                 source={{ uri: item?.serviceImg || "https://via.placeholder.com/64" }}
+//                 className="w-16 h-16 rounded-lg"
+//                 resizeMode="cover"
+//               />
+//               <View className="flex-1 ml-4">
+//                 <Text className="text-lg font-semibold text-gray-900">{item.serviceName}</Text>
+//                 <Text className="text-gray-600 text-sm">
+//                   ₹ <Text className="text-violet-600">{item.servicePrice}</Text> per unit
+//                 </Text>
+//               </View>
+//               <View className="items-end ml-1">
+//                 <View className="flex-row items-center bg-violet-50 rounded-lg  py-1 border border-violet-200 mb-2 ">
+//                   {item.quantity === 1 ? (
+//                     <TouchableOpacity
+//                       className="p-2"
+//                       onPress={() => !isProcessing && handleRemove(item._id)}
+//                       disabled={isProcessing}
+//                       accessibilityLabel={`Remove ${item.serviceName}`}
+//                     >
+//                       <MaterialIcons name="delete" size={18} color="#ef4444" />
+//                     </TouchableOpacity>
+//                   ) : (
+//                     <TouchableOpacity
+//                       className="p-2"
+//                       onPress={() => !isProcessing && handleQuantityChange(item._id, -1)}
+//                       disabled={isProcessing}
+//                       accessibilityLabel={`Decrease quantity of ${item.serviceName}`}
+//                     >
+//                       <Ionicons name="remove" size={18} color="#8b5cf6" />
+//                     </TouchableOpacity>
+//                   )}
+//                   <Text className="text-sm text-gray-900 w-10 text-center">
+//                     {isProcessing ? "..." : item.quantity}
+//                   </Text>
+//                   <TouchableOpacity
+//                     className="p-2"
+//                     onPress={() => !isProcessing && handleQuantityChange(item._id, 1)}
+//                     disabled={isProcessing}
+//                     accessibilityLabel={`Increase quantity of ${item.serviceName}`}
+//                   >
+//                     <Ionicons name="add" size={18} color="#8b5cf6" />
+//                   </TouchableOpacity>
+//                 </View>
+//                 <Text className="font-semibold text-gray-900">₹ {subtotal}</Text>
+//                 <View className="flex-row items-center mt-2">
+//                   {item.bookingDate ? (
+//                     <>
+//                       <TouchableOpacity
+//                         className="flex-row items-center"
+//                         onPress={() => showDatePickerForItem(item._id, item.bookingDate)}
+//                         accessibilityLabel={`Change booking date for ${item.serviceName}`}
+//                       >
+//                         <FontAwesome5 name="calendar-alt" size={20} color="#3b82f6" />
+//                         <Text className="text-sm text-blue-600 ml-2">{item.bookingDate}</Text>
+//                       </TouchableOpacity>
+//                       <TouchableOpacity
+//                         className="ml-3"
+//                         onPress={() => handleClearDate(item._id)}
+//                         accessibilityLabel={`Clear booking date for ${item.serviceName}`}
+//                       >
+//                         <Ionicons name="close" size={18} color="#6b7280" />
+//                       </TouchableOpacity>
+//                     </>
+//                   ) : (
+//                     <TouchableOpacity
+//                       onPress={() => showDatePickerForItem(item._id, "")}
+//                       accessibilityLabel={`Set booking date for ${item.serviceName}`}
+//                     >
+//                       {/* <Text className="text-sm text-blue-600">Set Date</Text> */}
+                      // <Text>📅</Text>
+//                     </TouchableOpacity>
+//                   )}
+//                 </View>
+//               </View>
+//             </View>
+//           );
+//         })}
+
+//         {selectedItems.length > 0 && (
+//           <View className="mt-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+//             <Text className="text-xl font-semibold text-gray-900 mb-4">Order Summary</Text>
+//             {selectedItems.map((item) => {
+//               const { subtotal, gst, total } = calculateItemTotal(item);
+//               return (
+//                 <View key={item._id} className="mb-4 p-3 bg-gray-50 rounded-lg">
+//                   <View className="flex-row justify-between">
+//                     <Text className="text-gray-900">{item.serviceName} (x{item.quantity})</Text>
+//                     <Text className="text-gray-900">₹{subtotal}</Text>
+//                   </View>
+//                   <View className="flex-row justify-between text-sm text-gray-600 mt-1">
+//                     <Text>Booking Date</Text>
+//                     <Text>{item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}</Text>
+//                   </View>
+//                   <View className="flex-row justify-between text-sm text-gray-600 mt-1">
+//                     <Text>GST (18%)</Text>
+//                     <Text>₹{gst}</Text>
+//                   </View>
+//                   <View className="flex-row justify-between font-semibold text-gray-900 mt-2">
+//                     <Text>Total</Text>
+//                     <Text>₹{total}</Text>
+//                   </View>
+//                 </View>
+//               );
+//             })}
+//             <View className="flex-row justify-between font-bold text-lg text-gray-900 mt-4">
+//               <Text>Grand Total</Text>
+//               <Text>
+//                 ₹{selectedItems.reduce((sum, item) => sum + calculateItemTotal(item).total, 0)}
+//               </Text>
+//             </View>
+//           </View>
+//         )}
+
+//         <View className="flex-row justify-between items-center mt-6 mb-14">
+//           <Text className="text-gray-600 text-base">Need more services?</Text>
+//           <TouchableOpacity
+//             className="bg-red-500 flex-row items-center px-4 py-2 rounded-full shadow-md"
+//             onPress={() => navigation.navigate("Category")}
+//             accessibilityLabel="Add more items to cart"
+//           >
+//             <Ionicons name="add" size={20} color="white" />
+//             <Text className="text-white font-semibold ml-2">Add Items</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </ScrollView>
+
+//       <View className="p-4 bg-white border-t border-gray-200 ">
+//         <TouchableOpacity
+//           className={`w-full py-4 rounded-xl shadow-md ${isBookingDisabled || isBooking ? "bg-gray-300" : "bg-violet-600"}`}
+//           disabled={isBookingDisabled || isBooking}
+//           onPress={handleBookNow}
+//           accessibilityLabel="Book selected items"
+//         >
+//           <Text
+//             className={`text-center font-semibold text-lg ${isBookingDisabled || isBooking ? "text-gray-500" : "text-white"}`}
+//           >
+//             {isBooking
+//               ? "Processing..."
+//               : isBookingDisabled
+//               ? selectedItems.length === 0
+//                 ? "Select at least one item"
+//                 : "Select dates for all items"
+//               : `Book Now (${selectedItems.length} items)`}
+//           </Text>
+//         </TouchableOpacity>
+//       </View>
+
+//       {showDatePicker && (
+//         <DateTimePicker
+//           testID="dateTimePicker"
+//           value={tempDate}
+//           mode="date"
+//           is24Hour={true}
+//           display={Platform.OS === "ios" ? "spinner" : "default"}
+//           onChange={handleDateChange}
+//           minimumDate={getMinDate()}
+//           maximumDate={getMaxDate()}
+//         />
+//       )}
+//     </View>
+//   );
+// };
+
+// export default CartScreen;
+// import React, { useEffect, useState, useRef } from "react";
+// import {
+//   View,
+//   Text,
+//   Image,
+//   TouchableOpacity,
+//   ScrollView,
+//   ActivityIndicator,
+//   Alert,
+//   Platform,
+//   TextInput,
+// } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
+// import DateTimePicker from "@react-native-community/datetimepicker";
+// import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { removeFromCart, addToCart, getCartItems, createBookService } from "../api/apiMethods"; // Assume this is adapted for RN
+
+// interface CartItem {
+//   _id: string;
+//   technicianId: string;
+//   serviceId: string;
+//   serviceName: string;
+//   serviceImg?: string;
+//   servicePrice?: number;
+//   price?: number;
+//   quantity: number;
+//   bookingDate: string;
+//   otp?: number;
+//   isSelected: boolean;
+// }
+
+// interface CartData {
+//   user: {
+//     _id: string;
+//     username: string;
+//     phoneNumber: string;
+//     role: string;
+//     buildingName: string;
+//     areaName: string;
+//     city: string;
+//     state: string;
+//     pincode: string;
+//   };
+//   cart: {
+//     _id: string;
+//     userId: string;
+//     items: CartItem[];
+//   };
+// }
+
+// const CartScreen = () => {
+//   const navigation = useNavigation();
+//   const [cartData, setCartData] = useState<CartData | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [processingItems, setProcessingItems] = useState<{ [key: string]: boolean }>({});
+//   const [isBooking, setIsBooking] = useState(false);
+//   const [selectedItems, setSelectedItems] = useState<CartItem[]>([]);
+//   const [showDatePicker, setShowDatePicker] = useState(false);
+//   const [currentItemId, setCurrentItemId] = useState<string | null>(null);
+//   const [tempDate, setTempDate] = useState(new Date());
+
+//   useEffect(() => {
+//     fetchCartData();
+//   }, []);
+
+//   const fetchCartData = async () => {
+//     try {
+//       setLoading(true);
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         setError("User not logged in");
+//         return;
+//       }
+//       const response = await getCartItems(userId);
+//       if (response.success && response.result.cart) {
+//         const formattedItems = response.result.cart.map((item: any) => ({
+//           _id: item?._id,
+//           serviceId: item?.serviceId,
+//           serviceName: item?.serviceName,
+//           serviceImg: item?.serviceImg,
+//           servicePrice: item?.servicePrice,
+//           quantity: item.quantity,
+//           technicianId: item.technicianId,
+//           bookingDate: item.bookingDate,
+//           isSelected: false,
+//         }));
+//         const updatedCartData = {
+//           user: response.result.user,
+//           cart: {
+//             ...response.result.cart,
+//             items: formattedItems,
+//           },
+//         };
+//         setCartData(updatedCartData);
+//         setSelectedItems([]);
+//       } else {
+//         setError("Failed to fetch cart data");
+//       }
+//     } catch (err: any) {
+//       setError(err?.message || "Failed to fetch cart data");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleDateChange = (event: any, selectedDate?: Date) => {
+//     setShowDatePicker(Platform.OS === "ios");
+//     if (selectedDate && currentItemId) {
+//       const dateString = selectedDate.toISOString().split("T")[0];
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.map((item) =>
+//               item._id === currentItemId ? { ...item, bookingDate: dateString } : item
+//             ),
+//           },
+//         };
+//       });
+//       setSelectedItems((prev) =>
+//         prev.map((item) =>
+//           item._id === currentItemId ? { ...item, bookingDate: dateString } : item
+//         )
+//       );
+//     }
+//   };
+
+//   const showDatePickerForItem = (itemId: string, currentDate: string) => {
+//     setCurrentItemId(itemId);
+//     setTempDate(currentDate ? new Date(currentDate) : new Date());
+//     setShowDatePicker(true);
+//   };
+
+//   const handleClearDate = (itemId: string) => {
+//     setCartData((prev) => {
+//       if (!prev) return null;
+//       return {
+//         ...prev,
+//         cart: {
+//           ...prev.cart,
+//           items: prev.cart.items.map((item) =>
+//             item._id === itemId ? { ...item, bookingDate: "" } : item
+//           ),
+//         },
+//       };
+//     });
+//     setSelectedItems((prev) =>
+//       prev.map((item) =>
+//         item._id === itemId ? { ...item, bookingDate: "" } : item
+//       )
+//     );
+//   };
+
+//   const handleQuantityChange = async (itemId: string, delta: number) => {
+//     try {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) return;
+//       const item = cartData?.cart.items.find((item) => item._id === itemId);
+//       if (!item) return;
+//       const newQuantity = Math.max(1, item.quantity + delta);
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.map((cartItem) =>
+//               cartItem._id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem
+//             ),
+//           },
+//         };
+//       });
+//       setSelectedItems((prev) =>
+//         prev.map((item) =>
+//           item._id === itemId ? { ...item, quantity: newQuantity } : item
+//         )
+//       );
+//       const payload = {
+//         userId,
+//         serviceId: item.serviceId,
+//         technicianId: item.technicianId,
+//         quantity: newQuantity,
+//       };
+//       await addToCart(payload);
+//     } catch (err: any) {
+//       setError("Failed to update quantity");
+//       await fetchCartData();
+//     } finally {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
+//     }
+//   };
+
+//   const handleRemove = async (itemId: string) => {
+//     try {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) return;
+//       const item = cartData?.cart.items.find((item) => item._id === itemId);
+//       if (!item) return;
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.filter((cartItem) => cartItem._id !== itemId),
+//           },
+//         };
+//       });
+//       setSelectedItems((prev) => prev.filter((item) => item._id !== itemId));
+//       await removeFromCart({ userId, serviceId: item.serviceId, technicianId: item.technicianId });
+//     } catch (err: any) {
+//       setError("Failed to remove item");
+//       await fetchCartData();
+//     } finally {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
+//     }
+//   };
+
+//   const handleCheckboxChange = (itemId: string) => {
+//     setCartData((prev) => {
+//       if (!prev) return null;
+//       const updatedItems = prev.cart.items.map((item) => {
+//         if (item._id === itemId) {
+//           const newSelectedState = !item.isSelected;
+//           setSelectedItems((prevSelected) => {
+//             if (newSelectedState) {
+//               return [...prevSelected, { ...item, isSelected: true }];
+//             } else {
+//               return prevSelected.filter((selected) => selected._id !== itemId);
+//             }
+//           });
+//           return { ...item, isSelected: newSelectedState };
+//         }
+//         return item;
+//       });
+//       return {
+//         ...prev,
+//         cart: {
+//           ...prev.cart,
+//           items: updatedItems,
+//         },
+//       };
+//     });
+//   };
+
+//   const handleBookNow = async () => {
+//     try {
+//       setIsBooking(true);
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         setError("User not logged in");
+//         return;
+//       }
+//       if (selectedItems.length === 0) {
+//         setError("No items selected for booking");
+//         return;
+//       }
+//       const bookings = selectedItems.map((item) => ({
+//         userId,
+//         serviceId: item.serviceId,
+//         technicianId: item.technicianId,
+//         quantity: item.quantity.toString(),
+//         bookingDate: item.bookingDate,
+//         servicePrice: ((item.servicePrice || item.price || 0) * item.quantity).toString(),
+//         gst: Math.round((item.servicePrice || item.price || 0) * item.quantity * 0.18).toString(),
+//         totalPrice: Math.round((item.servicePrice || item.price || 0) * item.quantity * 1.18).toString(),
+//       }));
+//       const response = await createBookService(bookings);
+//       if (response.success) {
+//         await fetchCartData();
+//         navigation.navigate("Transactions");
+//       } else {
+//         setError(response.message || "Booking failed");
+//       }
+//     } catch (err: any) {
+//       setError(err?.message || "Failed to create bookings");
+//     } finally {
+//       setIsBooking(false);
+//     }
+//   };
+
+//   const getMinDate = () => new Date();
+//   const getMaxDate = () => {
+//     const max = new Date();
+//     max.setDate(max.getDate() + 7);
+//     return max;
+//   };
+
+//   const calculateItemTotal = (item: CartItem) => {
+//     const price = item.servicePrice || item.price || 0;
+//     const subtotal = price * item.quantity;
+//     const gst = Math.round(subtotal * 0.18);
+//     const total = subtotal + gst;
+//     return { subtotal, gst, total };
+//   };
+
+//   if (loading) {
+//     return (
+//       <View className="flex-1 justify-center items-center bg-white">
+//         <ActivityIndicator size="large" color="#d946ef" />
+//       </View>
+//     );
+//   }
+
+//   if (error) {
+//     return (
+//       <View className="flex-1 justify-center items-center bg-white p-6">
+//         <Text className="text-red-500 text-center mb-4">{error}</Text>
+//         <View className="flex-row justify-center gap-4">
+//           {error.includes("log in") && (
+//             <TouchableOpacity
+//               className="bg-fuchsia-500 px-4 py-2 rounded-lg"
+//               onPress={() => navigation.navigate("Login")}
+//             >
+//               <Text className="text-white font-semibold">Log In</Text>
+//             </TouchableOpacity>
+//           )}
+//           <TouchableOpacity
+//             className="bg-fuchsia-500 px-4 py-2 rounded-lg"
+//             onPress={() => {
+//               setError(null);
+//               fetchCartData();
+//             }}
+//           >
+//             <Text className="text-white font-semibold">Try Again</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     );
+//   }
+
+//   if (!cartData || !cartData.cart?.items || cartData.cart?.items?.length === 0) {
+//     return (
+//       <View className="flex-1 justify-center items-center bg-white p-6">
+//         <Text className="text-gray-500 text-lg mb-4">Your cart is empty</Text>
+//         <TouchableOpacity
+//           className="bg-fuchsia-500 px-6 py-3 rounded-lg"
+//           onPress={() => navigation.navigate("Category")}
+//         >
+//           <Text className="text-white font-semibold">Browse Services</Text>
+//         </TouchableOpacity>
+//       </View>
+//     );
+//   }
+
+//   const isBookingDisabled =
+//     selectedItems.length === 0 || selectedItems.some((item) => !item.bookingDate);
+
+//   return (
+//     <ScrollView className="flex-1 bg-white px-4 py-6">
+//       <Text className="text-2xl font-bold text-gray-800 mb-6">Your Cart</Text>
+
+//       {cartData.cart?.items?.map((item) => {
+//         const isProcessing = processingItems[item._id];
+//         const { subtotal } = calculateItemTotal(item);
+//         return (
+//           <View
+//             key={item._id}
+//             className={`flex-row items-center justify-between border border-gray-300 p-4 rounded-xl bg-white shadow-md mb-4 ${isProcessing ? "opacity-70" : ""}`}
+//           >
+//             <TouchableOpacity
+//               className="mr-3"
+//               onPress={() => handleCheckboxChange(item._id)}
+//               disabled={isProcessing}
+//             >
+//               <Ionicons
+//                 name={item.isSelected ? "checkbox" : "square-outline"}
+//                 size={24}
+//                 color="#d946ef"
+//               />
+//             </TouchableOpacity>
+//             <Image
+//               source={{ uri: item?.serviceImg || "https://via.placeholder.com/64" }}
+//               className="w-16 h-16 rounded-xl"
+//               resizeMode="cover"
+//             />
+//             <View className="flex-1 ml-4">
+//               <Text className="text-lg font-semibold">{item?.serviceName}</Text>
+//               <Text className="text-gray-600">
+//                 ₹ <Text className="text-blue-600">{item?.servicePrice}</Text> per unit
+//               </Text>
+//               {/* Assuming ratings and reviews are optional and not in interface */}
+//             </View>
+//             <View className="items-end">
+//               <View className="flex-row items-center bg-fuchsia-100 rounded-lg px-2 border border-fuchsia-400 mb-2">
+//                 {item.quantity === 1 ? (
+//                   <TouchableOpacity
+//                     className="p-1"
+//                     onPress={() => !isProcessing && handleRemove(item._id)}
+//                     disabled={isProcessing}
+//                   >
+//                     <MaterialIcons name="delete" size={16} color="red" />
+//                   </TouchableOpacity>
+//                 ) : (
+//                   <TouchableOpacity
+//                     className="p-1"
+//                     onPress={() => !isProcessing && handleQuantityChange(item._id, -1)}
+//                     disabled={isProcessing}
+//                   >
+//                     <Ionicons name="remove" size={16} color="#a21caf" />
+//                   </TouchableOpacity>
+//                 )}
+//                 <Text className="text-sm text-black w-8 text-center">
+//                   {isProcessing ? "..." : item.quantity}
+//                 </Text>
+//                 <TouchableOpacity
+//                   className="p-1"
+//                   onPress={() => !isProcessing && handleQuantityChange(item._id, 1)}
+//                   disabled={isProcessing}
+//                 >
+//                   <Ionicons name="add" size={16} color="#a21caf" />
+//                 </TouchableOpacity>
+//               </View>
+//               <Text className="font-semibold text-gray-800">₹ {subtotal}</Text>
+//               <View className="flex-row items-center mt-2">
+//                 {item.bookingDate ? (
+//                   <>
+//                     <TouchableOpacity
+//                       className="flex-row items-center"
+//                       onPress={() => showDatePickerForItem(item._id, item.bookingDate)}
+//                     >
+//                       <FontAwesome5 name="calendar-alt" size={20} color="blue" />
+//                       <Text className="text-sm text-blue-600 ml-1">{item.bookingDate}</Text>
+//                     </TouchableOpacity>
+//                     <TouchableOpacity
+//                       className="ml-2"
+//                       onPress={() => handleClearDate(item._id)}
+//                     >
+//                       <Ionicons name="close" size={16} color="gray" />
+//                     </TouchableOpacity>
+//                   </>
+//                 ) : (
+//                   <TouchableOpacity
+//                     onPress={() => showDatePickerForItem(item._id, "")}
+//                   >
+//                     <FontAwesome5 name="calendar-alt" size={20} color="blue" />
+//                   </TouchableOpacity>
+//                 )}
+//               </View>
+//             </View>
+//           </View>
+//         );
+//       })}
+
+//       {selectedItems.length > 0 && (
+//         <View className="mt-6 border-t pt-4">
+//           <Text className="text-lg font-semibold mb-4">Selected Items</Text>
+//           {selectedItems.map((item) => {
+//             const { subtotal, gst, total } = calculateItemTotal(item);
+//             return (
+//               <View key={item._id} className="mb-4 px-4 py-3 border rounded-lg bg-gray-50">
+//                 <View className="flex-row justify-between">
+//                   <Text>{item.serviceName} ({item.quantity})</Text>
+//                   <Text>₹{subtotal}</Text>
+//                 </View>
+//                 <View className="flex-row justify-between text-sm text-gray-600 mt-1">
+//                   <Text>Booking Date</Text>
+//                   <Text>{item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}</Text>
+//                 </View>
+//                 <View className="flex-row justify-between text-sm text-gray-600 mt-1">
+//                   <Text>GST (18%)</Text>
+//                   <Text>₹{gst}</Text>
+//                 </View>
+//                 <View className="flex-row justify-between font-semibold mt-2">
+//                   <Text>Total</Text>
+//                   <Text>₹{total}</Text>
+//                 </View>
+//               </View>
+//             );
+//           })}
+//         </View>
+//       )}
+
+//       <View className="flex-row justify-between items-center mt-6">
+//         <Text className="text-gray-800 font-medium">Missed Something?</Text>
+//         <TouchableOpacity
+//           className="bg-red-600 flex-row items-center text-white px-3 py-1.5 rounded-lg"
+//           onPress={() => navigation.navigate("Category")}
+//         >
+//           <Ionicons name="add" size={20} color="white" className="mr-1" />
+//           <Text className="text-white font-medium">Add More Items</Text>
+//         </TouchableOpacity>
+//       </View>
+
+//       <TouchableOpacity
+//         className={`w-full mt-6 mb-10 py-4 rounded-xl ${isBookingDisabled ? "bg-gray-200" : "bg-fuchsia-500"} ${isBooking ? "opacity-70" : ""}`}
+//         disabled={isBookingDisabled || isBooking}
+//         onPress={handleBookNow}
+//       >
+//         <Text className={`text-center text-white font-semibold text-lg ${isBookingDisabled ? "text-gray-500" : ""}`}>
+//           {isBooking ? "Processing..." :
+//             isBookingDisabled
+//               ? selectedItems.length === 0
+//                 ? "Select at least one item"
+//                 : "Select dates for all selected items"
+//               : "Book Now"}
+//         </Text>
+//       </TouchableOpacity>
+
+//       {showDatePicker && (
+//         <DateTimePicker
+//           testID="dateTimePicker"
+//           value={tempDate}
+//           mode="date"
+//           is24Hour={true}
+//           display={Platform.OS === "ios" ? "spinner" : "default"}
+//           onChange={handleDateChange}
+//           minimumDate={getMinDate()}
+//           maximumDate={getMaxDate()}
+//         />
+//       )}
+//     </ScrollView>
+//   );
+// };
+
+// export default CartScreen;
 // // screens/CartScreen.tsx
 // import React, { useState, useEffect } from "react";
 // import {

@@ -108,7 +108,8 @@ const SavingsScreen: React.FC<SavingsProps> = ({ setCurrentStep, booking }) => {
           <View className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 items-center justify-center">
             <Text className="text-green-600 text-2xl">₹</Text>
           </View>
-          <Text className="text-xl font-semibold text-gray-900">Payment for {service?.serviceName}</Text>
+          <Text className="text-xl font-semibold text-gray-900 mx-auto">Payment for</Text>
+          <Text className="text-xl font-semibold text-gray-900 mx-auto">{service?.serviceName}</Text>
         </View>
         <View className="max-w-md mx-auto space-y-4 mb-8">
           <View className="flex-row justify-between items-center py-3 border-b border-gray-100">
@@ -124,13 +125,13 @@ const SavingsScreen: React.FC<SavingsProps> = ({ setCurrentStep, booking }) => {
             <Text className="text-gray-900 font-medium">₹{bookingData?.gst}</Text>
           </View>
           <View className="flex-row justify-between items-center py-4 border-t-2 border-gray-200">
-            <Text className="text-gray-900 text-xl font-semibold">Total Amount</Text>
-            <Text className="text-purple-600 text-xl font-bold">₹{bookingData?.totalPrice}</Text>
+            <Text className="text-gray-900 text-xl font-semibold ">Total Amount  </Text>
+            <Text className="text-purple-600 text-xl font-bold ml-2">₹{bookingData?.totalPrice}</Text>
           </View>
         </View>
         <View className="max-w-md mx-auto space-y-4">
           <TouchableOpacity
-            className="w-full bg-purple-500 py-4 rounded-2xl"
+            className="w-full bg-purple-500 py-2 px-4 rounded-2xl"
             onPress={() => setCurrentStep('final-rating', { booking })}
           >
             <Text className="text-white font-semibold text-center">Done</Text>

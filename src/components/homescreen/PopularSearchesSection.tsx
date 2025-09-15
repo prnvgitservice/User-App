@@ -33,7 +33,10 @@ const PopularSearchesSection: React.FC = () => {
     .slice(0, 6);
 
   const handleCategoryPress = (category: Category) => {
-    navigation.navigate("Technicians", { categoryId: category._id, category: category.category_name })
+    navigation.navigate("Technicians", {
+      categoryId: category._id,
+      category: category.category_name,
+    });
   };
   const renderPopularItem = ({
     item,
@@ -71,7 +74,11 @@ const PopularSearchesSection: React.FC = () => {
           className="w-16 h-16 relative z-10 group-active:scale-110"
           resizeMode="contain"
         />
-        <Text className="text-xs font-semibold text-gray-800 text-center group-active:text-emerald-600 mt-2 line-clamp-1">
+        <Text
+          className="text-xs font-semibold text-gray-800 text-center group-active:text-emerald-600 mt-2 line-clamp-1"
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
           {item.category_name}
         </Text>
       </TouchableOpacity>

@@ -150,6 +150,8 @@ const TrendingItem: React.FC<TrendingItemProps> = ({ item, index }) => {
           />
           <Animated.Text
             className="font-semibold text-sm text-center relative z-10 mt-2 line-clamp-1"
+            numberOfLines={1}
+            ellipsizeMode="tail"
             style={animatedTextStyle}
           >
             {item.category_name}

@@ -85,19 +85,19 @@ const CancelledCard: React.FC<CancelledCardProps> = ({ booking, setCurrentStep }
           </View>
         </View>
         <View className="flex-col gap-4">
-          <View className="flex-row items-center space-x-3">
+          <View className="flex-row items-center space-x-3 gap-4">
             <User width={20} height={20} color="#3B82F6" />
             <Text className="text-gray-700 font-medium">{technician?.username}</Text>
           </View>
-          <View className="flex-row items-center space-x-3">
+          <View className="flex-row items-center space-x-3 gap-4">
             <Globe width={20} height={20} color="#F97316" />
             <Text className="text-gray-700 font-medium">{service?.serviceName}</Text>
           </View>
-          <View className="flex-row items-center space-x-3">
+          <View className="flex-row items-center space-x-3 gap-4">
             <Phone width={20} height={20} color="#16A34A" />
             <Text className="text-gray-700 font-medium">{technician?.phoneNumber}</Text>
           </View>
-          <View className="flex-row items-center space-x-3">
+          <View className="flex-row items-center space-x-3 gap-4">
             <MapPin width={20} height={20} color="#DC2626" />
             <Text className="text-gray-700 text-sm">{formattedTechnicianAddress}</Text>
           </View>

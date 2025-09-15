@@ -106,7 +106,9 @@ const FinalRatingScreen: React.FC<FinalRatingProps> = ({ setCurrentStep, booking
 
   const handleSubmit = async () => {
     try {
+      console.log(formData)
       const response = await addReviewByUser(formData);
+      console.log(response)
       if (response?.success && response?.result) {
         alert('Review successfully submitted');
         refetchBookings();
@@ -142,13 +144,13 @@ const FinalRatingScreen: React.FC<FinalRatingProps> = ({ setCurrentStep, booking
           ))}
         </View>
         <TextInput
-          className="border border-gray-300 rounded-lg p-2 w-full"
+          className="border border-gray-300 rounded-lg w-full p-4"
           placeholder="Leave a comment..."
           value={formData.review}
           onChangeText={(text) => setFormData({ ...formData, review: text })}
         />
         <TouchableOpacity
-          className="w-full bg-purple-500 py-4 rounded-2xl"
+          className="w-full bg-purple-500 py-2 px-4 rounded-2xl"
           onPress={handleSubmit}
         >
           <Text className="text-white font-semibold text-center">Submit Rating</Text>

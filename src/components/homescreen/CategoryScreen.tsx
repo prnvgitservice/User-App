@@ -1,5 +1,12 @@
 import React, { useContext } from "react";
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  ScrollView,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import { CategoryContext } from "@/src/context/CategoryContext";
@@ -42,7 +49,12 @@ const CategoriesPage = () => {
       >
         <TouchableOpacity
           className="flex flex-col items-center p-4 rounded-2xl border border-gray-200 bg-white shadow-md active:scale-95"
-          onPress={() => navigation.navigate("Technicians", { categoryId: item._id, category: item.category_name })}
+          onPress={() =>
+            navigation.navigate("Technicians", {
+              categoryId: item._id,
+              category: item.category_name,
+            })
+          }
         >
           <View
             className={`w-20 h-20 ${bgColor} rounded-full flex items-center justify-center mb-3 overflow-hidden`}
@@ -54,7 +66,11 @@ const CategoriesPage = () => {
               resizeMode="contain"
             />
           </View>
-          <Text className="text-center text-sm line-clamp-1 font-medium text-gray-700">
+          <Text
+            className="text-center text-sm font-medium text-gray-700"
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
             {item.category_name}
           </Text>
         </TouchableOpacity>
@@ -77,7 +93,9 @@ const CategoriesPage = () => {
         <Text className="text-red-500 text-base font-semibold">{error}</Text>
         <TouchableOpacity
           className="mt-4 bg-blue-500 px-4 py-2 rounded-xl"
-          onPress={() => {/* Optionally add retry logic here if needed */}}
+          onPress={() => {
+            /* Optionally add retry logic here if needed */
+          }}
         >
           <Text className="text-white">Retry</Text>
         </TouchableOpacity>
@@ -86,9 +104,14 @@ const CategoriesPage = () => {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white px-4" showsVerticalScrollIndicator={false}>
+    <ScrollView
+      className="flex-1 bg-white px-4"
+      showsVerticalScrollIndicator={false}
+    >
       {/* Most Popular */}
-      <Text className="text-xl font-bold text-gray-900 mb-3 mt-2">Most Popular Categories</Text>
+      <Text className="text-xl font-bold text-gray-900 mb-3 mt-2">
+        Most Popular Categories
+      </Text>
       <View className="flex-row flex-wrap -mx-2">
         {categories
           .filter((c) => c.status === 1)
@@ -97,7 +120,9 @@ const CategoriesPage = () => {
       </View>
 
       {/* Other Categories */}
-      <Text className="text-xl font-bold text-gray-900 mt-6 mb-3">Other Categories</Text>
+      <Text className="text-xl font-bold text-gray-900 mt-6 mb-3">
+        Other Categories
+      </Text>
       <View className="flex-row flex-wrap -mx-2 mb-10">
         {categories
           .filter((c) => c.status === 0)
@@ -114,7 +139,6 @@ export default CategoriesPage;
 // import { View, Text, ScrollView, Image, StyleSheet, TouchableOpacity } from 'react-native';
 // import { useNavigation } from '@react-navigation/native';
 // import { getAllCategories } from '@/src/api/apiMethods';
-
 
 // interface Category {
 //   _id: string;

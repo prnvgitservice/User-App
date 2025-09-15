@@ -49,8 +49,12 @@ const CategoriesGrid = () => {
       >
         <TouchableOpacity
           className="flex flex-col items-center p-4 rounded-2xl border border-gray-200 bg-white shadow-md active:scale-95"
-          onPress={() => navigation.navigate("Technicians", { categoryId: item._id, category: item.category_name })}
-
+          onPress={() =>
+            navigation.navigate("Technicians", {
+              categoryId: item._id,
+              category: item.category_name,
+            })
+          }
         >
           <View
             className={`w-20 h-20 ${bgColor} rounded-full flex items-center justify-center mb-3 overflow-hidden`}
@@ -62,7 +66,11 @@ const CategoriesGrid = () => {
               resizeMode="contain"
             />
           </View>
-          <Text className="text-center text-sm line-clamp-1 font-medium text-gray-700">
+          <Text
+            className="text-center text-sm line-clamp-1 font-medium text-gray-700"
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
             {item.category_name}
           </Text>
         </TouchableOpacity>

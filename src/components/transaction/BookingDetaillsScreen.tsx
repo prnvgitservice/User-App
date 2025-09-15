@@ -269,7 +269,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
             </View>
             <View className="flex-1">
               <Text className="text-gray-600 text-sm font-medium">OTP</Text>
-              <Text className="bg-purple-600 text-white rounded-xl py-2 px-4 text-base font-semibold">
+              <Text className="bg-purple-600 text-white rounded-xl text-center py-2 px-4 text-base font-semibold w-28">
                 {bookingState?.otp || 'N/A'}
               </Text>
             </View>
@@ -281,13 +281,13 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
           <TouchableOpacity
             accessibilityLabel="Cancel booking"
             accessibilityRole="button"
-            className={`py-3 px-6 bg-red-600 rounded-xl shadow-md mx-4 ${
+            className={`py-3 px-6 bg-white border border-gray-200 rounded-xl shadow-md mx-4 ${
               isCancelling ? 'opacity-60' : ''
             }`}
             onPress={handleCancel}
             disabled={isCancelling}
           >
-            <Text className="text-white font-semibold text-center text-base">
+            <Text className="text-black font-semibold text-center text-base">
               {isCancelling ? 'Cancelling...' : 'Cancel Service'}
             </Text>
           </TouchableOpacity>

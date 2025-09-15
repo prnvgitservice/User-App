@@ -4,6 +4,8 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getAllCategories, getAllPincodes } from "../../api/apiMethods";
+import { Ionicons } from '@expo/vector-icons';
+
 
 const SearchableDropdown = ({ placeholder, options, selectedValue, onValueChange, disabled = false }) => {
   const [visible, setVisible] = useState(false);
@@ -32,7 +34,7 @@ const SearchableDropdown = ({ placeholder, options, selectedValue, onValueChange
         }`}
       >
         <Text className={`${disabled ? "text-gray-400" : "text-gray-700"}`}>{selectedLabel}</Text>
-        <Icon name="arrow-drop-down" size={20} color={disabled ? "#9CA3AF" : "#374151"} />
+        <Ionicons name="caret-down-sharp" size={15} color={disabled ? "#9CA3AF" : "#374151"} />
       </TouchableOpacity>
 
       <Modal visible={visible} transparent={true} animationType="fade" >
@@ -339,14 +341,14 @@ const SearchBarSection = () => {
               className="flex flex-row items-center gap-2 px-6 py-3 bg-orange-500 rounded-lg"
               onPress={handleSearch}
             >
-              <Icon name="search" size={20} color="#FFFFFF" />
+              <Ionicons name="search" size={18} color="#FFFFFF" />
               <Text className="text-white font-semibold">Search</Text>
             </TouchableOpacity>
             <TouchableOpacity
               className="flex flex-row items-center gap-2 px-4 py-3 bg-gray-200 rounded-lg"
               onPress={handleReset}
             >
-              <Icon name="refresh" size={20} color="#374151" />
+              <Ionicons name="refresh" size={18} color="#374151" />
               <Text className="text-gray-700 font-semibold">Reset</Text>
             </TouchableOpacity>
           </View>
