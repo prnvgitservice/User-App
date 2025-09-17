@@ -646,12 +646,12 @@ const CartScreen = () => {
           exiting={FadeOut.duration(400)}
           className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
         >
-          <BlurView intensity={20} className="absolute inset-0" />
+          <BlurView intensity={10} className="absolute inset-0" />
           
           <Animated.View 
             entering={SlideInDown.springify().damping(15).mass(0.8)}
             exiting={SlideOutDown.duration(400)}
-            className="bg-white p-6 rounded-2xl max-w-lg w-full border border-fuchsia-100 shadow-2xl"
+            className="bg-white p-6 rounded-2xl max-w-lg w-full border border-fuchsia-100 shadow-2xl mb-32"
           >
             {/* Enhanced Celebration Animation */}
             <Animated.View 
@@ -753,7 +753,7 @@ const CartScreen = () => {
                   setShowSavingsModal(false);
                   navigation.navigate("Transactions");
                 }}
-                className="w-full bg-gradient-to-r from-fuchsia-500 to-purple-600 px-4 py-3 rounded-xl font-semibold shadow-md items-center justify-center overflow-hidden"
+                className="w-full bg-purple-600 px-4 py-3 rounded-xl font-semibold shadow-md items-center justify-center overflow-hidden"
               >
                 <Text className="text-white font-semibold text-base">View Transaction Details 🚀</Text>
               </TouchableOpacity>
