@@ -129,7 +129,7 @@ const TransactionPageScreen: React.FC = () => {
 
   const handleBookingSelect = (booking: BookingData) => {
     setSelectedBooking(booking);
-    fadeAnim.setValue(0); // Reset animation
+    fadeAnim.setValue(0); 
     if (booking.booking.status.toLowerCase() === "completed") {
       setCurrentStep("completed-details");
     } else if (
@@ -148,8 +148,8 @@ const TransactionPageScreen: React.FC = () => {
 
   const handleTabPress = (tab: "upcoming" | "completed" | "cancelled") => {
     setActiveTab(tab);
-    setCurrentStep("bookings"); // Reset to bookings list when switching tabs
-    fadeAnim.setValue(0); // Reset animation
+    setCurrentStep("bookings");
+    fadeAnim.setValue(0); 
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 300,
@@ -272,6 +272,9 @@ const TransactionPageScreen: React.FC = () => {
 };
 
 export default TransactionPageScreen;
+
+
+
 // import React, { useState, useEffect } from 'react';
 // import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 // import AsyncStorage from '@react-native-async-storage/async-storage';
