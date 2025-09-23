@@ -100,8 +100,7 @@ const TechniciansScreen = () => {
             _id: item.technician._id,
             username: item.technician.username,
             profileImage:
-              item.technician.profileImage ||
-              'https://img-new.cgtrader.com/items/4519471/f444ec0898/large/mechanic-avatar-3d-icon-3d-model-f444ec0898.jpg',
+              item.technician.profileImage,
             service: item.services?.length > 0 ? item.services[0].serviceName : undefined,
             areaName: item.technician.areaName,
             city: item.technician.city,
@@ -147,7 +146,7 @@ const TechniciansScreen = () => {
       onPress={() => navigation.navigate('TechnicianProfile', { technicianId: item.technician._id })}
     >
       <Image
-        source={{ uri: item.technician.profileImage }}
+        source={{ uri: item.technician.profileImage || "https://img-new.cgtrader.com/items/4519471/f444ec0898/large/mechanic-avatar-3d-icon-3d-model-f444ec0898.jpg" }}
         className="w-24 h-24 rounded-2xl mr-3"
       />
       <View className="flex-1">

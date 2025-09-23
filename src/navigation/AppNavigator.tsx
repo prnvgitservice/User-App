@@ -13,7 +13,7 @@ import BlogDetailPage from "../components/blog/BlogDetail";
 import TechniciansScreen from "../screens/TechniciansScreen";
 import AllBlogs from "../components/blog/AllBlogs";
 import SearchFilterScreen from "../screens/SearchFilterScreen";
-import TransactionPageScreen from "../screens/TransactionPageScreen";
+import TransactionPageScreen from "../screens/TransactionScreen";
 import ProfileScreen from "../components/homescreen/ProfileScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import GuestBooking from "../components/homescreen/GuestBooking";
@@ -27,6 +27,7 @@ import PrivacyPolicyScreen from "../components/profile/PrivacyPolicyScreen";
 import TermsConditionsScreen from "../components/profile/TermsConditionsScreen";
 import CompanyReviewScreen from "../components/profile/CompanyReviewScreen";
 import ProfileEditPage from "../components/profile/EditProfile";
+import { SafeAreaView } from "react-native";
 
 // Root Stack Params
 export type RootStackParamList = {
@@ -116,28 +117,31 @@ function MainTabs({ navigation }) {
 
 // AppNavigator
 function AppNavigator() {
-   const [isLoginedIn, setIsLoginedIn] = useState(false); // Replace with actual auth state
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const loginConform = async () => {
+    const checkLoginStatus = async () => {
       try {
         const user = await AsyncStorage.getItem("user");
-        if (user) {
-          setIsLoginedIn(true);
-        } else {
-          setIsLoginedIn(false);
-        }
-      } catch (err) {
-        Alert.alert(err);
+        setIsLoggedIn(!!user);
+      } catch (error) {
+        console.error("Error checking login status:", error);
+        setIsLoggedIn(false);
       }
     };
-
-    loginConform();
+    checkLoginStatus();
   }, []);
+
+  if (isLoggedIn === null) {
+    return <SafeAreaView className="flex-1 bg-white" />;
+  }
+
   return (
     <Stack.Navigator
-      initialRouteName={"Onboarding"}
-      screenOptions={{ headerShown: false }}
+      initialRouteName={isLoggedIn ? "Main" : "OnBoarding"}
+      screenOptions={{
+        headerShown: false, // Disable header for all stack screens
+      }}
     >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
@@ -172,8 +176,8 @@ function AppNavigator() {
         component={TechniciansScreen}
         options={({ route }) => ({
           title:
-            (route.params as { categoryId: string } | undefined)
-              ?.categoryId || "Technicians",
+            (route.params as { categoryId: string } | undefined)?.categoryId ||
+            "Technicians",
         })}
       />
       <Stack.Screen
@@ -221,7 +225,11 @@ function AppNavigator() {
           };
         }}
       /> */}
-      <Stack.Screen name="SearchFilter" component={SearchFilterScreen} options={{ title: 'Technicians' }} />
+      <Stack.Screen
+        name="SearchFilter"
+        component={SearchFilterScreen}
+        options={{ title: "Technicians" }}
+      />
     </Stack.Navigator>
   );
 }

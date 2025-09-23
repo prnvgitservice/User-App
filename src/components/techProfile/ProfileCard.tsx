@@ -19,7 +19,7 @@ const ProfileCard = ({ technician}: ProfileCardProps) => {
     <View className="border border-gray-300 rounded-xl p-5 flex-col relative overflow-hidden">
       <View className="flex-col items-center mb-4 w-full">
         <Image
-          source={{ uri: technician.profileImage || "https://via.placeholder.com/150" }}
+          source={{ uri: technician.profileImage || "https://img-new.cgtrader.com/items/4519471/f444ec0898/large/mechanic-avatar-3d-icon-3d-model-f444ec0898.jpg" }}
           className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
         />
         

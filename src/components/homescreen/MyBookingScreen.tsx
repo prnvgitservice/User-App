@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Icon } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 // Add type for booking
 interface Booking {
@@ -94,7 +94,7 @@ const MyBookingScreen = () => {
     <View style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={styles.headerRow}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-back" size={28} color="#333" />
+          <Ionicons name="chevron-back" size={28} color="#333" />
         </TouchableOpacity>
         <View style={{ flex: 1, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
           <Text style={styles.headerTitle}>My Bookings</Text>

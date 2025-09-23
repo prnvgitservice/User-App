@@ -636,7 +636,7 @@ const CartScreen = () => {
 
       {/* Savings Modal */}
       <Modal
-        visible={showSavingsModal && !!savingsData}
+        visible={showSavingsModal}
         transparent
         animationType="fade"
         onRequestClose={() => setShowSavingsModal(false)}

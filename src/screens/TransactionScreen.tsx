@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getOrdersByUserId } from "../api/apiMethods";
-import BookingsListScreen from "../components/transaction/BookingsListScreen";
+import BookingsListScreen from "../components/transaction/BookingsList";
 import CompletedDetailsScreen from "../components/transaction/CompletedDetailsScreen";
 import CancelledCard from "../components/transaction/CancelledCard";
 import SavingsScreen from "../components/transaction/SavingsScreen";
@@ -94,6 +94,12 @@ const TransactionPageScreen: React.FC = () => {
     null
   );
   const fadeAnim = useState(new Animated.Value(0))[0]; // Animation for content fade-in
+
+    const transactionTabs = [
+    { id: 'upcoming', name: 'Upcoming', color: 'text-purple-600', bgColor: 'bg-purple-100', borderColor: 'border-purple-600' },
+    { id: 'completed', name: 'Completed', color: 'text-green-600', bgColor: 'bg-green-100', borderColor: 'border-green-600' },
+    { id: 'cancelled', name: 'Cancelled', color: 'text-red-600', bgColor: 'bg-red-100', borderColor: 'border-red-600' },
+  ];
 
   const fetchBookings = async () => {
     try {
@@ -238,35 +244,23 @@ const TransactionPageScreen: React.FC = () => {
           My Transactions
         </Text>
 
-        <View className="flex-row justify-around mb-1">
-          {["upcoming", "completed", "cancelled"].map((tab) => (
+        <View className="flex-row justify-around">
+          {transactionTabs.map((tab) => (
             <TouchableOpacity
-              key={tab}
-              onPress={() => handleTabPress(tab as any)}
-              className={`flex-1 py-3 rounded-lg mx-1 transition-all duration-200 ${
-                activeTab === tab
-                  ? tab === "upcoming"
-                    ? "bg-purple-100 border-b-2 border-purple-600"
-                    : tab === "completed"
-                      ? "bg-green-100 border-b-2 border-green-600"
-                      : "bg-red-100 border-b-2 border-red-600"
-                  : "bg-gray-200"
+              key={tab.id}
+              onPress={() => handleTabPress(tab.id as 'upcoming' | 'completed' | 'cancelled')}
+              className={`flex-1 py-3 rounded-lg mx-1 ${
+                activeTab === tab.id ? tab.bgColor + ' border-b-2 ' + tab.borderColor : 'bg-gray-200'
               }`}
-              accessibilityLabel={`Switch to ${tab} transactions`}
+              accessibilityLabel={`Switch to ${tab.name} transactions`}
               accessibilityRole="button"
             >
               <Text
                 className={`text-center font-medium ${
-                  activeTab === tab
-                    ? tab === "upcoming"
-                      ? "text-purple-600"
-                      : tab === "completed"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    : "text-gray-600"
+                  activeTab === tab.id ? tab.color : 'text-gray-600'
                 }`}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab.name}
               </Text>
             </TouchableOpacity>
           ))}

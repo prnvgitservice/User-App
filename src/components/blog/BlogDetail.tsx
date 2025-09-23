@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import RenderHTML from "react-native-render-html";
+import { Ionicons } from "@expo/vector-icons";
 
 // Define the Blog interface
 interface Blog {

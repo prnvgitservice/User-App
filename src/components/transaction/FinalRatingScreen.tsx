@@ -120,7 +120,7 @@ const FinalRatingScreen: React.FC<FinalRatingProps> = ({ setCurrentStep, booking
     } catch (err) {
       console.log('user review err', err);
       alert('You have already reviewed this service.');
-      setCurrentStep('bookings');
+      setCurrentStep('congratulations');
     }
   };
 
