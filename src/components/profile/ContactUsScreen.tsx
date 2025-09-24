@@ -90,7 +90,13 @@ const ContactUs = () => {
             className="ml-2 flex-1 text-base"
             placeholder="Enter your phone number"
             value={formData.phoneNumber}
-            onChangeText={(text) => handleChange('phoneNumber', text)}
+            onChangeText={(text) => {
+              // Only allow numbers and limit length to 10
+              const cleanedText = text.replace(/[^0-9]/g, '');
+              if (cleanedText.length <= 10) {
+                handleChange('phoneNumber', cleanedText);
+              }
+            }}
             keyboardType="phone-pad"
             required
             aria-label="Phone number"
@@ -133,7 +139,7 @@ const ContactUs = () => {
               <Text className="text-white text-lg font-semibold mr-2">
                 Get In Touch
               </Text>
-              <MaterialIcons name="double-arrow" size={30} color="#fff" />
+              <MaterialIcons name="double-arrow" size={20} color="#fff" />
             </>
           )}
         </TouchableOpacity>
@@ -148,6 +154,10 @@ const ContactUs = () => {
 };
 
 export default ContactUs;
+
+
+
+
 // import React, { useEffect, useState } from "react";
 // import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from "react-native";
 // import { Picker } from "@react-native-picker/picker";

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, ScrollView, ActivityIndicator, Dimensions } from 'react-native';
-import { ChevronLeft, User, Phone, MapPin, Key, Globe } from 'react-native-feather';
+import { View, Text, TouchableOpacity, Image, Alert, ScrollView, ActivityIndicator, Dimensions, Modal } from 'react-native';
+import { ChevronLeft, User, Phone, MapPin, Key, Globe, AlertCircle } from 'react-native-feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { bookingCancleByUser } from '@/src/api/apiMethods';
 
@@ -71,12 +71,19 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
   const [isCancelling, setIsCancelling] = useState<boolean>(false);
   const [isImageLoading, setIsImageLoading] = useState<boolean>(true);
   const [bookingState, setBookingState] = useState(booking.booking);
+  const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false);
 
   const { technician, service } = booking;
   const formattedTechnicianAddress = `${technician?.buildingName || ''}, ${technician?.areaName || ''}, ${technician?.city || ''}, ${technician?.state || ''} - ${technician?.pincode || ''}`.trim();
 
-  const handleCancel = async () => {
+  const handleCancelPress = () => {
+    setShowConfirmationModal(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    setShowConfirmationModal(false);
     setIsCancelling(true);
+    
     const data = {
       orderId: bookingState._id,
       userId: await AsyncStorage.getItem('userId'),
@@ -98,6 +105,63 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
       setIsCancelling(false);
     }
   };
+
+  const handleCancelModal = () => {
+    setShowConfirmationModal(false);
+  };
+
+  const ConfirmationModal = () => (
+    <Modal
+      transparent
+      visible={showConfirmationModal}
+      animationType="fade"
+      onRequestClose={handleCancelModal}
+    >
+      <View className="flex-1 bg-black/50 justify-center items-center px-6">
+        <View className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-xl">
+          {/* Icon */}
+          <View className="w-16 h-16 bg-red-100 rounded-full items-center justify-center mx-auto mb-6">
+            <AlertCircle width={32} height={32} color="#DC2626" />
+          </View>
+          
+          {/* Title */}
+          <Text className="text-xl font-bold text-gray-900 text-center mb-4">
+            Cancel Booking?
+          </Text>
+          
+          {/* Message */}
+          <Text className="text-gray-600 text-center mb-8 leading-6">
+            Do you really want to cancel this booking? This action cannot be undone.
+          </Text>
+          
+          {/* Buttons */}
+          <View className="space-y-3">
+            {/* Yes Button */}
+            <TouchableOpacity
+              className="bg-red-600 py-4 px-6 rounded-xl shadow-sm"
+              onPress={handleConfirmCancel}
+              disabled={isCancelling}
+            >
+              <Text className="text-white font-semibold text-center text-base">
+                {isCancelling ? 'Cancelling...' : 'Yes, Cancel Booking'}
+              </Text>
+            </TouchableOpacity>
+            
+            {/* No Button */}
+            <TouchableOpacity
+              className="bg-gray-100 py-4 px-6 rounded-xl border border-gray-200"
+              onPress={handleCancelModal}
+              disabled={isCancelling}
+            >
+              <Text className="text-gray-700 font-semibold text-center text-base">
+                No, Keep Booking
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <View className="flex-1 bg-gray-50">
@@ -264,11 +328,11 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
             accessibilityLabel="Cancel booking"
             accessibilityRole="button"
             className={`py-3 px-6 bg-white border border-gray-200 rounded-xl shadow-md mx-4 ${isCancelling ? 'opacity-60' : ''}`}
-            onPress={handleCancel}
+            onPress={handleCancelPress}
             disabled={isCancelling}
           >
             <Text className="text-black font-semibold text-center text-base">
-              {isCancelling ? 'Cancelling...' : 'Cancel Service'}
+              Cancel Service
             </Text>
           </TouchableOpacity>
         ) : (
@@ -279,11 +343,15 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
           </Text>
         )}
       </ScrollView>
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal />
     </View>
   );
 };
 
 export default BookingDetailsScreen;
+
 
 
 
@@ -366,11 +434,7 @@ export default BookingDetailsScreen;
 //   const [bookingState, setBookingState] = useState(booking.booking);
 
 //   const { technician, service } = booking;
-//   const formattedTechnicianAddress = `${technician?.buildingName || ''}, ${
-//     technician?.areaName || ''
-//   }, ${technician?.city || ''}, ${technician?.state || ''} - ${
-//     technician?.pincode || ''
-//   }`.trim();
+//   const formattedTechnicianAddress = `${technician?.buildingName || ''}, ${technician?.areaName || ''}, ${technician?.city || ''}, ${technician?.state || ''} - ${technician?.pincode || ''}`.trim();
 
 //   const handleCancel = async () => {
 //     setIsCancelling(true);
@@ -411,20 +475,15 @@ export default BookingDetailsScreen;
 //             <Text className="text-gray-600 text-lg font-medium">Back</Text>
 //           </TouchableOpacity>
 //           <Text className="text-xl font-bold text-gray-900">Booking Details</Text>
-//           <View className="w-10" /> {/* Spacer for alignment */}
+//           <View className="w-10" />
 //         </View>
 //       </View>
 
 //       {/* Scrollable Content */}
 //       <ScrollView
 //         className="flex-1"
-//         contentContainerStyle={{
-//           paddingHorizontal: 16,
-//           paddingTop: 16,
-//           paddingBottom: 100, // Extra padding to ensure button visibility
-//         }}
+//         contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 100 }}
 //         showsVerticalScrollIndicator={false}
-//         onContentSizeChange={(width, height) => console.log('Content height:', height)} // Debug content height
 //       >
 //         {/* Status and Date */}
 //         <View className="flex-row items-center justify-between mb-6">
@@ -461,10 +520,7 @@ export default BookingDetailsScreen;
 //         </View>
 
 //         {/* Service Image */}
-//         <View
-//           className="w-48 h-48 bg-gray-200 rounded-2xl mb-6 overflow-hidden shadow-md self-center"
-//           // style={{ height: SCREEN_HEIGHT * 0.35 }} // Dynamic height based on screen
-//         >
+//         <View className="w-48 h-48 bg-gray-200 rounded-2xl mb-6 overflow-hidden shadow-md self-center">
 //           {service?.serviceImg ? (
 //             <>
 //               {isImageLoading && (
@@ -490,8 +546,7 @@ export default BookingDetailsScreen;
 
 //         {/* Details Card */}
 //         <View className="bg-white rounded-2xl p-5 mb-6 shadow-md">
-//           {/* Technician Name */}
-//           <View className="flex-row items-center space-x-4 mb-4 gap-5">
+//           <View className="flex-row items-center space-x-4 mb-4">
 //             <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
 //               <User width={20} height={20} color="#2563EB" />
 //             </View>
@@ -503,8 +558,7 @@ export default BookingDetailsScreen;
 //             </View>
 //           </View>
 
-//           {/* Service */}
-//           <View className="flex-row items-center space-x-4 mb-4 gap-5">
+//           <View className="flex-row items-center space-x-4 mb-4">
 //             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center">
 //               <Globe width={20} height={20} color="#F97316" />
 //             </View>
@@ -516,8 +570,7 @@ export default BookingDetailsScreen;
 //             </View>
 //           </View>
 
-//           {/* Contact */}
-//           <View className="flex-row items-center space-x-4 mb-4 gap-5">
+//           <View className="flex-row items-center space-x-4 mb-4">
 //             <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center">
 //               <Phone width={20} height={20} color="#16A34A" />
 //             </View>
@@ -529,8 +582,7 @@ export default BookingDetailsScreen;
 //             </View>
 //           </View>
 
-//           {/* Address */}
-//           <View className="flex-row items-start space-x-4 mb-4 gap-5">
+//           <View className="flex-row items-start space-x-4 mb-4">
 //             <View className="w-10 h-10 bg-red-100 rounded-full items-center justify-center">
 //               <MapPin width={20} height={20} color="#DC2626" />
 //             </View>
@@ -542,8 +594,7 @@ export default BookingDetailsScreen;
 //             </View>
 //           </View>
 
-//           {/* Total Price */}
-//           <View className="flex-row items-center space-x-4 mb-4 gap-5">
+//           <View className="flex-row items-center space-x-4 mb-4">
 //             <View className="w-10 h-10 bg-purple-100 rounded-full items-center justify-center">
 //               <Text className="text-purple-700 text-xl font-bold">₹</Text>
 //             </View>
@@ -555,8 +606,7 @@ export default BookingDetailsScreen;
 //             </View>
 //           </View>
 
-//           {/* OTP */}
-//           <View className="flex-row items-center space-x-4 gap-5">
+//           <View className="flex-row items-center space-x-4">
 //             <View className="w-10 h-10 bg-yellow-100 rounded-full items-center justify-center">
 //               <Key width={20} height={20} color="#FBBF24" />
 //             </View>
@@ -574,9 +624,7 @@ export default BookingDetailsScreen;
 //           <TouchableOpacity
 //             accessibilityLabel="Cancel booking"
 //             accessibilityRole="button"
-//             className={`py-3 px-6 bg-white border border-gray-200 rounded-xl shadow-md mx-4 ${
-//               isCancelling ? 'opacity-60' : ''
-//             }`}
+//             className={`py-3 px-6 bg-white border border-gray-200 rounded-xl shadow-md mx-4 ${isCancelling ? 'opacity-60' : ''}`}
 //             onPress={handleCancel}
 //             disabled={isCancelling}
 //           >
@@ -597,3 +645,10 @@ export default BookingDetailsScreen;
 // };
 
 // export default BookingDetailsScreen;
+
+
+
+
+
+
+
