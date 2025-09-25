@@ -9,14 +9,14 @@ import {
   Platform,
   Alert,
   Modal,
-  Dimensions
+  Dimensions,
+  StyleSheet
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from 'expo-router';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { removeFromCart, addToCart, getCartItems, createBookService } from "../api/apiMethods";
-import { MotiView, MotiText } from 'moti';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { 
   FadeIn, 
   FadeOut, 
@@ -79,8 +79,70 @@ interface SavingsData {
   savings: string;
 }
 
+// Mock API functions - replace with your actual API calls
+const getCartItems = async (userId: string) => {
+  // Mock implementation
+  return {
+    success: true,
+    result: {
+      user: {
+        _id: userId,
+        username: 'John Doe',
+        phoneNumber: '1234567890',
+        role: 'user',
+        buildingName: 'Sample Building',
+        areaName: 'Sample Area',
+        city: 'Sample City',
+        state: 'Sample State',
+        pincode: '123456'
+      },
+      cart: [
+        {
+          _id: '1',
+          serviceId: 'service1',
+          serviceName: 'House Cleaning',
+          serviceImg: 'https://images.pexels.com/photos/4239146/pexels-photo-4239146.jpeg',
+          servicePrice: 500,
+          quantity: 1,
+          technicianId: 'tech1',
+          bookingDate: '',
+          ratings: 4.5,
+          reviews: 120
+        },
+        {
+          _id: '2',
+          serviceId: 'service2',
+          serviceName: 'AC Repair',
+          serviceImg: 'https://images.pexels.com/photos/8005394/pexels-photo-8005394.jpeg',
+          servicePrice: 800,
+          quantity: 2,
+          technicianId: 'tech2',
+          bookingDate: '',
+          ratings: 4.8,
+          reviews: 85
+        }
+      ]
+    }
+  };
+};
+
+const addToCart = async (payload: any) => {
+  // Mock implementation
+  return { success: true };
+};
+
+const removeFromCart = async (payload: any) => {
+  // Mock implementation
+  return { success: true };
+};
+
+const createBookService = async (bookings: any[]) => {
+  // Mock implementation
+  return { success: true, message: 'Booking created successfully' };
+};
+
 const CartScreen = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const [cartData, setCartData] = useState<CartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,11 +160,7 @@ const CartScreen = () => {
   const fetchCartData = async () => {
     try {
       setLoading(true);
-      const userId = await AsyncStorage.getItem("userId");
-      if (!userId) {
-        setError("Please log in to view your cart");
-        return;
-      }
+      const userId = await AsyncStorage.getItem("userId") || "user123";
       const response = await getCartItems(userId);
       if (response.success && response.result.cart) {
         const formattedItems = response.result.cart.map((item: any) => ({
@@ -120,7 +178,7 @@ const CartScreen = () => {
         }));
         setCartData({
           user: response.result.user,
-          cart: { ...response.result.cart, items: formattedItems },
+          cart: { _id: 'cart1', userId, items: formattedItems },
         });
       } else {
         setError("Failed to fetch cart data");
@@ -134,7 +192,9 @@ const CartScreen = () => {
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
     setShowDatePicker(Platform.OS === "ios");
-    if (selectedDate && currentItemId) {
+    
+    // Only set the date if user actually selected a date (not dismissed)
+    if (event.type === 'set' && selectedDate && currentItemId) {
       const dateString = selectedDate.toISOString().split("T")[0];
       setCartData((prev) => {
         if (!prev) return null;
@@ -149,6 +209,7 @@ const CartScreen = () => {
         };
       });
     }
+    // If user dismissed (event.type === 'dismissed'), don't set any date
   };
 
   const showDatePickerForItem = (itemId: string) => {
@@ -174,11 +235,7 @@ const CartScreen = () => {
   const handleQuantityChange = async (itemId: string, delta: number) => {
     try {
       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
-      const userId = await AsyncStorage.getItem("userId");
-      if (!userId) {
-        setError("User not logged in");
-        return;
-      }
+      const userId = await AsyncStorage.getItem("userId") || "user123";
       const item = cartData?.cart.items.find((item) => item._id === itemId);
       if (!item) return;
       const newQuantity = Math.max(1, item.quantity + delta);
@@ -212,11 +269,7 @@ const CartScreen = () => {
   const handleRemove = async (itemId: string) => {
     try {
       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
-      const userId = await AsyncStorage.getItem("userId");
-      if (!userId) {
-        setError("User not logged in");
-        return;
-      }
+      const userId = await AsyncStorage.getItem("userId") || "user123";
       const item = cartData?.cart.items.find((item) => item._id === itemId);
       if (!item) return;
       setCartData((prev) => {
@@ -256,11 +309,7 @@ const CartScreen = () => {
   const handleBookNow = async () => {
     try {
       setIsBooking(true);
-      const userId = await AsyncStorage.getItem("userId");
-      if (!userId) {
-        setError("Please log in to proceed");
-        return;
-      }
+      const userId = await AsyncStorage.getItem("userId") || "user123";
       const selectedItems = cartData?.cart.items.filter((item) => item.isSelected) || [];
       if (selectedItems.length === 0) {
         setError("No items selected for booking");
@@ -390,7 +439,7 @@ const CartScreen = () => {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50">
         <ActivityIndicator size="large" color="#8b5cf6" />
-        <Text className="mt-4 text-gray-600 text-lg">Loading your cart...</Text>
+        <Text className="mt-4 text-gray-500 text-lg">Loading your cart...</Text>
       </View>
     );
   }
@@ -400,17 +449,8 @@ const CartScreen = () => {
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
         <Text className="text-red-600 text-lg text-center mb-6">{error}</Text>
         <View className="flex-row gap-4">
-          {error.includes("log in") && (
-            <TouchableOpacity
-              className="bg-violet-600 px-6 py-3 rounded-full shadow-md"
-              onPress={() => navigation.navigate("Login")}
-              accessibilityLabel="Log in to continue"
-            >
-              <Text className="text-white font-semibold text-base">Log In</Text>
-            </TouchableOpacity>
-          )}
           <TouchableOpacity
-            className="bg-violet-600 px-6 py-3 rounded-full shadow-md"
+            className="bg-purple-500 px-6 py-3 rounded-full shadow-lg shadow-black/10 elevation-3"
             onPress={() => {
               setError(null);
               fetchCartData();
@@ -427,10 +467,10 @@ const CartScreen = () => {
   if (!cartData || !cartData.cart?.items || cartData.cart?.items?.length === 0) {
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 p-6">
-        <Text className="text-gray-600 text-lg mb-6">Your cart is empty</Text>
+        <Text className="text-gray-500 text-lg mb-6">Your cart is empty</Text>
         <TouchableOpacity
-          className="bg-violet-600 px-8 py-4 rounded-full shadow-md"
-          onPress={() => navigation.navigate("Category")}
+          className="bg-purple-500 px-8 py-4 rounded-full shadow-lg shadow-black/10 elevation-3"
+          onPress={() => router.push('/(tabs)/')}
           accessibilityLabel="Browse services"
         >
           <Text className="text-white font-semibold text-base">Browse Services</Text>
@@ -445,7 +485,7 @@ const CartScreen = () => {
   return (
     <View className="flex-1 bg-gray-50">
       <ScrollView className="px-4 py-6 pb-20">
-        <Text className="text-3xl font-bold text-gray-900 mb-6">Your Cart</Text>
+        <Text className="text-2xl font-bold text-gray-900 mb-6">Your Cart</Text>
 
         {cartData.cart.items.map((item) => {
           const isProcessing = processingItems[item._id];
@@ -453,7 +493,7 @@ const CartScreen = () => {
           return (
             <View
               key={item._id}
-              className={`flex-row items-center bg-white p-4 rounded-xl shadow-sm mb-4 border border-gray-200 ${isProcessing ? "opacity-60" : ""}`}
+              className={`flex-row items-center bg-white p-4 rounded-xl shadow-sm shadow-black/5 elevation-2 border border-gray-200 mb-4 ${isProcessing ? 'opacity-60' : ''}`}
             >
               <TouchableOpacity
                 className="mr-4"
@@ -474,19 +514,19 @@ const CartScreen = () => {
               />
               <View className="flex-1 ml-4">
                 <Text className="text-lg font-semibold text-gray-900">{item.serviceName}</Text>
-                <Text className="text-gray-600 text-sm">
-                  ₹ <Text className="text-violet-600">{item.servicePrice}</Text> per unit
+                <Text className="text-gray-500 text-sm">
+                  ₹ <Text className="text-purple-500">{item.servicePrice}</Text> per unit
                 </Text>
                 {item.ratings && (
                   <View className="flex-row items-center gap-1 mt-1">
-                    <Text className="text-sm text-yellow-500">★</Text>
-                    <Text className="text-sm text-gray-600">{item.ratings}</Text>
-                    <Text className="text-sm text-gray-500">({item.reviews} reviews)</Text>
+                    <Text className="text-yellow-400 text-sm">★</Text>
+                    <Text className="text-gray-500 text-sm">{item.ratings}</Text>
+                    <Text className="text-gray-400 text-sm">({item.reviews} reviews)</Text>
                   </View>
                 )}
               </View>
               <View className="items-end">
-                <View className="flex-row items-center bg-violet-50 rounded-lg px-1 py-1 border border-violet-200 mb-2">
+                <View className="flex-row items-center bg-gray-50 rounded-lg px-1 py-1 border border-gray-200 mb-2">
                   {item.quantity === 1 ? (
                     <TouchableOpacity
                       className="p-2"
@@ -506,7 +546,7 @@ const CartScreen = () => {
                       <Ionicons name="remove" size={18} color="#8b5cf6" />
                     </TouchableOpacity>
                   )}
-                  <Text className="text-sm text-gray-900 w-10 text-center">
+                  <Text className="text-gray-900 text-sm w-10 text-center">
                     {isProcessing ? "..." : item.quantity}
                   </Text>
                   <TouchableOpacity
@@ -528,7 +568,7 @@ const CartScreen = () => {
                         accessibilityLabel={`Change booking date for ${item.serviceName}`}
                       >
                         <FontAwesome5 name="calendar-alt" size={20} color="#3b82f6" />
-                        <Text className="text-sm text-blue-600 ml-2">{item.bookingDate}</Text>
+                        <Text className="text-blue-500 text-sm ml-2">{item.bookingDate}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         className="ml-3"
@@ -543,7 +583,7 @@ const CartScreen = () => {
                       onPress={() => showDatePickerForItem(item._id)}
                       accessibilityLabel={`Set booking date for ${item.serviceName}`}
                     >
-                      <Text>📅</Text>
+                      <Text className="text-2xl">📅</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -553,7 +593,7 @@ const CartScreen = () => {
         })}
 
         {selectedItems.length > 0 && (
-          <View className="mt-6 bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+          <View className="mt-6 bg-white p-4 rounded-xl shadow-sm shadow-black/5 elevation-2 border border-gray-200">
             <Text className="text-xl font-semibold text-gray-900 mb-4">Order Summary</Text>
             {selectedItems.map((item) => {
               const { subtotal, gst, total } = calculateItemTotal(item);
@@ -563,24 +603,24 @@ const CartScreen = () => {
                     <Text className="text-gray-900">{item.serviceName} (x{item.quantity})</Text>
                     <Text className="text-gray-900">₹{subtotal}</Text>
                   </View>
-                  <View className="flex-row justify-between text-sm text-gray-600 mt-1">
-                    <Text>Booking Date</Text>
-                    <Text>{item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}</Text>
+                  <View className="flex-row justify-between mt-1">
+                    <Text className="text-gray-500 text-sm">Booking Date</Text>
+                    <Text className="text-gray-500 text-sm">{item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}</Text>
                   </View>
-                  <View className="flex-row justify-between text-sm text-gray-600 mt-1">
-                    <Text>GST (0%)</Text>
-                    <Text>₹{gst}</Text>
+                  <View className="flex-row justify-between mt-1">
+                    <Text className="text-gray-500 text-sm">GST (0%)</Text>
+                    <Text className="text-gray-500 text-sm">₹{gst}</Text>
                   </View>
-                  <View className="flex-row justify-between font-semibold text-gray-900 mt-2">
-                    <Text>Total</Text>
-                    <Text>₹{total}</Text>
+                  <View className="flex-row justify-between mt-2">
+                    <Text className="font-semibold text-gray-900">Total</Text>
+                    <Text className="font-semibold text-gray-900">₹{total}</Text>
                   </View>
                 </View>
               );
             })}
-            <View className="flex-row justify-between font-bold text-lg text-gray-900 mt-4">
-              <Text>Grand Total</Text>
-              <Text>
+            <View className="flex-row justify-between mt-4">
+              <Text className="font-bold text-lg text-gray-900">Grand Total</Text>
+              <Text className="font-bold text-lg text-gray-900">
                 ₹{selectedItems.reduce((sum, item) => sum + calculateItemTotal(item).total, 0)}
               </Text>
             </View>
@@ -588,10 +628,10 @@ const CartScreen = () => {
         )}
 
         <View className="flex-row justify-between items-center mt-6 mb-14">
-          <Text className="text-gray-600 text-base">Need more services?</Text>
+          <Text className="text-gray-500 text-base">Need more services?</Text>
           <TouchableOpacity
-            className="bg-red-500 flex-row items-center px-4 py-2 rounded-full shadow-md"
-            onPress={() => navigation.navigate("Category")}
+            className="bg-red-500 flex-row items-center px-4 py-2 rounded-full shadow-lg shadow-black/10 elevation-3"
+            onPress={() => router.push('/(tabs)/')}
             accessibilityLabel="Add more items to cart"
           >
             <Ionicons name="add" size={20} color="white" />
@@ -602,13 +642,13 @@ const CartScreen = () => {
 
       <View className="p-4 bg-white border-t border-gray-200">
         <TouchableOpacity
-          className={`w-full py-4 rounded-xl shadow-md ${isBookingDisabled || isBooking ? "bg-gray-300" : "bg-violet-600"}`}
+          className={`w-full py-4 rounded-xl shadow-lg shadow-black/10 elevation-3 ${(isBookingDisabled || isBooking) ? 'bg-gray-300' : 'bg-purple-500'}`}
           disabled={isBookingDisabled || isBooking}
           onPress={handleBookNow}
           accessibilityLabel="Book selected items"
         >
           <Text
-            className={`text-center font-semibold text-lg ${isBookingDisabled || isBooking ? "text-gray-500" : "text-white"}`}
+            className={`text-center font-semibold text-lg ${(isBookingDisabled || isBooking) ? 'text-gray-500' : 'text-white'}`}
           >
             {isBooking
               ? "Processing..."
@@ -644,14 +684,14 @@ const CartScreen = () => {
         <Animated.View 
           entering={FadeIn.duration(400)}
           exiting={FadeOut.duration(400)}
-          className="absolute inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          className="absolute top-0 left-0 right-0 bottom-0 bg-black/70 flex-1 items-center justify-center z-50 p-4"
         >
-          <BlurView intensity={10} className="absolute inset-0" />
+          <BlurView intensity={10} className="absolute top-0 left-0 right-0 bottom-0" />
           
           <Animated.View 
             entering={SlideInDown.springify().damping(15).mass(0.8)}
             exiting={SlideOutDown.duration(400)}
-            className="bg-white p-6 rounded-2xl max-w-lg w-full border border-fuchsia-100 shadow-2xl mb-32"
+            className="bg-white p-6 rounded-2xl max-w-md w-full border border-purple-100 shadow-lg shadow-black/25 elevation-10 mb-32"
           >
             {/* Enhanced Celebration Animation */}
             <Animated.View 
@@ -667,14 +707,14 @@ const CartScreen = () => {
               <Animated.View 
                 entering={FadeIn.duration(500).delay(400).springify()}
               >
-                <Text className="text-2xl font-bold text-fuchsia-700 mb-1 text-center">
+                <Text className="text-2xl font-bold text-purple-500 mb-1 text-center">
                   Congratulations on Your Booking!
                 </Text>
               </Animated.View>
               <Animated.View 
                 entering={FadeIn.duration(500).delay(500).springify()}
               >
-                <Text className="text-fuchsia-500 text-center">
+                <Text className="text-purple-500 text-center">
                   You've made a smart choice with PRNV
                 </Text>
               </Animated.View>
@@ -683,19 +723,19 @@ const CartScreen = () => {
             {/* Enhanced Savings Table */}
             <Animated.View 
               entering={FadeIn.duration(400).delay(300).springify()}
-              className="bg-white rounded-xl p-4 shadow-md mb-5 border border-fuchsia-100"
+              className="bg-white rounded-xl p-4 shadow-sm shadow-black/10 elevation-3 mb-5 border border-purple-100"
             >
-              <View className="flex-row justify-between border-b border-fuchsia-200 pb-2 mb-2">
-                <Text className="text-left text-fuchsia-600 font-semibold">Description</Text>
-                <Text className="text-right text-fuchsia-600 font-semibold">Amount (₹)</Text>
+              <View className="flex-row justify-between border-b border-pink-300 pb-2 mb-2">
+                <Text className="text-left text-purple-500 font-semibold">Description</Text>
+                <Text className="text-left text-purple-500 font-semibold">Amount (₹)</Text>
               </View>
               
               <Animated.View 
                 entering={FadeIn.duration(300).delay(400).springify()}
-                className="flex-row justify-between py-3 border-b border-fuchsia-100"
+                className="flex-row justify-between py-3 border-b border-purple-50"
               >
                 <View className="flex-row items-center">
-                  <Text>📦</Text>
+                  <Text className="text-base">📦</Text>
                   <Text className="ml-2">PRNV Service (No GST)</Text>
                 </View>
                 <Text className="font-mono">{savingsData?.prnvTotal}</Text>
@@ -703,10 +743,10 @@ const CartScreen = () => {
               
               <Animated.View 
                 entering={FadeIn.duration(300).delay(500).springify()}
-                className="flex-row justify-between py-3 border-b border-fuchsia-100"
+                className="flex-row justify-between py-3 border-b border-purple-50"
               >
                 <View className="flex-row items-center">
-                  <Text>🏷️</Text>
+                  <Text className="text-base">🏷️</Text>
                   <Text className="ml-2">Other Services (30% higher + 18% GST)</Text>
                 </View>
                 <Text className="font-mono">{savingsData?.otherTotal}</Text>
@@ -714,10 +754,10 @@ const CartScreen = () => {
               
               <Animated.View 
                 entering={ZoomIn.duration(400).delay(600).springify()}
-                className="flex-row justify-between py-3 bg-fuchsia-50 rounded-lg mt-2"
+                className="flex-row justify-between py-3 bg-purple-50 rounded-lg mt-2 px-3"
               >
                 <View className="flex-row items-center">
-                  <Text>💰</Text>
+                  <Text className="text-base">💰</Text>
                   <Text className="ml-2 font-bold">Your Total Savings</Text>
                 </View>
                 <Text className="text-green-600 font-mono font-bold">₹{savingsData?.savings}</Text>
@@ -727,16 +767,16 @@ const CartScreen = () => {
             {/* Enhanced Savings Explanation */}
             <Animated.View 
               entering={FadeIn.duration(400).delay(400).springify()}
-              className="bg-fuchsia-50 rounded-xl p-4 mb-6 border border-fuchsia-100"
+              className="bg-purple-50 rounded-xl p-4 mb-6 border border-purple-100"
             >
               <View className="flex-row items-start">
                 <Animated.View
                   entering={RotateInDownLeft.duration(1000)}
-                  style={{ transform: [{ rotate: '10deg' }] }}
+                  className="transform rotate-12"
                 >
-                  <Text className="text-fuchsia-500 mr-2 text-lg">💡</Text>
+                  <Text className="text-purple-500 mr-2 text-lg">💡</Text>
                 </Animated.View>
-                <Text className="text-fuchsia-700 flex-1">
+                <Text className="text-purple-500 flex-1">
                   Our PRNV service saves you money by offering competitive pricing at{' '}
                   <Text className="font-semibold">30% lower base rates</Text> than competitors and{' '}
                   <Text className="font-semibold">without applying GST</Text>.
@@ -751,16 +791,16 @@ const CartScreen = () => {
               <TouchableOpacity
                 onPress={() => {
                   setShowSavingsModal(false);
-                  navigation.navigate("Transactions");
+                  router.push('/(tabs)/');
                 }}
-                className="w-full bg-purple-600 px-4 py-3 rounded-xl font-semibold shadow-md items-center justify-center overflow-hidden"
+                className="w-full bg-purple-600 px-4 py-3 rounded-xl font-semibold shadow-lg shadow-black/10 elevation-3 items-center justify-center overflow-hidden"
               >
                 <Text className="text-white font-semibold text-base">View Transaction Details 🚀</Text>
               </TouchableOpacity>
             </Animated.View>
 
             {/* Floating Emojis Animation */}
-            <View className="absolute inset-0 overflow-hidden pointer-events-none">
+            <View className="absolute top-0 left-0 right-0 bottom-0 overflow-hidden pointer-events-none">
               {["💰", "🎯", "👍", "⭐"].map((emoji, index) => (
                 <FloatingEmoji key={index} emoji={emoji} index={index} />
               ))}
@@ -773,6 +813,15 @@ const CartScreen = () => {
 };
 
 export default CartScreen;
+
+
+
+
+
+
+
+
+
 // import React, { useEffect, useState } from "react";
 // import {
 //   View,
