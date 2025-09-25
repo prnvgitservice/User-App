@@ -122,13 +122,13 @@ const TechnicianProfile = () => {
         <View className=" bg-gray-100 px-4 pt-4 flex-1">
           <ProfileCard
             technician={technicianDetails.technician}
-            ratings={technicianDetails.ratings}
+            ratings={technicianDetails.ratings || []}
           />
           <AllFilters
             services={technicianDetails.services}
             technician={technicianDetails.technician}
             technicianImages={technicianDetails.technicianImages?.imageUrl || []}
-            ratings={technicianDetails.ratings}
+            ratings={technicianDetails.ratings || []}
           />
         </View>
       )}

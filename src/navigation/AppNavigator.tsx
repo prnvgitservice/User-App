@@ -143,7 +143,7 @@ function AppNavigator() {
         headerShown: false, // Disable header for all stack screens
       }}
     >
-      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="OnBoarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Transactions" component={TransactionPageScreen} />

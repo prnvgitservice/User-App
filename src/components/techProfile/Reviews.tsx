@@ -22,11 +22,11 @@ const Reviews = ({ ratings }: ReviewsProps) => {
     <View className="border border-gray-200 shadow rounded-xl p-3 flex-col">
       <View className="flex-row gap-3 items-center">
         <Image
-          source={{ uri: item.image || "https://via.placeholder.com/50" }}
+          source={{ uri: item.image || "https://i.pinimg.com/736x/21/24/92/21249201424022cdd93cd144f099b056.jpg" }}
           className="w-14 h-14 object-cover rounded-full"
         />
         <View className="flex-col">
-          <Text className="text-md font-light">{item.name || "Anonymous"}</Text>
+          <Text className="text-md font-light">{item.name}</Text>
           <Text className="text-sm text-gray-500">{formatDate(item.createdAt)}</Text>
         </View>
       </View>
