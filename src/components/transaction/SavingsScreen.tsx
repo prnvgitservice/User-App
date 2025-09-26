@@ -92,10 +92,10 @@ const SavingsScreen: React.FC<SavingsProps> = ({ setCurrentStep, booking }) => {
   return (
     <View className="flex-1 bg-white rounded-lg border border-gray-200">
       <View className="border-b border-gray-200 px-6 py-4">
-        <View className="flex-row items-center space-x-3">
+        <View className="flex-row items-center gap-3">
           <TouchableOpacity
             onPress={() => setCurrentStep('completed-details', { booking })}
-            className="flex-row items-center space-x-2"
+            className="flex-row items-center gap-2"
           >
             <ChevronLeft width={20} height={20} color="#4B5563" />
             <Text className="text-gray-600">Back</Text>

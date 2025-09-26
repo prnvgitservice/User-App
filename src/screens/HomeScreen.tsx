@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -26,23 +27,26 @@ type RootStackParamList = {
   Category: undefined;
   Blog: { blog: [] };
   Reviews: undefined;
+  Profile: undefined; // Added Profile to the param list
 };
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-// Placeholder data
-const categories = ["Cleaning", "Plumbing", "Electrician", "Gardening"];
-const trendingServices = ["House Cleaning", "Pipe Repair", "Wiring"];
-const popularServices = ["Deep Cleaning", "Leak Fix", "Ceiling Fan Install"];
-const blogs = ["Top 5 Cleaning Tips", "DIY Repairs"];
-const reviews = [
-  { user: "John Doe", text: "Great service!" },
-  { user: "Jane Smith", text: "Highly recommend!" },
-];
-
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const [isLoginedIn, setIsLoginedIn] = useState(false); // Replace with actual auth state
+  const [isLoginedIn, setIsLoginedIn] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); // State for refresh control
+  const [refreshKey, setRefreshKey] = useState(0); // State to trigger re-render
+
+  // Function to handle pull-to-refresh
+  const onRefresh = () => {
+    setRefreshing(true);
+    // Simulate a data fetch or re-render trigger
+    setTimeout(() => {
+      setRefreshKey((prevKey) => prevKey + 1);
+      setRefreshing(false); // Stop the refresh animation
+    }, 1000); // Simulate a delay for refresh (adjust as needed)
+  };
 
   useEffect(() => {
     const loginConform = async () => {
@@ -54,7 +58,7 @@ const HomeScreen: React.FC = () => {
           setIsLoginedIn(false);
         }
       } catch (err) {
-        Alert.alert(err);
+        Alert.alert("Error", String(err));
       }
     };
 
@@ -62,71 +66,188 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <View className="flex-1 bg-white">
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* Header with Logo and Auth Options */}
-          <View className="flex-row justify-between items-center px-5 pt-4 pb-4">
-            <View className="bg-blue-900 rounded px-1 py-1 self-center">
-              <Image
-                source={require("../../assets/prnv_logo.jpg")}
-                className="h-10 w-52"
-                resizeMode="contain"
-              />
-            </View>
-            <View className="space-x-1">
-              {isLoginedIn ? (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("Profile")}
-                >
-                  <Ionicons
-                    name="person-circle-outline"
-                    size={38}
-                    color="#a259ff"
-                  />
+    <View className="flex-1 bg-white">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#a259ff", "blue"]} // Customize refresh spinner colors
+            tintColor="#a259ff" // iOS spinner color
+          />
+        }
+      >
+        {/* Header with Logo and Auth Options */}
+        <View className="flex-row justify-between items-center px-5 pt-4 pb-4">
+          <View className="bg-blue-900 rounded px-1 py-1 self-center">
+            <Image
+              source={require("../../assets/prnv_logo.jpg")}
+              className="h-10 w-52"
+              resizeMode="contain"
+            />
+          </View>
+          <View className="space-x-1">
+            {isLoginedIn ? (
+              <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+                <Ionicons
+                  name="person-circle-outline"
+                  size={38}
+                  color="#a259ff"
+                />
+              </TouchableOpacity>
+            ) : (
+              <View className="flex-row gap-2">
+                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                  <Text className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                    Login
+                  </Text>
                 </TouchableOpacity>
-              ) : (
-                <View className="flex-row space-x-2 gap-2">
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("Login")}
-                  >
-                    <Text className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-                      Login
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate("GuestBook")}
-                  >
-                    <Text className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Guest</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
+                <TouchableOpacity onPress={() => navigation.navigate("GuestBook")}>
+                  <Text className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                    Guest
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
+        </View>
 
-
-          <View>
-            <BannerCarousel />
-
-            <SearchBarSection />
-
-            <CategoriesGrid />
-
-            <TrendingSection />
-
-            <PopularSearchesSection />
-
-            <BlogList />
-
-            <CustomerReviews/>
-          </View>
-        </ScrollView>
-      </View>
-    </>
+        <View>
+          <BannerCarousel />
+          <SearchBarSection />
+          <CategoriesGrid />
+          <TrendingSection />
+          <PopularSearchesSection />
+          <BlogList />
+          <CustomerReviews />
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
 export default HomeScreen;
+// import React, { useEffect, useState } from "react";
+// import {
+//   View,
+//   Text,
+//   Image,
+//   ScrollView,
+//   TouchableOpacity,
+//   Alert,
+// } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
+// import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+// import { Ionicons } from "@expo/vector-icons";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import TrendingSection from "../components/homescreen/TrendingSection";
+// import PopularSearchesSection from "../components/homescreen/PopularSearchesSection";
+// import BlogList from "../components/homescreen/BlogList";
+// import CategoriesGrid from "../components/homescreen/CategoryGrid";
+// import CustomerReviews from "../components/homescreen/CustomerReviews";
+// import BannerCarousel from "../components/homescreen/BannerCarousel";
+// import SearchBarSection from "../components/homescreen/SearchBarSection";
+
+// // Define navigation param list
+// type RootStackParamList = {
+//   Login: undefined;
+//   GuestBook: undefined;
+//   Category: undefined;
+//   Blog: { blog: [] };
+//   Reviews: undefined;
+// };
+
+// type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+
+// const HomeScreen: React.FC = () => {
+//   const navigation = useNavigation<NavigationProp>();
+//   const [isLoginedIn, setIsLoginedIn] = useState(false); // Replace with actual auth state
+
+//   useEffect(() => {
+//     const loginConform = async () => {
+//       try {
+//         const user = await AsyncStorage.getItem("user");
+//         if (user) {
+//           setIsLoginedIn(true);
+//         } else {
+//           setIsLoginedIn(false);
+//         }
+//       } catch (err) {
+//         Alert.alert(err);
+//       }
+//     };
+
+//     loginConform();
+//   }, []);
+
+//   return (
+//     <>
+//       <View className="flex-1 bg-white">
+//         <ScrollView showsVerticalScrollIndicator={false}>
+//           {/* Header with Logo and Auth Options */}
+//           <View className="flex-row justify-between items-center px-5 pt-4 pb-4">
+//             <View className="bg-blue-900 rounded px-1 py-1 self-center">
+//               <Image
+//                 source={require("../../assets/prnv_logo.jpg")}
+//                 className="h-10 w-52"
+//                 resizeMode="contain"
+//               />
+//             </View>
+//             <View className="space-x-1">
+//               {isLoginedIn ? (
+//                 <TouchableOpacity
+//                   onPress={() => navigation.navigate("Profile")}
+//                 >
+//                   <Ionicons
+//                     name="person-circle-outline"
+//                     size={38}
+//                     color="#a259ff"
+//                   />
+//                 </TouchableOpacity>
+//               ) : (
+//                 <View className="flex-row space-x-2 gap-2">
+//                   <TouchableOpacity
+//                     onPress={() => navigation.navigate("Login")}
+//                   >
+//                     <Text className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+//                       Login
+//                     </Text>
+//                   </TouchableOpacity>
+//                   <TouchableOpacity
+//                     onPress={() => navigation.navigate("GuestBook")}
+//                   >
+//                     <Text className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">Guest</Text>
+//                   </TouchableOpacity>
+//                 </View>
+//               )}
+//             </View>
+//           </View>
+
+
+//           <View>
+//             <BannerCarousel />
+
+//             <SearchBarSection />
+
+//             <CategoriesGrid />
+
+//             <TrendingSection />
+
+//             <PopularSearchesSection />
+
+//             <BlogList />
+
+//             <CustomerReviews/>
+//           </View>
+//         </ScrollView>
+//       </View>
+//     </>
+//   );
+// };
+
+// export default HomeScreen;
 {/* <View className="h-2 bg-gray-100 mb-4" />
 
 <Text className="text-center text-gray-600 mb-4">

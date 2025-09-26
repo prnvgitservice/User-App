@@ -66,17 +66,16 @@ const CompletedDetailsScreen: React.FC<CompletedDetailsProps> = ({ booking, setC
       {/* Header */}
       <View className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
         <View className="flex-row items-center justify-between">
+          <Text className="text-xl font-bold text-gray-900">Booking Details</Text>
           <TouchableOpacity
             accessibilityLabel="Go back to bookings"
             accessibilityRole="button"
             onPress={() => setCurrentStep('bookings')}
-            className="flex-row items-center space-x-2"
+            className="flex-row items-center gap-2"
           >
             <ChevronLeft width={24} height={24} color="#374151" />
             <Text className="text-gray-600 text-lg font-medium">Back</Text>
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">Booking Details</Text>
-          <View className="w-10" />
         </View>
       </View>
 
@@ -123,7 +122,7 @@ const CompletedDetailsScreen: React.FC<CompletedDetailsProps> = ({ booking, setC
 
         {/* Details Card */}
         <View className="bg-white rounded-2xl p-5 mb-6 shadow-md">
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
               <User width={20} height={20} color="#2563EB" />
             </View>
@@ -135,7 +134,7 @@ const CompletedDetailsScreen: React.FC<CompletedDetailsProps> = ({ booking, setC
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center">
               <Star width={20} height={20} color="#F97316" />
             </View>
@@ -147,7 +146,7 @@ const CompletedDetailsScreen: React.FC<CompletedDetailsProps> = ({ booking, setC
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center">
               <Phone width={20} height={20} color="#16A34A" />
             </View>
@@ -159,7 +158,7 @@ const CompletedDetailsScreen: React.FC<CompletedDetailsProps> = ({ booking, setC
             </View>
           </View>
 
-          <View className="flex-row items-start space-x-4 mb-4">
+          <View className="flex-row items-start gap-4 mb-4">
             <View className="w-10 h-10 bg-red-100 rounded-full items-center justify-center">
               <MapPin width={20} height={20} color="#DC2626" />
             </View>
@@ -171,7 +170,7 @@ const CompletedDetailsScreen: React.FC<CompletedDetailsProps> = ({ booking, setC
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-purple-100 rounded-full items-center justify-center">
               <Text className="text-purple-700 text-xl font-bold">₹</Text>
             </View>
@@ -272,10 +271,10 @@ export default CompletedDetailsScreen;
 //   return (
 //     <View className="flex-1 bg-white rounded-lg border border-gray-200">
 //       <View className="border-b border-gray-200 px-6 py-4">
-//         <View className="flex-row items-center space-x-3">
+//         <View className="flex-row items-center gap-3">
 //           <TouchableOpacity
 //             onPress={() => setCurrentStep('bookings')}
-//             className="flex-row items-center space-x-2"
+//             className="flex-row items-center gap-2"
 //           >
 //             <ChevronLeft width={20} height={20} color="#4B5563" />
 //             <Text className="text-gray-600">Back</Text>
@@ -300,7 +299,7 @@ export default CompletedDetailsScreen;
 //           />
 //         </View>
 //         <View className="flex-col gap-6 mb-6">
-//           <View className="flex-row items-center space-x-4 gap-5">
+//           <View className="flex-row items-center gap-4 gap-5">
 //             <View className="w-12 h-12 bg-blue-100 rounded-full items-center justify-center">
 //               <User width={24} height={24} color="#2563EB" />
 //             </View>
@@ -309,7 +308,7 @@ export default CompletedDetailsScreen;
 //               <Text className="text-gray-900 font-medium ml-2">{technician?.username}</Text>
 //             </View>
 //           </View>
-//           <View className="flex-row items-center space-x-4 gap-5">
+//           <View className="flex-row items-center gap-4 gap-5">
 //             <View className="w-12 h-12 bg-orange-100 rounded-full items-center justify-center">
 //               <Star width={24} height={24} color="#F97316" />
 //             </View>
@@ -318,7 +317,7 @@ export default CompletedDetailsScreen;
 //               <Text className="text-gray-900 font-medium ml-2">{service?.serviceName}</Text>
 //             </View>
 //           </View>
-//           <View className="flex-row items-center space-x-4 gap-5">
+//           <View className="flex-row items-center gap-4 gap-5">
 //             <View className="w-12 h-12 bg-green-100 rounded-full items-center justify-center">
 //               <Phone width={24} height={24} color="#16A34A" />
 //             </View>
@@ -327,7 +326,7 @@ export default CompletedDetailsScreen;
 //               <Text className="text-gray-900 font-medium ml-2">{technician?.phoneNumber}</Text>
 //             </View>
 //           </View>
-//           <View className="flex-row items-center space-x-4 gap-5">
+//           <View className="flex-row items-center gap-4 gap-5">
 //             <View className="w-12 h-12 bg-red-100 rounded-full items-center justify-center">
 //               <MapPin width={24} height={24} color="#DC2626" />
 //             </View>
@@ -338,7 +337,7 @@ export default CompletedDetailsScreen;
 //               </Text>
 //             </View>
 //           </View>
-//           <View className="flex-row items-center space-x-4 gap-5">
+//           <View className="flex-row items-center gap-4 gap-5">
 //             <View className="w-12 h-12 bg-purple-100 rounded-full items-center justify-center">
 //               <Text className="text-purple-600 text-2xl">₹</Text>
 //             </View>

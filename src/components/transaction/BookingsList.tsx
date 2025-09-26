@@ -60,7 +60,7 @@ const BookingsList: React.FC<BookingsListProps> = ({
   if (sortedBookings.length === 0) {
     return (
       <View className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[400px]">
-        <View className="border-b border-gray-200 px-6 py-4 flex-row items-center space-x-3">
+        <View className="border-b border-gray-200 px-6 py-4 flex-row items-center gap-3">
           <View
             className={`w-8 h-8 rounded-lg ${
               activeTab === 'upcoming'
@@ -98,7 +98,7 @@ const BookingsList: React.FC<BookingsListProps> = ({
   return (
     <ScrollView className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[400px] mb-2">
       {/* Header */}
-      <View className="border-b border-gray-200 px-6 py-4 flex-row items-center space-x-3">
+      <View className="border-b border-gray-200 px-6 py-4 flex-row items-center gap-3">
         <View
           className={`w-8 h-8 rounded-lg ${
             activeTab === 'upcoming'
@@ -145,7 +145,7 @@ const BookingsList: React.FC<BookingsListProps> = ({
               }}
               disabled={isCancelled}
             >
-              <View className="flex-row items-center space-x-4 gap-2 ">
+              <View className="flex-row items-center gap-4 ">
                 {/* Service image */}
                 <View className="w-16 h-16 bg-gray-200 rounded-xl overflow-hidden">
                   <Image
@@ -166,9 +166,9 @@ const BookingsList: React.FC<BookingsListProps> = ({
                     {bookingData.service?.serviceName || 'Service not specified'}
                   </Text>
                   <Text className="text-gray-500 text-sm truncate">
-                    User Name:{' '}
+                    Technician Name:{' '}
                     <Text className="text-gray-900">
-                      {bookingData?.user?.username || 'Unknown User'}
+                      {bookingData?.technician?.username || 'Unknown User'}
                     </Text>
                   </Text>
 
@@ -299,7 +299,7 @@ export default BookingsList;
 //   if (sortedBookings.length === 0) {
 //     return (
 //       <View className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[400px]">
-//         <View className="border-b border-gray-200 px-6 py-4 flex-row items-center space-x-3">
+//         <View className="border-b border-gray-200 px-6 py-4 flex-row items-center gap-3">
 //           <View
 //             className={`w-8 h-8 rounded-lg ${
 //               activeTab === 'upcoming'
@@ -337,7 +337,7 @@ export default BookingsList;
 //   return (
 //     <ScrollView className="bg-white rounded-lg shadow-sm border border-gray-200 min-h-[400px] mb-2">
 //       {/* Header */}
-//       <View className="border-b border-gray-200 px-6 py-4 flex-row items-center space-x-3">
+//       <View className="border-b border-gray-200 px-6 py-4 flex-row items-center gap-3">
 //         <View
 //           className={`w-8 h-8 rounded-lg ${
 //             activeTab === 'upcoming'
@@ -384,7 +384,7 @@ export default BookingsList;
 //               }}
 //               disabled={isCancelled}
 //             >
-//               <View className="flex-row items-center space-x-4 gap-2 ">
+//               <View className="flex-row items-center gap-4 gap-2 ">
 //                 {/* Service image */}
 //                 <View className="w-16 h-16 bg-gray-200 rounded-xl overflow-hidden">
 //                   <Image

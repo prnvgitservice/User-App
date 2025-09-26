@@ -1,16 +1,71 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Platform, Modal, TextInput, FlatList, TouchableWithoutFeedback, Keyboard } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getAllCategories, getAllPincodes } from "../../api/apiMethods";
+import { View, Text, TouchableOpacity, Modal, TextInput, FlatList, TouchableWithoutFeedback, Keyboard, ActivityIndicator } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from "@react-navigation/native";
+import { getAllCategories, getAllPincodes } from "../../api/apiMethods";
 
+// Define interfaces based on API responses
+interface Category {
+  _id: string;
+  category_name: string;
+  category_slug: string;
+  category_image: string;
+  meta_title: string;
+  meta_description: string;
+  status: number;
+  totalviews: number;
+  ratings: null;
+  seo_content: string;
+  updatedAt: string;
+}
 
-const SearchableDropdown = ({ placeholder, options, selectedValue, onValueChange, disabled = false }) => {
+interface SubArea {
+  _id: string;
+  name: string;
+}
+
+interface Area {
+  _id: string;
+  name: string;
+  subAreas: SubArea[];
+}
+
+interface FlattenedArea extends Area {
+  pincode: string;
+  state: string;
+  city: string;
+}
+
+interface Pincode {
+  _id: string;
+  code: string;
+  city: string;
+  areas: Area[];
+  state: string;
+}
+
+interface Option {
+  label: string;
+  value: string;
+}
+
+interface SelectedCategory {
+  name: string;
+  slug: string;
+  id: string;
+}
+
+interface SearchableDropdownProps {
+  placeholder: string;
+  options: Option[];
+  selectedValue: string;
+  onValueChange: (value: string) => void;
+  disabled?: boolean;
+}
+
+const SearchableDropdown: React.FC<SearchableDropdownProps> = ({ placeholder, options, selectedValue, onValueChange, disabled = false }) => {
   const [visible, setVisible] = useState(false);
   const [search, setSearch] = useState("");
-
   const filteredOptions = options.filter((opt) =>
     opt.label.toLowerCase().includes(search.toLowerCase())
   );
@@ -37,9 +92,9 @@ const SearchableDropdown = ({ placeholder, options, selectedValue, onValueChange
         <Ionicons name="caret-down-sharp" size={15} color={disabled ? "#9CA3AF" : "#374151"} />
       </TouchableOpacity>
 
-      <Modal visible={visible} transparent={true} animationType="fade" >
+      <Modal visible={visible} transparent={true} animationType="fade">
         <TouchableOpacity
-          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)" , paddingTop: 30 ,paddingBottom: 30}}
+          style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", paddingTop: 30, paddingBottom: 30 }}
           activeOpacity={1}
           onPress={() => setVisible(false)}
         >
@@ -55,7 +110,7 @@ const SearchableDropdown = ({ placeholder, options, selectedValue, onValueChange
               <View
                 className="bg-white rounded-lg p-4 w-full max-h-[100%]"
                 onStartShouldSetResponder={() => true}
-                style={{width:"80%"}}
+                style={{ width: "80%" }}
               >
                 <TextInput
                   className="border border-gray-300 rounded-lg px-4 py-2 mb-4"
@@ -90,41 +145,44 @@ const SearchableDropdown = ({ placeholder, options, selectedValue, onValueChange
   );
 };
 
-const SearchBarSection = () => {
-  const navigation = useNavigation();
+const SearchBarSection: React.FC = () => {
+  const navigation = useNavigation<any>(); // Use 'any' or define navigation prop type if using TS navigation
 
   // States for dropdowns
-  const [categories, setCategories] = useState([]);
-  const [pincodeData, setPincodeData] = useState([]);
-  const [areaOptions, setAreaOptions] = useState([]);
-  const [subAreaOptions, setSubAreaOptions] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [pincodeData, setPincodeData] = useState<Pincode[]>([]);
+  const [areaOptions, setAreaOptions] = useState<FlattenedArea[]>([]);
+  const [subAreaOptions, setSubAreaOptions] = useState<SubArea[]>([]);
 
   // Selected values
-  const [selectedCity, setSelectedCity] = useState("Hyderabad");
-  const [selectedState, setSelectedState] = useState("Telangana");
-  const [selectedCategory, setSelectedCategory] = useState({
+  const [selectedCity, setSelectedCity] = useState<string>("Hyderabad");
+  const [selectedState, setSelectedState] = useState<string>("Telangana");
+  const [selectedCategory, setSelectedCategory] = useState<SelectedCategory>({
     name: "",
     slug: "",
     id: "",
   });
-  const [selectedArea, setSelectedArea] = useState("");
-  const [selectedPincode, setSelectedPincode] = useState("");
-  const [selectedSubArea, setSelectedSubArea] = useState("");
+  const [selectedArea, setSelectedArea] = useState<string>("");
+  const [selectedPincode, setSelectedPincode] = useState<string>("");
+  const [selectedSubArea, setSelectedSubArea] = useState<string>("");
 
-  const [error, setError] = useState(null);
-  const cityOptions = ["Hyderabad"];
+  // Loading and error states
+  const [loadingCategories, setLoadingCategories] = useState<boolean>(true);
+  const [loadingPincodes, setLoadingPincodes] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const cityOptions: string[] = ["Hyderabad"];
 
   // Fetch categories
   useEffect(() => {
     const fetchCategories = async () => {
+      setLoadingCategories(true);
       try {
-        const res = await getAllCategories();
+        const res = await getAllCategories({});
         if (res.success && Array.isArray(res.data)) {
           setCategories(
-            res.data.sort((a, b) =>
-              a.category_name
-                .toLowerCase()
-                .localeCompare(b.category_name.toLowerCase())
+            res.data.sort((a: Category, b: Category) =>
+              a.category_name.toLowerCase().localeCompare(b.category_name.toLowerCase())
             )
           );
         } else {
@@ -132,6 +190,8 @@ const SearchBarSection = () => {
         }
       } catch (err) {
         setError("Error fetching categories");
+      } finally {
+        setLoadingCategories(false);
       }
     };
     fetchCategories();
@@ -140,6 +200,7 @@ const SearchBarSection = () => {
   // Fetch pincode and area data
   useEffect(() => {
     const fetchPincodeInfo = async () => {
+      setLoadingPincodes(true);
       try {
         const res = await getAllPincodes();
         if (res.success && Array.isArray(res.data)) {
@@ -149,6 +210,8 @@ const SearchBarSection = () => {
         }
       } catch (err) {
         setError("Error fetching pincodes");
+      } finally {
+        setLoadingPincodes(false);
       }
     };
     fetchPincodeInfo();
@@ -156,8 +219,8 @@ const SearchBarSection = () => {
 
   // Update area options when pincodeData is available
   useEffect(() => {
-    const flattenedAreas = pincodeData.flatMap((p) =>
-      p.areas.map((area) => ({
+    const flattenedAreas: FlattenedArea[] = pincodeData.flatMap((p: Pincode) =>
+      p.areas.map((area: Area) => ({
         ...area,
         pincode: p.code,
         state: p.state,
@@ -168,40 +231,41 @@ const SearchBarSection = () => {
   }, [pincodeData]);
 
   // Handle area selection and update subareas
-  const handleAreaChange = (areaName) => {
-    setSelectedArea(areaName);
+  const handleAreaChange = (value: string) => {
+    try {
+      const { name, pincode } = JSON.parse(value);
+      setSelectedArea(name);
+      setSelectedPincode(pincode);
 
-    const matchedPincodeObj = pincodeData.find((p) =>
-      p.areas.some((a) => a.name === areaName)
-    );
+      const matchedPincodeObj = pincodeData.find((p: Pincode) => p.code === pincode);
+      if (matchedPincodeObj) {
+        setSelectedState(matchedPincodeObj.state);
+        setSelectedCity(matchedPincodeObj.city);
 
-    if (matchedPincodeObj) {
-      setSelectedPincode(matchedPincodeObj.code);
-      setSelectedState(matchedPincodeObj.state);
-      setSelectedCity(matchedPincodeObj.city);
+        const matchedArea = matchedPincodeObj.areas.find(
+          (a: Area) => a.name === name
+        );
+        const subAreas = matchedArea?.subAreas || [];
 
-      const matchedArea = matchedPincodeObj.areas.find(
-        (a) => a.name === areaName
-      );
-      const subAreas = matchedArea?.subAreas || [];
-
-      setSubAreaOptions(
-        [...subAreas].sort((a, b) => a.name.localeCompare(b.name))
-      );
-      setSelectedSubArea("");
-    } else {
-      setSelectedPincode("");
-      setSubAreaOptions([]);
-      setSelectedSubArea("");
+        setSubAreaOptions(
+          [...subAreas].sort((a: SubArea, b: SubArea) => a.name.localeCompare(b.name))
+        );
+        setSelectedSubArea("");
+      } else {
+        setSelectedPincode("");
+        setSubAreaOptions([]);
+        setSelectedSubArea("");
+      }
+    } catch (err) {
+      setError("Error selecting area");
     }
   };
 
-  const handleCategoryChange = (categoryName) => {
-    const index = categories.findIndex(
-      (cat) => cat.category_name === categoryName
+  const handleCategoryChange = (categoryName: string) => {
+    const cat = categories.find(
+      (cat: Category) => cat.category_name === categoryName
     );
-    if (index >= 0) {
-      const cat = categories[index];
+    if (cat) {
       setSelectedCategory({
         name: cat.category_name,
         slug: cat.category_slug,
@@ -212,41 +276,27 @@ const SearchBarSection = () => {
     }
   };
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (!selectedCategory.slug || !selectedCity) {
       setError("Please select category and city");
       return;
     }
 
-    const citySlug = selectedCity.toLowerCase().replace(/\s+/g, "-");
-    const areaSlug = selectedArea.toLowerCase().replace(/\s+/g, "-");
-    const subAreaSlug = selectedSubArea.toLowerCase().replace(/\s+/g, "-");
+    setError(null);
 
-    const searchData = {
-      category: selectedCategory.id,
-      areaName: selectedArea,
-      subArea: selectedSubArea,
-      pincode: selectedPincode,
-      city: selectedCity,
-      state: selectedState,
-    };
+    // const citySlug = selectedCity.toLowerCase().replace(/\s+/g, "-");
+    // const areaSlug = selectedArea.toLowerCase().replace(/\s+/g, "-");
 
-    try {
-      setSelectedCategory({ name: "", slug: "", id: "" });
-      setSelectedCity("Hyderabad");
-      setSelectedState("Telangana");
-      setSelectedPincode("");
-      setSelectedArea("");
-      setSelectedSubArea("");
-      setSubAreaOptions([]);
-      setError(null);
-    } catch (err) {
-      setError("Error saving search data");
-      return;
-    }
+    // Reset form after successful validation
+    setSelectedCategory({ name: "", slug: "", id: "" });
+    setSelectedCity("Hyderabad");
+    setSelectedState("Telangana");
+    setSelectedPincode("");
+    setSelectedArea("");
+    setSelectedSubArea("");
+    setSubAreaOptions([]);
 
     navigation.navigate("SearchFilter", {
-      path: `/${selectedCategory.slug}/${citySlug}/${areaSlug}-${selectedPincode}`,
       categoryId: selectedCategory.id,
       pincode: selectedPincode,
       Area: selectedArea || null,
@@ -268,27 +318,35 @@ const SearchBarSection = () => {
     setError(null);
   };
 
-  const categoryOptions = categories.map((cat) => ({
+  const categoryOptions: Option[] = categories.map((cat: Category) => ({
     label: cat.category_name,
     value: cat.category_name,
   }));
 
-  const cityOptionList = cityOptions.map((city) => ({
+  const cityOptionList: Option[] = cityOptions.map((city: string) => ({
     label: city,
     value: city,
   }));
 
-  const areaOptionList = areaOptions
-    .sort((a, b) => Number(a.pincode) - Number(b.pincode))
-    .map((area) => ({
+  const areaOptionList: Option[] = areaOptions
+    .sort((a: FlattenedArea, b: FlattenedArea) => Number(a.pincode) - Number(b.pincode))
+    .map((area: FlattenedArea) => ({
       label: `${area.name} - ${area.pincode}`,
-      value: area.name,
+      value: JSON.stringify({ name: area.name, pincode: area.pincode }),
     }));
 
-  const subAreaOptionList = subAreaOptions.map((sub) => ({
+  const subAreaOptionList: Option[] = subAreaOptions.map((sub: SubArea) => ({
     label: sub.name,
     value: sub.name,
   }));
+
+  if (loadingCategories || loadingPincodes) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 p-4 bg-gray-100">
@@ -321,7 +379,7 @@ const SearchBarSection = () => {
             <SearchableDropdown
               placeholder="Select Area"
               options={areaOptionList}
-              selectedValue={selectedArea}
+              selectedValue={selectedArea ? JSON.stringify({ name: selectedArea, pincode: selectedPincode }) : ""}
               onValueChange={handleAreaChange}
             />
 
@@ -359,6 +417,364 @@ const SearchBarSection = () => {
 };
 
 export default SearchBarSection;
+// import React, { useEffect, useState } from "react";
+// import { getAllCategories, getAllPincodes } from "@/src/api/apiMethods";
+// import { Ionicons } from "@expo/vector-icons";
+// import { useNavigation } from "@react-navigation/native";
+// import { FlatList, Keyboard, Modal, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
+
+
+// const SearchableDropdown = ({ placeholder, options, selectedValue, onValueChange, disabled = false }) => {
+//   const [visible, setVisible] = useState(false);
+//   const [search, setSearch] = useState("");
+//   const filteredOptions = options.filter((opt) =>
+//     opt.label.toLowerCase().includes(search.toLowerCase())
+//   );
+
+//   const selectedLabel = selectedValue
+//     ? options.find((opt) => opt.value === selectedValue)?.label || placeholder
+//     : placeholder;
+
+//   const handleOpen = () => {
+//     if (!disabled) {
+//       setVisible(true);
+//     }
+//   };
+
+//   return (
+//     <View className="flex-1 relative">
+//       <TouchableOpacity
+//         onPress={handleOpen}
+//         className={`flex flex-row items-center justify-between px-4 py-3 border border-gray-300 rounded-lg ${
+//           disabled ? "bg-gray-100" : "bg-white"
+//         }`}
+//       >
+//         <Text className={`${disabled ? "text-gray-400" : "text-gray-700"}`}>{selectedLabel}</Text>
+//         <Ionicons name="caret-down" size={15} color={disabled ? "#9CA3AF" : "#374151"} />
+//       </TouchableOpacity>
+
+//       <Modal visible={visible} transparent={true} animationType="fade" >
+//         <TouchableOpacity
+//           style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)" , paddingTop: 30 ,paddingBottom: 30}}
+//           activeOpacity={1}
+//           onPress={() => setVisible(false)}
+//         >
+//           <View
+//             style={{
+//               flex: 1,
+//               justifyContent: "center",
+//               alignItems: "center",
+//               paddingHorizontal: 20,
+//             }}
+//           >
+//             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+//               <View
+//                 className="bg-white rounded-lg p-4 w-full max-h-[100%]"
+//                 onStartShouldSetResponder={() => true}
+//                 style={{width:"80%"}}
+//               >
+//                 <TextInput
+//                   className="border border-gray-300 rounded-lg px-4 py-2 mb-4"
+//                   placeholder="Search..."
+//                   value={search}
+//                   onChangeText={setSearch}
+//                   autoFocus={true}
+//                 />
+//                 <FlatList
+//                   data={filteredOptions}
+//                   keyExtractor={(item) => item.value}
+//                   renderItem={({ item }) => (
+//                     <TouchableOpacity
+//                       className="py-3 border-b border-gray-200"
+//                       onPress={() => {
+//                         onValueChange(item.value);
+//                         setVisible(false);
+//                         setSearch("");
+//                       }}
+//                     >
+//                       <Text className="text-gray-700">{item.label}</Text>
+//                     </TouchableOpacity>
+//                   )}
+//                   keyboardShouldPersistTaps="handled"
+//                 />
+//               </View>
+//             </TouchableWithoutFeedback>
+//           </View>
+//         </TouchableOpacity>
+//       </Modal>
+//     </View>
+//   );
+// };
+
+// const SearchBarSection = () => {
+//   const navigation = useNavigation();
+
+//   // States for dropdowns
+//   const [categories, setCategories] = useState([]);
+//   const [pincodeData, setPincodeData] = useState([]);
+//   const [areaOptions, setAreaOptions] = useState([]);
+//   const [subAreaOptions, setSubAreaOptions] = useState([]);
+
+//   // Selected values
+//   const [selectedCity, setSelectedCity] = useState("Hyderabad");
+//   const [selectedState, setSelectedState] = useState("Telangana");
+//   const [selectedCategory, setSelectedCategory] = useState({
+//     name: "",
+//     slug: "",
+//     id: "",
+//   });
+//   const [selectedArea, setSelectedArea] = useState("");
+//   const [selectedPincode, setSelectedPincode] = useState("");
+//   const [selectedSubArea, setSelectedSubArea] = useState("");
+
+//   const [error, setError] = useState<string | null>(null);
+//   const cityOptions = ["Hyderabad"];
+
+//   // Fetch categories
+//   useEffect(() => {
+//     const fetchCategories = async () => {
+//       try {
+//         const res = await getAllCategories({});
+//         if (res.success && Array.isArray(res.data)) {
+//           setCategories(
+//             res.data.sort((a, b) =>
+//               a.category_name
+//                 .toLowerCase()
+//                 .localeCompare(b.category_name.toLowerCase())
+//             )
+//           );
+//         } else {
+//           setError("Failed to fetch categories");
+//         }
+//       } catch (err) {
+//         setError("Error fetching categories");
+//       }
+//     };
+//     fetchCategories();
+//   }, []);
+
+//   // Fetch pincode and area data
+//   useEffect(() => {
+//     const fetchPincodeInfo = async () => {
+//       try {
+//         const res = await getAllPincodes();
+//         if (res.success && Array.isArray(res.data)) {
+//           setPincodeData(res.data);
+//         } else {
+//           setError("Failed to fetch pincodes");
+//         }
+//       } catch (err) {
+//         setError("Error fetching pincodes");
+//       }
+//     };
+//     fetchPincodeInfo();
+//   }, []);
+
+//   // Update area options when pincodeData is available
+//   useEffect(() => {
+//     const flattenedAreas: any[] = pincodeData.flatMap((p) =>
+//       p.areas.map((area) => ({
+//         ...area,
+//         pincode: p.code,
+//         state: p.state,
+//         city: p.city,
+//       }))
+//     );
+//     setAreaOptions(flattenedAreas);
+//   }, [pincodeData]);
+
+//   // Handle area selection and update subareas
+//   const handleAreaChange = (areaName) => {
+//     setSelectedArea(areaName);
+
+//     const matchedPincodeObj = pincodeData.find((p) =>
+//       p.areas.some((a) => a.name === areaName)
+//     );
+
+//     if (matchedPincodeObj) {
+//       setSelectedPincode(matchedPincodeObj.code);
+//       setSelectedState(matchedPincodeObj.state);
+//       setSelectedCity(matchedPincodeObj.city);
+
+//       const matchedArea = matchedPincodeObj.areas.find(
+//         (a) => a.name === areaName
+//       );
+//       const subAreas = matchedArea?.subAreas || [];
+
+//       setSubAreaOptions(
+//         [...subAreas].sort((a, b) => a.name.localeCompare(b.name))
+//       );
+//       setSelectedSubArea("");
+//     } else {
+//       setSelectedPincode("");
+//       setSubAreaOptions([]);
+//       setSelectedSubArea("");
+//     }
+//   };
+
+//   const handleCategoryChange = (categoryName) => {
+//     const index = categories.findIndex(
+//       (cat) => cat.category_name === categoryName
+//     );
+//     if (index >= 0) {
+//       const cat = categories[index];
+//       setSelectedCategory({
+//         name: cat.category_name,
+//         slug: cat.category_slug,
+//         id: cat._id,
+//       });
+//     } else {
+//       setSelectedCategory({ name: "", slug: "", id: "" });
+//     }
+//   };
+
+//   const handleSearch = async () => {
+//     if (!selectedCategory.slug || !selectedCity) {
+//       setError("Please select category and city");
+//       return;
+//     }
+
+//     const citySlug = selectedCity.toLowerCase().replace(/\s+/g, "-");
+//     const areaSlug = selectedArea.toLowerCase().replace(/\s+/g, "-");
+//     const subAreaSlug = selectedSubArea.toLowerCase().replace(/\s+/g, "-");
+
+//     const searchData = {
+//       category: selectedCategory.id,
+//       areaName: selectedArea,
+//       subArea: selectedSubArea,
+//       pincode: selectedPincode,
+//       city: selectedCity,
+//       state: selectedState,
+//     };
+
+//     try {
+//       setSelectedCategory({ name: "", slug: "", id: "" });
+//       setSelectedCity("Hyderabad");
+//       setSelectedState("Telangana");
+//       setSelectedPincode("");
+//       setSelectedArea("");
+//       setSelectedSubArea("");
+//       setSubAreaOptions([]);
+//       setError(null);
+//     } catch (err) {
+//       setError("Error saving search data");
+//       return;
+//     }
+
+//     navigation.navigate("SearchFilter", {
+//       path: `/${selectedCategory.slug}/${citySlug}/${areaSlug}-${selectedPincode}`,
+//       categoryId: selectedCategory.id,
+//       pincode: selectedPincode,
+//       Area: selectedArea || null,
+//       subArea: selectedSubArea,
+//       city: selectedCity,
+//       state: selectedState,
+//       category: selectedCategory.name,
+//     });
+//   };
+
+//   const handleReset = () => {
+//     setSelectedCategory({ name: "", slug: "", id: "" });
+//     setSelectedCity("Hyderabad");
+//     setSelectedState("Telangana");
+//     setSelectedPincode("");
+//     setSelectedArea("");
+//     setSelectedSubArea("");
+//     setSubAreaOptions([]);
+//     setError(null);
+//   };
+
+//   const categoryOptions = categories.map((cat) => ({
+//     label: cat.category_name,
+//     value: cat.category_name,
+//   }));
+
+//   const cityOptionList = cityOptions.map((city) => ({
+//     label: city,
+//     value: city,
+//   }));
+
+//   const areaOptionList = areaOptions
+//     .sort((a, b) => Number(a.pincode) - Number(b.pincode))
+//     .map((area) => ({
+//       label: `${area.name} - ${area.pincode}`,
+//       value: area.name,
+//     }));
+
+//   const subAreaOptionList = subAreaOptions.map((sub) => ({
+//     label: sub.name,
+//     value: sub.name,
+//   }));
+
+//   return (
+//     <View className="flex-1 p-4 bg-gray-100">
+//       {error && <Text className="text-red-500 text-center mb-4">{error}</Text>}
+
+//       <View className="max-w-screen-lg mx-auto">
+//         <View className="flex flex-col gap-2 w-full">
+//           {/* First Row: Category and City Pickers */}
+//           <View className="flex flex-row gap-4 w-full">
+//             {/* Category Dropdown */}
+//             <SearchableDropdown
+//               placeholder="Select Category"
+//               options={categoryOptions}
+//               selectedValue={selectedCategory.name}
+//               onValueChange={handleCategoryChange}
+//             />
+
+//             {/* City Dropdown */}
+//             <SearchableDropdown
+//               placeholder="Select City"
+//               options={cityOptionList}
+//               selectedValue={selectedCity}
+//               onValueChange={setSelectedCity}
+//             />
+//           </View>
+
+//           {/* Second Row: Area and Subarea Pickers */}
+//           <View className="flex flex-row gap-4 w-full">
+//             {/* Area Dropdown */}
+//             <SearchableDropdown
+//               placeholder="Select Area"
+//               options={areaOptionList}
+//               selectedValue={selectedArea}
+//               onValueChange={handleAreaChange}
+//             />
+
+//             {/* Subarea Dropdown */}
+//             <SearchableDropdown
+//               placeholder="Select Subarea"
+//               options={subAreaOptionList}
+//               selectedValue={selectedSubArea}
+//               onValueChange={setSelectedSubArea}
+//               disabled={subAreaOptions.length === 0}
+//             />
+//           </View>
+
+//           {/* Action Buttons */}
+//           <View className="flex flex-row justify-center gap-3 mt-4">
+//             <TouchableOpacity
+//               className="flex flex-row items-center gap-2 px-6 py-3 bg-orange-500 rounded-lg"
+//               onPress={handleSearch}
+//             >
+//               <Ionicons name="search" size={18} color="#FFFFFF" />
+//               <Text className="text-white font-semibold">Search</Text>
+//             </TouchableOpacity>
+//             <TouchableOpacity
+//               className="flex flex-row items-center gap-2 px-4 py-3 bg-gray-200 rounded-lg"
+//               onPress={handleReset}
+//             >
+//               <Ionicons name="refresh" size={18} color="#374151" />
+//               <Text className="text-gray-700 font-semibold">Reset</Text>
+//             </TouchableOpacity>
+//           </View>
+//         </View>
+//       </View>
+//     </View>
+//   );
+// };
+
+// export default SearchBarSection;
 // import React, { useEffect, useState } from "react";
 // import { View, Text, TouchableOpacity, Platform } from "react-native";
 // import { Picker } from "@react-native-picker/picker";

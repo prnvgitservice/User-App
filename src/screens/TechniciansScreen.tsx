@@ -72,7 +72,7 @@ const FILTER_ICONS: FilterIcon[] = [
   },
 ];
 
-const AdvertisementBanner: FC = () => {
+ export const AdvertisementBanner: FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -94,7 +94,7 @@ const AdvertisementBanner: FC = () => {
   );
 };
 
-const ServiceFilters: FC<{ onFilterChange: (filter: string) => void }> = ({
+export const ServiceFilters: FC<{ onFilterChange: (filter: string) => void }> = ({
   onFilterChange,
 }) => {
   const [activeFilter, setActiveFilter] = useState<string>("");
@@ -146,9 +146,9 @@ const SkeletonLoader: FC = () => (
 const TechnicianItem = memo(({ item }: { item: Technician }) => {
   const navigation = useNavigation();
 
-  const openWhatsApp = useCallback(() => {
+  const openWhatsApp = useCallback((prnvNumber: number) => {
     const message = `Hello ${item.technician.username}, I'm interested in your ${item.technician.service || "services"}`;
-    const url = `whatsapp://send?phone=${item.technician.phoneNumber}&text=${encodeURIComponent(message)}`;
+    const url = `whatsapp://send?phone=${prnvNumber}&text=${encodeURIComponent(message)}`;
     Linking.openURL(url).catch(() => alert("WhatsApp is not installed"));
   }, [item]);
 
@@ -211,7 +211,7 @@ const TechnicianItem = memo(({ item }: { item: Technician }) => {
         )}
         <TouchableOpacity
           className="bg-green-600 rounded-lg px-3 py-1.5 mt-2 flex-row items-center w-32"
-          onPress={openWhatsApp}
+          onPress={() => openWhatsApp(919603558369)}
           accessibilityLabel={`Contact ${item.technician.username} via WhatsApp`}
           accessibilityRole="button"
         >

@@ -7,10 +7,7 @@ interface ReviewsProps {
   ratings: Rating[];
 }
 
-const Reviews = ({ ratings }: ReviewsProps) => {
-  const [visibleReviews, setVisibleReviews] = useState(ratings.slice(0, 4)); // Initially show 3-4 reviews
-  const [page, setPage] = useState(1);
-  const reviewsPerPage = 3;
+const Reviews = ({ ratings }: ReviewsProps) => { 
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -19,13 +16,6 @@ const Reviews = ({ ratings }: ReviewsProps) => {
       month: "short",
       year: "numeric",
     });
-  };
-
-  const loadMoreReviews = () => {
-    const nextPage = page + 1;
-    const newReviews = ratings.slice(0, nextPage * reviewsPerPage);
-    setVisibleReviews(newReviews);
-    setPage(nextPage);
   };
 
   const renderReview = ({ item }: { item: Rating }) => (

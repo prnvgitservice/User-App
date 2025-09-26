@@ -168,17 +168,16 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
       {/* Header */}
       <View className="bg-white border-b border-gray-200 px-6 py-4 shadow-sm">
         <View className="flex-row items-center justify-between">
+          <Text className="text-xl font-bold text-gray-900">Booking Details</Text>
           <TouchableOpacity
             accessibilityLabel="Go back to bookings"
             accessibilityRole="button"
             onPress={() => setCurrentStep('bookings')}
-            className="flex-row items-center space-x-2"
+            className="flex-row items-center gap-2"
           >
             <ChevronLeft width={24} height={24} color="#374151" />
             <Text className="text-gray-600 text-lg font-medium">Back</Text>
           </TouchableOpacity>
-          <Text className="text-xl font-bold text-gray-900">Booking Details</Text>
-          <View className="w-10" />
         </View>
       </View>
 
@@ -249,7 +248,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
 
         {/* Details Card */}
         <View className="bg-white rounded-2xl p-5 mb-6 shadow-md">
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
               <User width={20} height={20} color="#2563EB" />
             </View>
@@ -261,7 +260,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center">
               <Globe width={20} height={20} color="#F97316" />
             </View>
@@ -273,7 +272,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center">
               <Phone width={20} height={20} color="#16A34A" />
             </View>
@@ -285,7 +284,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
             </View>
           </View>
 
-          <View className="flex-row items-start space-x-4 mb-4">
+          <View className="flex-row items-start gap-4 mb-4">
             <View className="w-10 h-10 bg-red-100 rounded-full items-center justify-center">
               <MapPin width={20} height={20} color="#DC2626" />
             </View>
@@ -297,7 +296,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-purple-100 rounded-full items-center justify-center">
               <Text className="text-purple-700 text-xl font-bold">₹</Text>
             </View>
@@ -309,7 +308,7 @@ const BookingDetailsScreen: React.FC<BookingDetailsProps> = ({
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-yellow-100 rounded-full items-center justify-center">
               <Key width={20} height={20} color="#FBBF24" />
             </View>

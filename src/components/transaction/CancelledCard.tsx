@@ -69,7 +69,7 @@ const CancelledCard: React.FC<CancelledCardProps> = ({ booking, setCurrentStep }
             accessibilityLabel="Go back to bookings"
             accessibilityRole="button"
             onPress={() => setCurrentStep('bookings')}
-            className="flex-row items-center space-x-2"
+            className="flex-row items-center gap-2"
           >
             <ChevronLeft width={24} height={24} color="#374151" />
             <Text className="text-gray-600 text-lg font-medium">Back</Text>
@@ -90,7 +90,7 @@ const CancelledCard: React.FC<CancelledCardProps> = ({ booking, setCurrentStep }
           <Text className="text-gray-500 text-sm font-medium">
             Date: {new Date(bookingData.bookingDate).toLocaleDateString()}
           </Text>
-          <View className="bg-red-100 px-4 py-2 rounded-full shadow-sm flex-row items-center space-x-1">
+          <View className="bg-red-100 px-4 py-2 rounded-full shadow-sm flex-row items-center gap-1">
             <XCircle width={16} height={16} color="#DC2626" />
             <Text className="text-red-700 text-sm font-semibold">Cancelled</Text>
           </View>
@@ -98,7 +98,7 @@ const CancelledCard: React.FC<CancelledCardProps> = ({ booking, setCurrentStep }
 
         {/* Details Card */}
         <View className="bg-white rounded-2xl p-5 mb-6 shadow-md">
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-blue-100 rounded-full items-center justify-center">
               <User width={20} height={20} color="#2563EB" />
             </View>
@@ -110,7 +110,7 @@ const CancelledCard: React.FC<CancelledCardProps> = ({ booking, setCurrentStep }
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center">
               <Globe width={20} height={20} color="#F97316" />
             </View>
@@ -122,7 +122,7 @@ const CancelledCard: React.FC<CancelledCardProps> = ({ booking, setCurrentStep }
             </View>
           </View>
 
-          <View className="flex-row items-center space-x-4 mb-4">
+          <View className="flex-row items-center gap-4 mb-4">
             <View className="w-10 h-10 bg-green-100 rounded-full items-center justify-center">
               <Phone width={20} height={20} color="#16A34A" />
             </View>
@@ -134,7 +134,7 @@ const CancelledCard: React.FC<CancelledCardProps> = ({ booking, setCurrentStep }
             </View>
           </View>
 
-          <View className="flex-row items-start space-x-4 mb-4">
+          <View className="flex-row items-start gap-4 mb-4">
             <View className="w-10 h-10 bg-red-100 rounded-full items-center justify-center">
               <MapPin width={20} height={20} color="#DC2626" />
             </View>
@@ -223,10 +223,10 @@ export default CancelledCard;
 //   return (
 //     <View className="flex-1 bg-white rounded-lg border border-gray-200">
 //       <View className="border-b border-gray-200 px-6 py-4">
-//         <View className="flex-row items-center space-x-3">
+//         <View className="flex-row items-center gap-3">
 //           <TouchableOpacity
 //             onPress={() => setCurrentStep('bookings')}
-//             className="flex-row items-center space-x-2"
+//             className="flex-row items-center gap-2"
 //           >
 //             <ChevronLeft width={20} height={20} color="#4B5563" />
 //             <Text className="text-gray-600">Back</Text>
@@ -245,19 +245,19 @@ export default CancelledCard;
 //           </View>
 //         </View>
 //         <View className="flex-col gap-4">
-//           <View className="flex-row items-center space-x-3 gap-4">
+//           <View className="flex-row items-center gap-3 gap-4">
 //             <User width={20} height={20} color="#3B82F6" />
 //             <Text className="text-gray-700 font-medium">{technician?.username}</Text>
 //           </View>
-//           <View className="flex-row items-center space-x-3 gap-4">
+//           <View className="flex-row items-center gap-3 gap-4">
 //             <Globe width={20} height={20} color="#F97316" />
 //             <Text className="text-gray-700 font-medium">{service?.serviceName}</Text>
 //           </View>
-//           <View className="flex-row items-center space-x-3 gap-4">
+//           <View className="flex-row items-center gap-3 gap-4">
 //             <Phone width={20} height={20} color="#16A34A" />
 //             <Text className="text-gray-700 font-medium">{technician?.phoneNumber}</Text>
 //           </View>
-//           <View className="flex-row items-center space-x-3 gap-4">
+//           <View className="flex-row items-center gap-3 gap-4">
 //             <MapPin width={20} height={20} color="#DC2626" />
 //             <Text className="text-gray-700 text-sm">{formattedTechnicianAddress}</Text>
 //           </View>

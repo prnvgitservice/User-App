@@ -128,7 +128,7 @@ const FinalRatingScreen: React.FC<FinalRatingProps> = ({ setCurrentStep, booking
     <View className="flex-1 bg-white rounded-lg border border-gray-200 items-center justify-center">
       <View className="text-center max-w-md mx-auto p-8 flex-col items-center gap-2">
         <Text className="text-2xl font-bold text-gray-900 mb-6">Rate Your Experience</Text>
-        <View className="flex-row justify-center space-x-2 mb-8">
+        <View className="flex-row justify-center gap-2 mb-8">
           {[1, 2, 3, 4, 5].map((star) => (
             <TouchableOpacity
               key={star}

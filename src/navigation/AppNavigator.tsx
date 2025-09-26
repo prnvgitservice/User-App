@@ -38,7 +38,7 @@ export type RootStackParamList = {
   Profile: undefined;
   BlogDetail: { blog: Blog };
   AllBlogs: undefined;
-  Technicians: { category?: Category };
+  Technicians: { category?: Category ,categoryId?: string};
   TechnicianProfile: { technicianId: string };
   GuestBook?: undefined;
   Category?: undefined;
@@ -56,7 +56,7 @@ export type RootStackParamList = {
   TermsConditions?: undefined;
   CompanyReview?: undefined;
   EditProfile?: undefined;
-  SearchFilter?: { path: string; category?: string; pincode?: string };
+  SearchFilter?: {};
   PAG?: undefined; // Professional Agreement
 };
 
@@ -91,7 +91,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 // MainTabs (unchanged, but typed Tab)
-function MainTabs({ navigation }) {
+function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -204,45 +204,10 @@ function AppNavigator() {
             : "TechnicianProfile",
         })}
       />
-
-      {/* <Stack.Screen
-        name="SearchFilter"
-        component={SearchFilterScreen}
-        options={({ route }) => ({
-          title:
-            (route.params as { categoryName?: string; pincode?: string })
-              ?.categoryName ||
-            (route.params as { pincode?: string })?.pincode ||
-            "Search Filter",
-        })}
-      /> */}
-      {/* <Stack.Screen
-        name="SearchFilter"
-        component={SearchFilterScreen}
-        options={({ route }) => {
-          const { path, category, pincode } = route.params;
-          // Parse path to extract segments for dynamic title
-          const pathSegments = path.split('/').filter(Boolean);
-          const categoryName = category || pathSegments[0] || 'Search';
-          const areaPincode = pathSegments[2] || pincode || '';
-          const title = areaPincode ? `${categoryName} in ${areaPincode}` : categoryName;
-
-          return {
-            title: title || 'Search Filter',
-            headerStyle: {
-              backgroundColor: '#f8f8f8',
-            },
-            headerTintColor: '#333',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          };
-        }}
-      /> */}
+      
       <Stack.Screen
         name="SearchFilter"
         component={SearchFilterScreen}
-        options={{ title: "Technicians" }}
       />
     </Stack.Navigator>
   );

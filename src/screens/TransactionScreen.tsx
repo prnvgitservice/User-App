@@ -16,6 +16,7 @@ import SavingsScreen from "../components/transaction/SavingsScreen";
 import FinalRatingScreen from "../components/transaction/FinalRatingScreen";
 import CongratulationsModal from "../components/transaction/CongratulationsModal";
 import BookingDetailsScreen from "../components/transaction/BookingDetaillsScreen";
+import { RefreshControl } from "react-native-gesture-handler";
 
 interface Booking {
   _id: string;
@@ -94,6 +95,14 @@ const TransactionPageScreen: React.FC = () => {
     null
   );
   const fadeAnim = useState(new Animated.Value(0))[0]; // Animation for content fade-in
+  
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBookings(); // Re-fetch bookings data
+    setRefreshing(false);
+  };
 
     const transactionTabs = [
     { id: 'upcoming', name: 'Upcoming', color: 'text-purple-600', bgColor: 'bg-purple-100', borderColor: 'border-purple-600' },
@@ -238,6 +247,7 @@ const TransactionPageScreen: React.FC = () => {
   };
 
   return (
+       
     <View className="flex-1 bg-gray-50">
       <View className="p-4 bg-white shadow-md">
         <Text className="text-2xl font-bold text-gray-900 mb-4">
@@ -247,9 +257,9 @@ const TransactionPageScreen: React.FC = () => {
         <View className="flex-row justify-around">
           {transactionTabs.map((tab) => (
             <TouchableOpacity
-              key={tab.id}
-              onPress={() => handleTabPress(tab.id as 'upcoming' | 'completed' | 'cancelled')}
-              className={`flex-1 py-3 rounded-lg mx-1 ${
+            key={tab.id}
+            onPress={() => handleTabPress(tab.id as 'upcoming' | 'completed' | 'cancelled')}
+            className={`flex-1 py-3 rounded-lg mx-1 ${
                 activeTab === tab.id ? tab.bgColor + ' border-b-2 ' + tab.borderColor : 'bg-gray-200'
               }`}
               accessibilityLabel={`Switch to ${tab.name} transactions`}
@@ -259,14 +269,25 @@ const TransactionPageScreen: React.FC = () => {
                 className={`text-center font-medium ${
                   activeTab === tab.id ? tab.color : 'text-gray-600'
                 }`}
-              >
+                >
                 {tab.name}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
-      <ScrollView className="flex-1 px-4">{renderContent()}</ScrollView>
+      <ScrollView className="flex-1 px-4"
+       refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#A21CAF", "#fuchsia-500"]}
+            tintColor="#A21CAF"
+          />
+        }
+
+      >{renderContent()}</ScrollView>
+                
     </View>
   );
 };

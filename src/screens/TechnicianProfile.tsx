@@ -84,7 +84,6 @@ const TechnicianProfile = () => {
       try {
         setLoading(true);
         const response = await getAllTechnicianDetails(technicianId);
-        console.log("Technician Details Response:", response);
         if (response?.success && response.result) {
           setTechnicianDetails(response.result);
           setError("");
