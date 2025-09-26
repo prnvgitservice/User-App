@@ -31,7 +31,7 @@ import { SafeAreaView } from "react-native";
 
 // Root Stack Params
 export type RootStackParamList = {
-  Onboarding: undefined;
+  OnBoarding: undefined;
   Login: undefined;
   Signup: undefined;
   Main: undefined;
@@ -44,6 +44,20 @@ export type RootStackParamList = {
   Category?: undefined;
   Blog?: { id: string };
   Reviews?: undefined;
+  AboutUs?: undefined;
+  ContactUs?: undefined;
+  KeyFeatures?: undefined;
+  Cart?: undefined;
+  Transactions?: undefined;
+  FAQ?: undefined;
+  ProfessionalAgreement?: undefined;
+  RefundPolicy?: undefined;
+  PrivacyPolicy?: undefined;
+  TermsConditions?: undefined;
+  CompanyReview?: undefined;
+  EditProfile?: undefined;
+  SearchFilter?: { path: string; category?: string; pincode?: string };
+  PAG?: undefined; // Professional Agreement
 };
 
 export interface Blog {
