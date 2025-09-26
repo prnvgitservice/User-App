@@ -3,11 +3,9 @@ import { View, Text, TouchableOpacity, Image, Animated } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type RootStackParamList = {
-  Onboarding: undefined;
+  OnBoarding: undefined;
   Login: undefined;
 };
-
-type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 
 const pages = [
   { title: 'Welcome to our App!', subtitle: 'Your journey starts here' },
@@ -21,7 +19,7 @@ const images = [
   require('../../assets/f3.jpg'),
 ];
 
-const OnboardingScreen: React.FC<Props> = ({ navigation }) => {
+const OnboardingScreen: React.FC = () => {
   const [page, setPage] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;

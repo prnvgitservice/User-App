@@ -31,19 +31,33 @@ import { SafeAreaView } from "react-native";
 
 // Root Stack Params
 export type RootStackParamList = {
-  Onboarding: undefined;
+  OnBoarding: undefined;
   Login: undefined;
   Signup: undefined;
   Main: undefined;
   Profile: undefined;
   BlogDetail: { blog: Blog };
   AllBlogs: undefined;
-  Technicians: { category?: Category };
+  Technicians: { category?: Category ,categoryId?: string};
   TechnicianProfile: { technicianId: string };
   GuestBook?: undefined;
   Category?: undefined;
   Blog?: { id: string };
   Reviews?: undefined;
+  AboutUs?: undefined;
+  ContactUs?: undefined;
+  KeyFeatures?: undefined;
+  Cart?: undefined;
+  Transactions?: undefined;
+  FAQ?: undefined;
+  ProfessionalAgreement?: undefined;
+  RefundPolicy?: undefined;
+  PrivacyPolicy?: undefined;
+  TermsConditions?: undefined;
+  CompanyReview?: undefined;
+  EditProfile?: undefined;
+  SearchFilter?: {};
+  PAG?: undefined; // Professional Agreement
 };
 
 export interface Blog {
@@ -77,7 +91,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
 // MainTabs (unchanged, but typed Tab)
-function MainTabs({ navigation }) {
+function MainTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -143,7 +157,7 @@ function AppNavigator() {
         headerShown: false, // Disable header for all stack screens
       }}
     >
-      <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Screen name="OnBoarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="Transactions" component={TransactionPageScreen} />
@@ -190,45 +204,10 @@ function AppNavigator() {
             : "TechnicianProfile",
         })}
       />
-
-      {/* <Stack.Screen
-        name="SearchFilter"
-        component={SearchFilterScreen}
-        options={({ route }) => ({
-          title:
-            (route.params as { categoryName?: string; pincode?: string })
-              ?.categoryName ||
-            (route.params as { pincode?: string })?.pincode ||
-            "Search Filter",
-        })}
-      /> */}
-      {/* <Stack.Screen
-        name="SearchFilter"
-        component={SearchFilterScreen}
-        options={({ route }) => {
-          const { path, category, pincode } = route.params;
-          // Parse path to extract segments for dynamic title
-          const pathSegments = path.split('/').filter(Boolean);
-          const categoryName = category || pathSegments[0] || 'Search';
-          const areaPincode = pathSegments[2] || pincode || '';
-          const title = areaPincode ? `${categoryName} in ${areaPincode}` : categoryName;
-
-          return {
-            title: title || 'Search Filter',
-            headerStyle: {
-              backgroundColor: '#f8f8f8',
-            },
-            headerTintColor: '#333',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          };
-        }}
-      /> */}
+      
       <Stack.Screen
         name="SearchFilter"
         component={SearchFilterScreen}
-        options={{ title: "Technicians" }}
       />
     </Stack.Navigator>
   );

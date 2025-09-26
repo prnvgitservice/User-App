@@ -84,7 +84,6 @@ const TechnicianProfile = () => {
       try {
         setLoading(true);
         const response = await getAllTechnicianDetails(technicianId);
-        console.log("Technician Details Response:", response);
         if (response?.success && response.result) {
           setTechnicianDetails(response.result);
           setError("");
@@ -122,13 +121,13 @@ const TechnicianProfile = () => {
         <View className=" bg-gray-100 px-4 pt-4 flex-1">
           <ProfileCard
             technician={technicianDetails.technician}
-            ratings={technicianDetails.ratings}
+            ratings={technicianDetails.ratings || []}
           />
           <AllFilters
             services={technicianDetails.services}
             technician={technicianDetails.technician}
             technicianImages={technicianDetails.technicianImages?.imageUrl || []}
-            ratings={technicianDetails.ratings}
+            ratings={technicianDetails.ratings || []}
           />
         </View>
       )}

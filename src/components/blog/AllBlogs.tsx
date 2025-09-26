@@ -36,7 +36,7 @@ const AllBlogs: React.FC = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response: ApiResponse = await getAllBlogs();
+        const response: ApiResponse = await getAllBlogs({});
         if (response.success) {
           setBlogs(response.data);
         } else {
