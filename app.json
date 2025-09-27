@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "MyApp",
-    "slug": "MyApp",
+    "name": "UserApp",
+    "slug": "user-app",
+    "owner": "prnv_services",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,7 +30,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "679d0d55-5c79-4109-9226-abbd05de257d"
+        "projectId": "3886cb75-fda8-4fde-a02e-2848c5ef634c"
       }
     }
   }
