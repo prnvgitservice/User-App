@@ -108,12 +108,12 @@ const ProfileScreen = () => {
       bounces={false}
     >
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+      <View className="w-full flex-row px-4 py-3 bg-white border-b border-gray-200">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <Text className="text-xl font-bold text-gray-900">Settings</Text>
-        <View className="w-6" /> {/* Spacer for symmetry */}
+        <Text className="text-xl font-bold text-gray-900 mx-auto">Settings</Text>
+        {/* <View className="w-6" /> Spacer for symmetry */}
       </View>
 
       {/* User Profile */}

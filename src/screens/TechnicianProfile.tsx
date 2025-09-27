@@ -68,8 +68,7 @@ export interface TechnicianDetailsResponse {
 const TechnicianProfile = () => {
   const route = useRoute();
   const { technicianId } = (route.params as { technicianId?: string }) || {};
-  const [technicianDetails, setTechnicianDetails] =
-    useState<TechnicianDetailsResponse | null>(null);
+  const [technicianDetails, setTechnicianDetails] = useState<TechnicianDetailsResponse | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -91,9 +90,7 @@ const TechnicianProfile = () => {
           setError("Failed to load technician details. Invalid response format.");
         }
       } catch (err: any) {
-        setError(
-          err.message || "An error occurred while fetching technician details."
-        );
+        setError(err.message || "An error occurred while fetching technician details.");
       } finally {
         setLoading(false);
       }
@@ -107,18 +104,14 @@ const TechnicianProfile = () => {
       {loading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#0000ff" />
-          <Text className="text-center text-lg mt-4 text-blue-600">
-            Loading...
-          </Text>
+          <Text className="text-center text-lg mt-4 text-blue-600">Loading...</Text>
         </View>
       ) : error || !technicianDetails ? (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-red-600 text-center text-lg">
-            {error || "No technician details available."}
-          </Text>
+          <Text className="text-red-600 text-center text-lg">{error || "No technician details available."}</Text>
         </View>
       ) : (
-        <View className=" bg-gray-100 px-4 pt-4 flex-1">
+        <View className="bg-gray-100 px-4 pt-4 flex-1">
           <ProfileCard
             technician={technicianDetails.technician}
             ratings={technicianDetails.ratings || []}
@@ -134,6 +127,75 @@ const TechnicianProfile = () => {
     </View>
   );
 };
+// const TechnicianProfile = () => {
+//   const route = useRoute();
+//   const { technicianId } = (route.params as { technicianId?: string }) || {};
+//   const [technicianDetails, setTechnicianDetails] =
+//     useState<TechnicianDetailsResponse | null>(null);
+//   const [error, setError] = useState<string>("");
+//   const [loading, setLoading] = useState<boolean>(true);
+
+//   useEffect(() => {
+//     const fetchTechAllDetails = async () => {
+//       if (!technicianId) {
+//         setError("Technician ID is missing. Please try again.");
+//         setLoading(false);
+//         return;
+//       }
+
+//       try {
+//         setLoading(true);
+//         const response = await getAllTechnicianDetails(technicianId);
+//         if (response?.success && response.result) {
+//           setTechnicianDetails(response.result);
+//           setError("");
+//         } else {
+//           setError("Failed to load technician details. Invalid response format.");
+//         }
+//       } catch (err: any) {
+//         setError(
+//           err.message || "An error occurred while fetching technician details."
+//         );
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchTechAllDetails();
+//   }, [technicianId]);
+
+//   return (
+//     <View className="flex-1 bg-white">
+//       {loading ? (
+//         <View className="flex-1 justify-center items-center">
+//           <ActivityIndicator size="large" color="#0000ff" />
+//           <Text className="text-center text-lg mt-4 text-blue-600">
+//             Loading...
+//           </Text>
+//         </View>
+//       ) : error || !technicianDetails ? (
+//         <View className="flex-1 justify-center items-center">
+//           <Text className="text-red-600 text-center text-lg">
+//             {error || "No technician details available."}
+//           </Text>
+//         </View>
+//       ) : (
+//         <View className=" bg-gray-100 px-4 pt-4 flex-1">
+//           <ProfileCard
+//             technician={technicianDetails.technician}
+//             ratings={technicianDetails.ratings || []}
+//           />
+//           <AllFilters
+//             services={technicianDetails.services}
+//             technician={technicianDetails.technician}
+//             technicianImages={technicianDetails.technicianImages?.imageUrl || []}
+//             ratings={technicianDetails.ratings || []}
+//           />
+//         </View>
+//       )}
+//     </View>
+//   );
+// };
 
 export default TechnicianProfile;
 

@@ -229,14 +229,15 @@ const AboutUsScreen: React.FC = () => {
               <Ionicons name="call" size={24} color="#1e40af" />
               <View>
                 <Text className="text-base font-medium text-gray-700">Phone</Text>
-                <Text className="text-base text-gray-600">+91 98765 43210</Text>
+                <Text className="text-base text-gray-600">+91 9603558369</Text>
+                <Text className="text-base text-gray-600">+91 9059789177</Text>
               </View>
             </View>
             <View className="flex-row items-center gap-3">
               <Ionicons name="mail" size={24} color="#1e40af" />
               <View>
                 <Text className="text-base font-medium text-gray-700">Email</Text>
-                <Text className="text-base text-gray-600">info@prnvservices.com</Text>
+                <Text className="text-base text-gray-600">prnvserviceswork@gmail.com</Text>
               </View>
             </View>
             <View className="flex-row items-center gap-3">

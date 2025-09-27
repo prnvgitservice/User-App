@@ -91,6 +91,7 @@ const GuestBooking = () => {
             value={formData.phoneNumber}
             onChangeText={(text) => handleChange('phoneNumber', text)}
             keyboardType="phone-pad"
+            maxLength={10}
             required
             aria-label="Phone number"
           />

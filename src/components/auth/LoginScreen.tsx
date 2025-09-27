@@ -54,7 +54,6 @@ const LoginScreen = () => {
         
         // For cart update event, you can use a global event emitter or context
         // Here we'll just log it for now
-        console.log('Login successful - Cart updated event dispatched');
         Alert.alert('Login Successfully')
         
         navigation.replace('Main');
@@ -62,9 +61,8 @@ const LoginScreen = () => {
         throw new Error('Invalid credentials or server error');
       }
     } catch (err: any) {
-      const errorMsg = err?.message || 'Login failed. Please try again.';
+      const errorMsg = 'Login failed. Please try again.';
       setError(errorMsg);
-      Alert.alert('Login Error', errorMsg);
     } finally {
       setIsLoading(false);
     }

@@ -1,11 +1,8 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, Image, Animated } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-type RootStackParamList = {
-  OnBoarding: undefined;
-  Login: undefined;
-};
+
 
 const pages = [
   { title: 'Welcome to our App!', subtitle: 'Your journey starts here' },
@@ -23,6 +20,7 @@ const OnboardingScreen: React.FC = () => {
   const [page, setPage] = useState(0);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+  const navigation = useNavigation();
 
   React.useEffect(() => {
     Animated.parallel([
@@ -48,11 +46,11 @@ const OnboardingScreen: React.FC = () => {
   };
 
   const handleGetStarted = () => {
-    navigation.replace('Login');
+    navigation.navigate('Login');
   };
 
   const handleSkip = () => {
-    navigation.replace('Login');
+    navigation.navigate('Login');
   };
 
   return (
