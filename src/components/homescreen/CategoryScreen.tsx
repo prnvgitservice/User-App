@@ -7,9 +7,10 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+// import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import { CategoryContext } from "@/src/context/CategoryContext";
+import { useNavigation } from "@react-navigation/native";
 
 interface Category {
   _id: string;
