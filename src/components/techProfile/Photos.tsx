@@ -8,7 +8,6 @@ interface PhotosProps {
 const Photos = ({ images }: PhotosProps) => {
   const [showAll, setShowAll] = useState(false);
   const visibleImages = showAll ? images : images?.slice(0, 6);
-  console.log("Photos component images:", images);
 
   const renderImage = ({ item }: { item: string }) => (
     <View className="relative">

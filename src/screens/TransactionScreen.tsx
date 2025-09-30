@@ -281,7 +281,7 @@ const TransactionPageScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#A21CAF", "#fuchsia-500"]}
+            colors={["#A21CAF", "fuchsia"]}
             tintColor="#A21CAF"
           />
         }

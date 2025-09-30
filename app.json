@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MyApp",
-    "slug": "MyApp",
+    "name": "UserApp",
+    "slug": "user-app",
     "owner": "prnv_services",
     "version": "1.0.0",
     "orientation": "portrait",

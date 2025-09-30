@@ -56,10 +56,10 @@ Check out the profile: ${shareUrl}`;
         if (result.activityType) {
           console.log("Shared with activity type: ", result.activityType);
         } else {
-          console.log("Shared successfully!");
+          Alert.alert("Shared!", "Profile details shared successfully.");
         }
       } else if (result.action === Share.dismissedAction) {
-        console.log("Share dismissed");
+        Alert.alert("Share dismissed", "You dismissed the share dialog.");
       }
     } catch (error) {
       // Fallback: copy to clipboard

@@ -1,6 +1,6 @@
 import { addReviewByUser } from '@/src/api/apiMethods';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Star } from 'react-native-feather';
 
 interface Booking {
@@ -106,9 +106,7 @@ const FinalRatingScreen: React.FC<FinalRatingProps> = ({ setCurrentStep, booking
 
   const handleSubmit = async () => {
     try {
-      console.log(formData)
       const response = await addReviewByUser(formData);
-      console.log(response)
       if (response?.success && response?.result) {
         alert('Review successfully submitted');
         refetchBookings();
@@ -118,8 +116,8 @@ const FinalRatingScreen: React.FC<FinalRatingProps> = ({ setCurrentStep, booking
         setCurrentStep('bookings');
       }
     } catch (err) {
-      console.log('user review err', err);
-      alert('You have already reviewed this service.');
+      
+      Alert.alert('Review Error', 'You have already reviewed this service.');
       setCurrentStep('congratulations');
     }
   };

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Modal, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Icon } from 'lucide-react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 // Add type for booking

@@ -172,7 +172,7 @@ const ProfileEditPage: React.FC = () => {
           }
         }
       } catch (err) {
-        console.log("Failed to fetch pincodes:", err);
+        setError("Failed to fetch pincodes. Please try again.");
       }
     };
 

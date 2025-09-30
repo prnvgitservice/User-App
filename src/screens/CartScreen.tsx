@@ -1,11 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator, Modal, Platform, Dimensions, RefreshControl } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  Modal,
+  Platform,
+  Dimensions,
+  RefreshControl,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {
   removeFromCart,
   addToCart,
@@ -74,7 +85,9 @@ const SavingsModal: React.FC<{
             <View className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
               <MaterialIcons name="check" size={32} color="green" />
             </View>
-            <Text className="text-2xl font-bold text-gray-800 mb-2">Congratulations!</Text>
+            <Text className="text-2xl font-bold text-gray-800 mb-2">
+              Congratulations!
+            </Text>
             <Text className="text-gray-600">Your booking was successful!</Text>
           </View>
 
@@ -94,14 +107,19 @@ const SavingsModal: React.FC<{
               </View>
               <View className="flex-row justify-between bg-green-50 py-2 font-semibold">
                 <Text>Your Total Savings</Text>
-                <Text className="text-green-600 font-mono">₹ {savingsData.savings}</Text>
+                <Text className="text-green-600 font-mono">
+                  ₹ {savingsData.savings}
+                </Text>
               </View>
             </View>
           )}
 
           <View className="bg-blue-50 rounded-xl p-4 mb-6 text-sm text-blue-800">
             <Text>
-              PRNV offers competitive pricing with <Text className="font-semibold">no GST</Text> and rates <Text className="font-semibold">30% lower</Text> than competitors, saving you money!
+              PRNV offers competitive pricing with{" "}
+              <Text className="font-semibold">no GST</Text> and rates{" "}
+              <Text className="font-semibold">30% lower</Text> than competitors,
+              saving you money!
             </Text>
           </View>
 
@@ -109,7 +127,9 @@ const SavingsModal: React.FC<{
             className="w-full bg-fuchsia-500 py-3 rounded-xl"
             onPress={onViewTransactions}
           >
-            <Text className="text-white font-semibold text-center">View Transaction Details</Text>
+            <Text className="text-white font-semibold text-center">
+              View Transaction Details
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -122,7 +142,9 @@ const CartScreen: React.FC = () => {
   const [cartData, setCartData] = useState<CartData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [processingItems, setProcessingItems] = useState<{ [key: string]: boolean }>({});
+  const [processingItems, setProcessingItems] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [isBooking, setIsBooking] = useState(false);
   const [selectedItems, setSelectedItems] = useState<CartItem[]>([]);
   const [showSavingsModal, setShowSavingsModal] = useState(false);
@@ -131,7 +153,7 @@ const CartScreen: React.FC = () => {
   const [currentItemId, setCurrentItemId] = useState<string | null>(null);
   const [date, setDate] = useState(new Date());
   const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
-  const { width } = Dimensions.get('window');
+  const { width } = Dimensions.get("window");
   const itemWidth = width * 0.9;
 
   useEffect(() => {
@@ -150,20 +172,20 @@ const CartScreen: React.FC = () => {
       const response = await getCartItems(userId);
       if (response?.success && response?.result?.cart) {
         const formattedItems = response.result.cart.map((item: any) => ({
-          _id: item?._id || '',
-          serviceId: item?.serviceId || '',
-          serviceName: item?.serviceName || 'Unknown Service',
-          serviceImg: item?.serviceImg || '',
+          _id: item?._id || "",
+          serviceId: item?.serviceId || "",
+          serviceName: item?.serviceName || "Unknown Service",
+          serviceImg: item?.serviceImg || "",
           servicePrice: Number(item?.servicePrice || item?.price || 0),
           quantity: Number(item?.quantity || 1),
-          technicianId: item?.technicianId || '',
-          bookingDate: item?.bookingDate || '',
+          technicianId: item?.technicianId || "",
+          bookingDate: item?.bookingDate || "",
           isSelected: false,
         }));
         setCartData({
           user: response.result.user || {},
           cart: {
-            _id: response.result.cart._id || '',
+            _id: response.result.cart._id || "",
             userId: response.result.cart.userId || userId,
             items: formattedItems,
           },
@@ -188,30 +210,32 @@ const CartScreen: React.FC = () => {
 
   const handleCalendarClick = (itemId: string) => {
     setCurrentItemId(itemId);
-    const item = cartData?.cart.items.find(i => i._id === itemId);
+    const item = cartData?.cart.items.find((i) => i._id === itemId);
     setDate(item?.bookingDate ? new Date(item.bookingDate) : new Date());
     setShowDatePicker(true);
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (event.type === 'dismissed' || !selectedDate) return;
+    setShowDatePicker(Platform.OS === "ios");
+    if (event.type === "dismissed" || !selectedDate) return;
     if (currentItemId) {
-      const dateStr = selectedDate.toISOString().split('T')[0];
-      setCartData(prev => {
+      const dateStr = selectedDate.toISOString().split("T")[0];
+      setCartData((prev) => {
         if (!prev) return null;
         return {
           ...prev,
           cart: {
             ...prev.cart,
-            items: prev.cart.items.map(item =>
-              item._id === currentItemId ? { ...item, bookingDate: dateStr } : item
+            items: prev.cart.items.map((item) =>
+              item._id === currentItemId
+                ? { ...item, bookingDate: dateStr }
+                : item
             ),
           },
         };
       });
-      setSelectedItems(prev =>
-        prev.map(item =>
+      setSelectedItems((prev) =>
+        prev.map((item) =>
           item._id === currentItemId ? { ...item, bookingDate: dateStr } : item
         )
       );
@@ -220,33 +244,33 @@ const CartScreen: React.FC = () => {
   };
 
   const handleClearDate = (itemId: string) => {
-    setCartData(prev => {
+    setCartData((prev) => {
       if (!prev) return null;
       return {
         ...prev,
         cart: {
           ...prev.cart,
-          items: prev.cart.items.map(item =>
-            item._id === itemId ? { ...item, bookingDate: '' } : item
+          items: prev.cart.items.map((item) =>
+            item._id === itemId ? { ...item, bookingDate: "" } : item
           ),
         },
       };
     });
-    setSelectedItems(prev =>
-      prev.map(item =>
-        item._id === itemId ? { ...item, bookingDate: '' } : item
+    setSelectedItems((prev) =>
+      prev.map((item) =>
+        item._id === itemId ? { ...item, bookingDate: "" } : item
       )
     );
   };
 
   const handleQuantityChange = async (itemId: string, delta: number) => {
     try {
-      setProcessingItems(prev => ({ ...prev, [itemId]: true }));
+      setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
       const userId = await AsyncStorage.getItem("userId");
       if (!userId) {
         throw new Error("User not logged in");
       }
-      const item = cartData?.cart.items.find(item => item._id === itemId);
+      const item = cartData?.cart.items.find((item) => item._id === itemId);
       if (!item) {
         throw new Error("Item not found");
       }
@@ -261,20 +285,22 @@ const CartScreen: React.FC = () => {
       if (!response?.success) {
         throw new Error(response?.message || "Failed to update quantity");
       }
-      setCartData(prev => {
+      setCartData((prev) => {
         if (!prev) return null;
         return {
           ...prev,
           cart: {
             ...prev.cart,
-            items: prev.cart.items.map(cartItem =>
-              cartItem._id === itemId ? { ...cartItem, quantity: newQuantity } : cartItem
+            items: prev.cart.items.map((cartItem) =>
+              cartItem._id === itemId
+                ? { ...cartItem, quantity: newQuantity }
+                : cartItem
             ),
           },
         };
       });
-      setSelectedItems(prev =>
-        prev.map(item =>
+      setSelectedItems((prev) =>
+        prev.map((item) =>
           item._id === itemId ? { ...item, quantity: newQuantity } : item
         )
       );
@@ -282,18 +308,18 @@ const CartScreen: React.FC = () => {
       setError(err.message || "Failed to update quantity");
       await fetchCartData();
     } finally {
-      setProcessingItems(prev => ({ ...prev, [itemId]: false }));
+      setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
     }
   };
 
   const handleRemove = async (itemId: string) => {
     try {
-      setProcessingItems(prev => ({ ...prev, [itemId]: true }));
+      setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
       const userId = await AsyncStorage.getItem("userId");
       if (!userId) {
         throw new Error("User not logged in");
       }
-      const item = cartData?.cart.items.find(item => item._id === itemId);
+      const item = cartData?.cart.items.find((item) => item._id === itemId);
       if (!item) {
         throw new Error("Item not found");
       }
@@ -305,36 +331,38 @@ const CartScreen: React.FC = () => {
       if (!response?.success) {
         throw new Error(response?.message || "Failed to remove item");
       }
-      setCartData(prev => {
+      setCartData((prev) => {
         if (!prev) return null;
         return {
           ...prev,
           cart: {
             ...prev.cart,
-            items: prev.cart.items.filter(cartItem => cartItem._id !== itemId),
+            items: prev.cart.items.filter(
+              (cartItem) => cartItem._id !== itemId
+            ),
           },
         };
       });
-      setSelectedItems(prev => prev.filter(item => item._id !== itemId));
+      setSelectedItems((prev) => prev.filter((item) => item._id !== itemId));
     } catch (err: any) {
       setError(err.message || "Failed to remove item");
       await fetchCartData();
     } finally {
-      setProcessingItems(prev => ({ ...prev, [itemId]: false }));
+      setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
     }
   };
 
   const handleCheckboxChange = (itemId: string) => {
-    setCartData(prev => {
+    setCartData((prev) => {
       if (!prev) return null;
-      const updatedItems = prev.cart.items.map(item => {
+      const updatedItems = prev.cart.items.map((item) => {
         if (item._id === itemId) {
           const newSelectedState = !item.isSelected;
-          setSelectedItems(prevSelected => {
+          setSelectedItems((prevSelected) => {
             if (newSelectedState) {
               return [...prevSelected, { ...item, isSelected: true }];
             }
-            return prevSelected.filter(selected => selected._id !== itemId);
+            return prevSelected.filter((selected) => selected._id !== itemId);
           });
           return { ...item, isSelected: newSelectedState };
         }
@@ -358,7 +386,7 @@ const CartScreen: React.FC = () => {
       if (selectedItems.length === 0) {
         throw new Error("No items selected for booking");
       }
-      if (selectedItems.some(item => !item.bookingDate)) {
+      if (selectedItems.some((item) => !item.bookingDate)) {
         throw new Error("Select dates for all selected items");
       }
       const prnvTotal = selectedItems.reduce(
@@ -369,7 +397,7 @@ const CartScreen: React.FC = () => {
       const otherGst = Math.round(otherBaseTotal * 0.18);
       const otherTotal = Math.round(otherBaseTotal) + otherGst;
       const savings = otherTotal - prnvTotal;
-      const bookings = selectedItems.map(item => ({
+      const bookings = selectedItems.map((item) => ({
         userId,
         serviceId: item.serviceId,
         technicianId: item.technicianId,
@@ -423,7 +451,9 @@ const CartScreen: React.FC = () => {
     return { subtotal, gst, total };
   };
 
-  const isBookingDisabled = selectedItems.length === 0 || selectedItems.some(item => !item.bookingDate);
+  const isBookingDisabled =
+    selectedItems.length === 0 ||
+    selectedItems.some((item) => !item.bookingDate);
 
   return (
     <View className="flex-1 bg-white">
@@ -446,7 +476,9 @@ const CartScreen: React.FC = () => {
 
         {error && (
           <View className="p-4">
-            <Text className="text-red-500 text-center text-lg font-semibold">{error}</Text>
+            <Text className="text-red-500 text-center text-lg font-semibold">
+              {error}
+            </Text>
             <View className="flex-row justify-center gap-4 mt-4">
               {error.includes("log in") && (
                 <TouchableOpacity
@@ -466,24 +498,32 @@ const CartScreen: React.FC = () => {
           </View>
         )}
 
-        {!loading && !error && (!cartData || cartData.cart.items.length === 0) && (
-          <View className="px-1 py-2">
-            <Text className="text-2xl font-bold text-gray-800 mb-6">Your Cart</Text>
-            <View className="flex-col items-center">
-              <Text className="text-gray-500 text-lg">Your cart is empty</Text>
-              <TouchableOpacity
-                className="mt-4 bg-fuchsia-500 px-6 py-2 rounded-lg"
-                onPress={() => navigation.navigate("Category")}
-              >
-                <Text className="text-white">Browse Services</Text>
-              </TouchableOpacity>
+        {!loading &&
+          !error &&
+          (!cartData || cartData.cart.items.length === 0) && (
+            <View className="px-1 py-2">
+              <Text className="text-2xl font-bold text-gray-800 mb-6">
+                Your Cart
+              </Text>
+              <View className="flex-col items-center">
+                <Text className="text-gray-500 text-lg">
+                  Your cart is empty
+                </Text>
+                <TouchableOpacity
+                  className="mt-4 bg-fuchsia-500 px-6 py-2 rounded-lg"
+                  onPress={() => navigation.navigate("Category")}
+                >
+                  <Text className="text-white">Browse Services</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
+          )}
 
         {!loading && !error && cartData && cartData.cart.items.length > 0 && (
           <>
-            <Text className="text-2xl font-bold text-gray-800 mb-6">Your Cart</Text>
+            <Text className="text-2xl font-bold text-gray-800 mb-6">
+              Your Cart
+            </Text>
             <View className="flex-col gap-4">
               {cartData.cart.items.map((item) => {
                 const isProcessing = processingItems[item._id];
@@ -500,7 +540,11 @@ const CartScreen: React.FC = () => {
                         disabled={isProcessing}
                       >
                         <MaterialCommunityIcons
-                          name={item.isSelected ? "checkbox-marked" : "checkbox-blank-outline"}
+                          name={
+                            item.isSelected
+                              ? "checkbox-marked"
+                              : "checkbox-blank-outline"
+                          }
                           size={20}
                           color="#A21CAF"
                         />
@@ -510,9 +554,15 @@ const CartScreen: React.FC = () => {
                         className="rounded-xl w-16 h-16 object-cover border border-gray-200"
                       />
                       <View className="ml-4 flex-1">
-                        <Text className="text-lg font-semibold text-gray-800">{item.serviceName}</Text>
+                        <Text className="text-lg font-semibold text-gray-800">
+                          {item.serviceName}
+                        </Text>
                         <Text className="text-gray-600">
-                          ₹ <Text className="text-fuchsia-600">{item.servicePrice}</Text> per unit
+                          ₹{" "}
+                          <Text className="text-fuchsia-600">
+                            {item.servicePrice}
+                          </Text>{" "}
+                          per unit
                         </Text>
                       </View>
                     </View>
@@ -521,14 +571,23 @@ const CartScreen: React.FC = () => {
                       <View className="flex-row items-center gap-2 bg-fuchsia-50 rounded-lg px-2 py-1 border border-fuchsia-200">
                         {item.quantity === 1 ? (
                           <TouchableOpacity
-                            onPress={() => !isProcessing && handleRemove(item._id)}
+                            onPress={() =>
+                              !isProcessing && handleRemove(item._id)
+                            }
                             disabled={isProcessing}
                           >
-                            <MaterialIcons name="delete" size={16} color="red" />
+                            <MaterialIcons
+                              name="delete"
+                              size={16}
+                              color="red"
+                            />
                           </TouchableOpacity>
                         ) : (
                           <TouchableOpacity
-                            onPress={() => !isProcessing && handleQuantityChange(item._id, -1)}
+                            onPress={() =>
+                              !isProcessing &&
+                              handleQuantityChange(item._id, -1)
+                            }
                             disabled={isProcessing}
                           >
                             <Ionicons name="remove" size={12} color="#A21CAF" />
@@ -538,7 +597,9 @@ const CartScreen: React.FC = () => {
                           {isProcessing ? "..." : item.quantity}
                         </Text>
                         <TouchableOpacity
-                          onPress={() => !isProcessing && handleQuantityChange(item._id, 1)}
+                          onPress={() =>
+                            !isProcessing && handleQuantityChange(item._id, 1)
+                          }
                           disabled={isProcessing}
                         >
                           <Ionicons name="add" size={16} color="#A21CAF" />
@@ -549,13 +610,17 @@ const CartScreen: React.FC = () => {
                         ₹ {(item.servicePrice || 0) * item.quantity}
                       </Text>
 
-                      <TouchableOpacity onPress={() => handleCalendarClick(item._id)}>
+                      <TouchableOpacity
+                        onPress={() => handleCalendarClick(item._id)}
+                      >
                         {item.bookingDate ? (
                           <View className="flex-row items-center">
                             <Text className="text-gray-800">
                               {new Date(item.bookingDate).toLocaleDateString()}
                             </Text>
-                            <TouchableOpacity onPress={() => handleClearDate(item._id)}>
+                            <TouchableOpacity
+                              onPress={() => handleClearDate(item._id)}
+                            >
                               <Ionicons name="close" size={16} color="gray" />
                             </TouchableOpacity>
                           </View>
@@ -578,6 +643,10 @@ const CartScreen: React.FC = () => {
                 <Text className="text-lg font-semibold mb-4">Selected Items</Text>
                 {selectedItems.map((item) => {
                   const { subtotal, gst, total } = calculateItemTotal(item);
+                  const truncatedServiceName =
+                    item.serviceName.length > 30
+                      ? `${item.serviceName.substring(0, 30)}...`
+                      : item.serviceName;
                   return (
                     <View
                       key={item._id}
@@ -585,8 +654,10 @@ const CartScreen: React.FC = () => {
                       style={{ width: itemWidth }}
                     >
                       <View className="flex-row justify-between">
-                        <Text className="font-medium">
-                          {item.serviceName} ({item.quantity})
+                        <Text className="font-medium"
+                          numberOfLines={2}
+                          ellipsizeMode="tail">
+                          {truncatedServiceName} ({item.quantity})
                         </Text>
                         <Text className="font-mono">₹ {subtotal}</Text>
                       </View>
@@ -594,6 +665,56 @@ const CartScreen: React.FC = () => {
                         <Text>Booking Date</Text>
                         <Text>
                           {item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}
+                        </Text>
+                      </View>
+                      <View className="flex-row justify-between text-sm text-gray-600 mt-2">
+                        <Text>GST</Text>
+                        <Text>0</Text>
+                      </View>
+                      <View className="flex-row justify-between font-semibold mt-2">
+                        <Text>Total</Text>
+                        <Text className="font-mono">₹ {total}</Text>
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+            {/* {selectedItems.length > 0 && (
+              <View className="mt-6 border-t pt-4">
+                <Text className="text-lg font-semibold mb-4">
+                  Selected Items
+                </Text>
+                {selectedItems.map((item) => {
+                  const { subtotal, gst, total } = calculateItemTotal(item);
+                  // Truncate serviceName if longer than 20 characters
+                  const truncatedServiceName =
+                    item.serviceName.length > 20
+                      ? `${item.serviceName.substring(0, 20)}...`
+                      : item.serviceName;
+
+                  return (
+                    <View
+                      key={item._id}
+                      className="mb-4 p-4 border rounded-lg bg-white shadow-sm"
+                      style={{ width: itemWidth, maxWidth: 300 }} // Set a max width for better control
+                    >
+                      <View className="flex-row justify-between">
+                        <Text
+                          className="font-medium"
+                          numberOfLines={2}
+                          ellipsizeMode="tail"
+                        >
+                          {truncatedServiceName} ({item.quantity})
+                        </Text>
+                        <Text className="font-mono">₹ {subtotal}</Text>
+                      </View>
+                      <View className="flex-row justify-between text-sm text-gray-600 mt-2">
+                        <Text>Booking Date</Text>
+                        <Text>
+                          {item.bookingDate
+                            ? new Date(item.bookingDate).toLocaleDateString()
+                            : "Not set"}
                         </Text>
                       </View>
                       <View className="flex-row justify-between text-sm text-gray-600 mt-2">
@@ -608,7 +729,7 @@ const CartScreen: React.FC = () => {
                   );
                 })}
               </View>
-            )}
+            )} */}
 
             <View className="flex-row justify-between items-center mt-6">
               <Text className="text-gray-800">Missed Something?</Text>
@@ -624,7 +745,9 @@ const CartScreen: React.FC = () => {
             <View className="mt-6 border-t pt-4 pb-6">
               <TouchableOpacity
                 className={`w-full py-3 rounded-xl text-lg font-semibold ${
-                  isBookingDisabled ? "bg-gray-200 text-gray-500" : "bg-fuchsia-500 text-white"
+                  isBookingDisabled
+                    ? "bg-gray-200 text-gray-500"
+                    : "bg-fuchsia-500 text-white"
                 } ${isBooking ? "opacity-70" : ""}`}
                 disabled={isBookingDisabled || isBooking}
                 onPress={handleBookNow}
@@ -634,10 +757,10 @@ const CartScreen: React.FC = () => {
                   {isBooking
                     ? "Processing..."
                     : isBookingDisabled
-                    ? selectedItems.length === 0
-                      ? "Select at least one item"
-                      : "Select dates for all selected items"
-                    : "Book Now"}
+                      ? selectedItems.length === 0
+                        ? "Select at least one item"
+                        : "Select dates for all selected items"
+                      : "Book Now"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -651,7 +774,7 @@ const CartScreen: React.FC = () => {
           value={date}
           mode="date"
           is24Hour={true}
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display={Platform.OS === "ios" ? "spinner" : "default"}
           onChange={handleDateChange}
           minimumDate={new Date()}
           maximumDate={getMaxDate()}
@@ -1322,7 +1445,6 @@ export default CartScreen;
 // };
 
 // export default CartScreen;
-
 
 // import React, { useEffect, useState } from "react";
 // import {
@@ -3487,12 +3609,12 @@ export default CartScreen;
 //     const days: Day[] = [];
 //     const today = new Date();
 //     today.setHours(0, 0, 0, 0);
-    
+
 //     for (let i = 0; i < 7; i++) {
 //       const date = new Date(startDate);
 //       date.setDate(startDate.getDate() + i);
 //       date.setHours(0, 0, 0, 0);
-      
+
 //       days.push({
 //         date,
 //         day: date.getDate(),
@@ -3503,7 +3625,7 @@ export default CartScreen;
 //         isSelected: false,
 //       });
 //     }
-    
+
 //     return days;
 //   };
 
@@ -3652,14 +3774,14 @@ export default CartScreen;
 //       Alert.alert("Error", "Please select at least one item to proceed");
 //       return;
 //     }
-    
+
 //     // Check if all selected items have a booking date
 //     const itemsWithoutDate = selectedItems.filter(item => !item.bookingDate);
 //     if (itemsWithoutDate.length > 0) {
 //       Alert.alert("Error", "Please select a date for all selected services");
 //       return;
 //     }
-    
+
 //     // Proceed with booking
 //     Alert.alert("Success", "Booking confirmed!");
 //     navigation.navigate("Transactions");
@@ -3728,7 +3850,7 @@ export default CartScreen;
 //                   <Text className="text-gray-500">
 //                     ₹{item.servicePrice} per unit
 //                   </Text>
-                  
+
 //                   {/* Date Picker */}
 //                   <TouchableOpacity
 //                     onPress={() => openDatePicker(item._id)}
@@ -3773,7 +3895,7 @@ export default CartScreen;
 //           {/* Cart Summary */}
 //           <View className="bg-white p-4 rounded-xl shadow mt-4">
 //             <Text className="text-lg font-semibold mb-2">Order Summary</Text>
-            
+
 //             {cartItems
 //               .filter(item => item.isSelected)
 //               .map(item => {
@@ -3794,7 +3916,7 @@ export default CartScreen;
 //                   </View>
 //                 );
 //               })}
-            
+
 //             {cartItems.filter(item => item.isSelected).length > 0 && (
 //               <View className="border-t border-gray-200 pt-3 mt-2">
 //                 <View className="flex-row justify-between mb-1">
@@ -3847,18 +3969,18 @@ export default CartScreen;
 
 //             {/* Week Navigation */}
 //             <View className="flex-row justify-between items-center mb-4">
-//               <TouchableOpacity 
+//               <TouchableOpacity
 //                 onPress={() => navigateWeek('prev')}
 //                 className="p-2"
 //               >
 //                 <ChevronDown size={20} color="#4B5563" style={{ transform: [{ rotate: '90deg' }] }} />
 //               </TouchableOpacity>
-              
+
 //               <Text className="text-lg font-semibold">
 //                 {weekDays[0]?.month} {weekDays[0]?.day} - {weekDays[6]?.month} {weekDays[6]?.day}
 //               </Text>
-              
-//               <TouchableOpacity 
+
+//               <TouchableOpacity
 //                 onPress={() => navigateWeek('next')}
 //                 className="p-2"
 //               >
@@ -3869,11 +3991,11 @@ export default CartScreen;
 //             {/* Week Days */}
 //             <View className="flex-row justify-between mb-4">
 //               {weekDays.map((day, index) => {
-//                 const isSelected = cartItems.find(item => 
-//                   item._id === datePickerItemId && 
+//                 const isSelected = cartItems.find(item =>
+//                   item._id === datePickerItemId &&
 //                   item.bookingDate === day.date.toISOString().split('T')[0]
 //                 );
-                
+
 //                 return (
 //                   <TouchableOpacity
 //                     key={index}
@@ -3908,12 +4030,6 @@ export default CartScreen;
 // };
 
 // export default CartScreen;
-
-
-
-
-
-
 
 // import React, { useEffect, useState, useRef } from 'react';
 // import { View, Text, Image, TouchableOpacity, TextInput, ActivityIndicator, ScrollView, Platform } from 'react-native';
