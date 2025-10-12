@@ -10,6 +10,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import { CategoryContext } from "@/src/context/CategoryContext";
+// import { CategoryContext } from "@/src/context/CategoryContext";
 
 interface Category {
   _id: string;

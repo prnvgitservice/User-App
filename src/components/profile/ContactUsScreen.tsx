@@ -3,8 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } fro
 import { Picker } from '@react-native-picker/picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { CategoryContext } from '@/src/context/CategoryContext';
+
 import { createGetInTouch } from '@/src/api/apiMethods';
+import { CategoryContext } from '@/src/context/CategoryContext';
 
 const ContactUs = () => {
   const { categories, loading, error: contextError } = useContext(CategoryContext);

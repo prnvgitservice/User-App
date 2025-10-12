@@ -28,11 +28,12 @@ import {
   MapPin,
 } from "lucide-react-native";
 import { useNavigation, useRouter } from "expo-router";
-import {
-  getAllPincodes,
-  userEditProfile,
-  userGetProfile,
-} from "@/src/api/apiMethods";
+import { getAllPincodes, userEditProfile, userGetProfile } from "@/src/api/apiMethods";
+// import {
+//   getAllPincodes,
+//   userEditProfile,
+//   userGetProfile,
+// } from "@/src/api/apiMethods";
 
 const { width } = Dimensions.get("window");
 

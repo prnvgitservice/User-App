@@ -14,12 +14,13 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  getAllPincodes,
-  userRegister,
-} from '@/src/api/apiMethods';
+// import {
+//   getAllPincodes,
+//   userRegister,
+// } from '@/src/api/apiMethods';
 import { Feather } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+import { getAllPincodes } from '@/src/api/apiMethods';
 
 interface PincodeArea {
   _id: string;

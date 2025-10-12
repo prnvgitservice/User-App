@@ -15,10 +15,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrendingSection from "../components/homescreen/TrendingSection";
 import PopularSearchesSection from "../components/homescreen/PopularSearchesSection";
 import BlogList from "../components/homescreen/BlogList";
-import CategoriesGrid from "../components/homescreen/CategoryGrid";
+// import CategoriesGrid from "../components/homescreen/CategoryGrid";
 import CustomerReviews from "../components/homescreen/CustomerReviews";
 import BannerCarousel from "../components/homescreen/BannerCarousel";
 import SearchBarSection from "../components/homescreen/SearchBarSection";
+import CategoriesGrid from "../components/homescreen/CategoryGrid";
 
 // Define navigation param list
 type RootStackParamList = {

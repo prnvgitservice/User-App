@@ -1,16 +1,17 @@
 import * as React from "react";
-import AppNavigator from "./src/navigation/AppNavigator";
+// import AppNavigator from "./src/navigation/AppNavigator";
 import "./global.css";
 import { CategoryProvider } from "./src/context/CategoryContext";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaView } from "react-native";
+import AppNavigator from "./src/navigation/AppNavigator.tsx";
 
 export default function App() {
   return (
       <NavigationContainer>
         <CategoryProvider>
           <SafeAreaView className="flex-1 bg-white pb-14 pt-10">
-            <AppNavigator />
+            <AppNavigator/>
           </SafeAreaView>
         </CategoryProvider>
       </NavigationContainer>

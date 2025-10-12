@@ -1,9 +1,10 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { CategoryContext } from '@/src/context/CategoryContext';
+// import { CategoryContext } from '@/src/context/CategoryContext';
 import { createGuestBooking } from '@/src/api/apiMethods';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { CategoryContext } from '@/src/context/CategoryContext';
 
 const GuestBooking = () => {
   const { categories, loading, error: contextError } = useContext(CategoryContext);

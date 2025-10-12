@@ -13,9 +13,9 @@ import BookingsListScreen from "../components/transaction/BookingsList";
 import CompletedDetailsScreen from "../components/transaction/CompletedDetailsScreen";
 import CancelledCard from "../components/transaction/CancelledCard";
 import SavingsScreen from "../components/transaction/SavingsScreen";
-import FinalRatingScreen from "../components/transaction/FinalRatingScreen";
+import FinalRatingScreen from "../components/transaction/FinalRatingScreen.tsx";
 import CongratulationsModal from "../components/transaction/CongratulationsModal";
-import BookingDetailsScreen from "../components/transaction/BookingDetaillsScreen";
+import BookingDetailsScreen from "../components/transaction/BookingDetaillsScreen.tsx";
 import { RefreshControl } from "react-native-gesture-handler";
 
 interface Booking {

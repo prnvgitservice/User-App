@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Image, Alert, ScrollView, ActivityIndicat
 import { ChevronLeft, User, Phone, MapPin, Key, Globe, AlertCircle } from 'react-native-feather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { bookingCancleByUser } from '@/src/api/apiMethods';
+// import { bookingCancleByUser } from '@/src/api/apiMethods.tsx';
 
 interface BookingData {
   booking: {
