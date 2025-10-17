@@ -1,5 +1,6 @@
 {
   "expo": {
+    "sdkVersion": "54.0.0",
     "name": "MyApp",
     "slug": "MyApp",
     "version": "1.0.0",
@@ -13,7 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "buildNumber": "1.0.0"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.velrk.MyApp"
+      "package": "com.velrk.MyApp",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -29,7 +32,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "679d0d55-5c79-4109-9226-abbd05de257d"
+        "projectId": "d91cc924-f395-457a-9d56-ae2b8af7d515"
       }
     }
   }

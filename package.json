@@ -4,9 +4,14 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "eas:build:android": "eas build --platform android --profile production",
+    "eas:build:apk": "eas build --platform android --profile apk",
+    "prebuild": "expo prebuild",
+    "build:local:apk": "eas build --platform android --local --profile apk",
+    "postinstall": "node scripts/handle-react-version.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
@@ -57,7 +62,8 @@
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "^13.2.3",
     "nativewind": "^4.1.23",
-    "typescript": "~5.8.3"
+    "typescript": "~5.8.3",
+    "react-dom": "19.0.0"
   },
   "private": true
 }

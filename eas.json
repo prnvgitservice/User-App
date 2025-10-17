@@ -6,13 +6,43 @@
   "build": {
     "production": {
       "android": {
-        "buildType": "app-bundle"  // ✅ this is the correct value, NOT "aab"
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease",
+        "cache": {
+          "key": "gradle-v1"
+        }
+      },
+      "env": {
+        "REACT_OVERRIDE_VERSION": "19.2.0",
+        "NODE_OPTIONS": "--max-old-space-size=6144"
       }
     },
     "apk": {
       "android": {
-        "buildType": "apk"         // ✅ generates APK
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease",
+        "cache": {
+          "key": "gradle-v1"
+        }
+      },
+      "env": {
+        "REACT_OVERRIDE_VERSION": "19.2.0",
+        "NODE_OPTIONS": "--max-old-space-size=6144"
       }
+    },
+    "development": {
+      "android": {
+        "gradleCommand": ":app:assembleDebug",
+        "buildType": "apk",
+        "cache": {
+          "key": "gradle-v1"
+        }
+      },
+      "env": {
+        "REACT_OVERRIDE_VERSION": "19.0.0"
+      },
+      "developmentClient": true,
+      "distribution": "internal"
     }
   },
   "submit": {
