@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, SafeAreaView } from "react-native";
+import { View, Text, ActivityIndicator} from "react-native";
 import { useRoute } from "@react-navigation/native";
 import { getAllTechnicianDetails } from "../api/apiMethods";
 import ProfileCard from "../components/techProfile/ProfileCard";

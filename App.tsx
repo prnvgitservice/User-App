@@ -3,11 +3,13 @@ import * as React from "react";
 import "./global.css";
 import { CategoryProvider } from "./src/context/CategoryContext";
 import { NavigationContainer } from "@react-navigation/native";
-import { SafeAreaView } from "react-native";
 import AppNavigator from "./src/navigation/AppNavigator.tsx";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 export default function App() {
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <NavigationContainer>
         <CategoryProvider>
           <SafeAreaView className="flex-1 bg-white pb-14 pt-10">
@@ -15,6 +17,7 @@ export default function App() {
           </SafeAreaView>
         </CategoryProvider>
       </NavigationContainer>
+      </GestureHandlerRootView>
   );
 }
 
