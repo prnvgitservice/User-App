@@ -6,12 +6,12 @@
   "build": {
     "production": {
       "android": {
-        "buildType": "app-bundle"  // ✅ this is the correct value, NOT "aab"
+        "buildType": "app-bundle"
       }
     },
     "apk": {
       "android": {
-        "buildType": "apk"         // ✅ generates APK
+        "buildType": "apk"      
       }
     }
   },
