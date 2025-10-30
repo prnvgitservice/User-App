@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -23,6 +23,7 @@ import {
   getCartItems,
   createBookService,
 } from "../api/apiMethods";
+import { Animated } from "react-native";
 
 interface CartItem {
   _id: string;
@@ -58,30 +59,129 @@ interface CartData {
 }
 
 interface SavingsData {
-  prnvTotal: number;
+  prnvBase: number;
+  prnvDiscount: number;
+  prnvFinal: number;
+  otherBase: number;
+  otherGst: number;
   otherTotal: number;
   savings: number;
 }
 
-const SavingsModal: React.FC<{
+interface SavingsModalProps {
   show: boolean;
   onClose: () => void;
   savingsData: SavingsData | null;
   onViewTransactions: () => void;
-}> = ({ show, onClose, savingsData, onViewTransactions }) => {
+}
+
+const getDiscountRate = (price: number): number => {
+  if (price > 1000) return 20;
+  if (price >= 500 && price <= 1000) return 10;
+  return 0;
+};
+
+const calculateItemBreakdown = (item: CartItem) => {
+  const originalPrice = item.servicePrice || 0;
+  const qty = item.quantity;
+  const originalSubtotal = originalPrice * qty;
+  const discountRate = getDiscountRate(originalPrice);
+  const discountAmount = originalSubtotal * (discountRate / 100);
+  const subtotal = originalSubtotal - discountAmount;
+  const gst = 0;
+  const total = subtotal + gst;
+  return {
+    originalSubtotal,
+    discountRate,
+    discountAmount,
+    subtotal,
+    gst,
+    total,
+  };
+};
+
+const { height, width } = Dimensions.get("window");
+
+
+const SavingsModal: React.FC<SavingsModalProps> = ({
+  show,
+  onClose,
+  savingsData,
+  onViewTransactions,
+}) => {
+  const emojis = ["💰", "🎯", "👍", "⭐", "🎊", "💸", "🏆", "🔥"];
+
+  // Create animated values for each emoji
+  const animValues = useRef(emojis.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    if (show) {
+      // Start looping animation for each emoji
+      animValues.forEach((anim, i) => {
+        const loop = () => {
+          anim.setValue(0);
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 5000 + Math.random() * 2000,
+            delay: i * 400,
+            useNativeDriver: true,
+          }).start(() => {
+            setTimeout(loop, 1000);
+          });
+        };
+        loop();
+      });
+    }
+  }, [show]);
+
   if (!show) return null;
 
   return (
     <Modal visible={show} transparent animationType="fade">
-      <View className="flex-1 bg-black/50 items-center justify-center p-4">
-        <View className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl border border-gray-200 relative">
-          <TouchableOpacity
-            className="absolute top-4 right-4"
-            onPress={onClose}
-          >
+      <View className="flex-1 bg-black/50 items-center justify-center px-2 relative">
+        {/* 🎊 Floating Emojis Background */}
+        <View className="absolute inset-0 overflow-hidden pointer-events-none">
+          {emojis.map((emoji, index) => {
+            const translateY = animValues[index].interpolate({
+              inputRange: [0, 1],
+              outputRange: [height * 0.3 + Math.random() * 100, -80],
+            });
+            const opacity = animValues[index].interpolate({
+              inputRange: [0, 0.2, 0.8, 1],
+              outputRange: [0, 1, 1, 0],
+            });
+            const rotate = animValues[index].interpolate({
+              inputRange: [0, 1],
+              outputRange: ["0deg", `${Math.random() * 360}deg`],
+            });
+
+            const randomLeft = Math.random() * width * 0.8;
+
+            return (
+              <Animated.View
+                key={index}
+                className="absolute"
+                style={{
+                  left: randomLeft,
+                  transform: [{ translateY }, { rotate }],
+                  opacity,
+                }}
+              >
+                <Text style={{ fontSize: 36 }}>{emoji}</Text>
+              </Animated.View>
+            );
+          })}
+        </View>
+
+        {/* 💸 Main Modal Box */}
+        <View className="bg-white px-2 py-3 rounded-2xl w-full max-w-md shadow-xl border border-gray-200 relative z-10">
+          {/* Close Button */}
+          <TouchableOpacity className="absolute top-4 right-4" onPress={onClose}>
             <Ionicons name="close" size={20} color="gray" />
           </TouchableOpacity>
-          <View className="text-center mb-6">
+
+          {/* Success Header */}
+          <View className="text-center mb-2">
             <View className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
               <MaterialIcons name="check" size={32} color="green" />
             </View>
@@ -91,31 +191,82 @@ const SavingsModal: React.FC<{
             <Text className="text-gray-600">Your booking was successful!</Text>
           </View>
 
+          {/* Billing Table */}
           {savingsData && (
-            <View className="bg-gray-50 rounded-xl p-4 mb-6">
-              <View className="flex-row justify-between border-b border-gray-200 py-2 text-gray-700 font-semibold">
-                <Text>Description</Text>
-                <Text>Amount (₹)</Text>
+            <>
+              {/* PRNV Billing */}
+              <View className="bg-gray-50 rounded-xl p-2 mb-2">
+                <Text className="text-lg font-semibold mb-3 text-gray-800">
+                  PRNV Billing
+                </Text>
+                <View className="border border-gray-200 rounded-lg overflow-hidden">
+                  <View className="flex-row bg-gray-100 px-3 py-2 border-b border-gray-200">
+                    <Text className="flex-1 font-semibold text-gray-700">
+                      Description
+                    </Text>
+                    <Text className="w-24 text-right font-semibold text-gray-700">
+                      Amount
+                    </Text>
+                  </View>
+                  <View className="flex-row px-3 py-2 bg-gray-100">
+                    <Text className="flex-1 font-semibold">Final Price</Text>
+                    <Text className="w-24 text-right font-semibold text-fuchsia-600 font-mono">
+                      ₹{savingsData.prnvFinal}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              <View className="flex-row justify-between border-b border-gray-100 py-2">
-                <Text>PRNV Service (No GST)</Text>
-                <Text className="font-mono">{savingsData.prnvTotal}</Text>
+
+              {/* Competitor Pricing */}
+              <View className="bg-yellow-50 rounded-xl p-2 mb-2">
+                <Text className="text-lg font-semibold mb-3 text-gray-800">
+                  Competitor Pricing
+                </Text>
+                <View className="border border-gray-200 rounded-lg overflow-hidden">
+                  <View className="flex-row bg-yellow-100 px-3 py-2 border-b border-gray-200">
+                    <Text className="flex-1 font-semibold text-gray-700">
+                      Description
+                    </Text>
+                    <Text className="w-24 text-right font-semibold text-gray-700">
+                      Amount
+                    </Text>
+                  </View>
+                  <View className="flex-row px-3 py-2 border-b border-gray-200">
+                    <Text className="flex-1 text-gray-700">
+                      Base Price (30% higher)
+                    </Text>
+                    <Text className="w-24 text-right font-mono text-gray-700">
+                      ₹{savingsData.otherBase}
+                    </Text>
+                  </View>
+                  <View className="flex-row px-3 py-2 border-b border-gray-200">
+                    <Text className="flex-1 text-gray-500">GST (18%)</Text>
+                    <Text className="w-24 text-right font-mono text-gray-500">
+                      ₹{savingsData.otherGst}
+                    </Text>
+                  </View>
+                  <View className="flex-row px-3 py-2 bg-yellow-100">
+                    <Text className="flex-1 font-semibold">Total</Text>
+                    <Text className="w-24 text-right font-semibold text-red-600 font-mono">
+                      ₹{savingsData.otherTotal}
+                    </Text>
+                  </View>
+                </View>
               </View>
-              <View className="flex-row justify-between border-b border-gray-100 py-2">
-                <Text>Other Services (30% higher + 18% GST)</Text>
-                <Text className="font-mono">{savingsData.otherTotal}</Text>
-              </View>
-              <View className="flex-row justify-between bg-green-50 py-2 font-semibold">
-                <Text>Your Total Savings</Text>
-                <Text className="text-green-600 font-mono">
-                  ₹ {savingsData.savings}
+
+              {/* Savings Summary */}
+              <View className="bg-green-50 rounded-xl p-4 mb-6 flex-row justify-between items-center">
+                <Text className="text-lg font-bold">Total Savings</Text>
+                <Text className="font-mono text-green-600 text-lg font-bold">
+                  ₹{savingsData.savings}
                 </Text>
               </View>
-            </View>
+            </>
           )}
 
-          <View className="bg-blue-50 rounded-xl p-4 mb-6 text-sm text-blue-800">
-            <Text>
+          {/* Info Note */}
+          <View className="bg-blue-50 rounded-xl p-4 mb-6">
+            <Text className="text-blue-800 text-sm">
               PRNV offers competitive pricing with{" "}
               <Text className="font-semibold">no GST</Text> and rates{" "}
               <Text className="font-semibold">30% lower</Text> than competitors,
@@ -123,6 +274,7 @@ const SavingsModal: React.FC<{
             </Text>
           </View>
 
+          {/* CTA Button */}
           <TouchableOpacity
             className="w-full bg-fuchsia-500 py-3 rounded-xl"
             onPress={onViewTransactions}
@@ -136,6 +288,277 @@ const SavingsModal: React.FC<{
     </Modal>
   );
 };
+
+
+// const SavingsModal: React.FC<{
+//   show: boolean;
+//   onClose: () => void;
+//   savingsData: SavingsData | null;
+//   onViewTransactions: () => void;
+// }> = ({ show, onClose, savingsData, onViewTransactions }) => {
+//   if (!show) return null;
+
+//   return (
+//     <Modal visible={show} transparent animationType="fade">
+//       <View className="flex-1 bg-black/50 items-center justify-center px-2 relative">
+//         <View className="bg-white px-2 py-3 rounded-2xl w-full max-w-md shadow-xl border border-gray-200 relative">
+//           <View className="absolute inset-0 overflow-hidden pointer-events-none">
+//           {["💰", "🎯", "👍", "⭐", "🎊", "💸", "🏆", "🔥"].map((emoji, index) => (
+//             <View
+//               key={index}
+//               className="absolute"
+//               style={{
+//                 top: `${Math.random() * 80}%`,
+//                 left: `${Math.random() * 80}%`,
+//                 transform: [{ rotate: `${Math.random() * 360}deg` }],
+//                 opacity: 0.25,
+//               }}
+//             >
+//               <Text style={{ fontSize: 36 }}>{emoji}</Text>
+//             </View>
+//           ))}
+//         </View>
+//           {/* Close Button */}
+//           <TouchableOpacity className="absolute top-4 right-4" onPress={onClose}>
+//             <Ionicons name="close" size={20} color="gray" />
+//           </TouchableOpacity>
+
+
+//           {/* Success Header */}
+//           <View className="text-center mb-2">
+//             <View className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+//               <MaterialIcons name="check" size={32} color="green" />
+//             </View>
+//             <Text className="text-2xl font-bold text-gray-800 mb-2">
+//               Congratulations!
+//             </Text>
+//             <Text className="text-gray-600">Your booking was successful!</Text>
+//           </View>
+
+//           {/* Billing Table */}
+//           {savingsData && (
+//             <>
+//               {/* PRNV Billing */}
+//               <View className="bg-gray-50 rounded-xl p-2 mb-2">
+//                 <Text className="text-lg font-semibold mb-3 text-gray-800">
+//                   PRNV Billing
+//                 </Text>
+//                 <View className="border border-gray-200 rounded-lg overflow-hidden">
+//                   {/* Table Header */}
+//                   <View className="flex-row bg-gray-100 px-3 py-2 border-b border-gray-200">
+//                     <Text className="flex-1 font-semibold text-gray-700">
+//                       Description
+//                     </Text>
+//                     <Text className="w-24 text-right font-semibold text-gray-700">
+//                       Amount
+//                     </Text>
+//                   </View>
+
+//                   {/* Table Rows */}
+//                   {/* <View className="flex-row px-3 py-2 border-b border-gray-200">
+//                     <Text className="flex-1 text-gray-700">Product Price</Text>
+//                     <Text className="w-24 text-right font-mono text-gray-700">
+//                       ₹{savingsData.prnvBase}
+//                     </Text>
+//                   </View>
+//                   <View className="flex-row px-3 py-2 border-b border-gray-200">
+//                     <Text className="flex-1 text-green-600">Discount</Text>
+//                     <Text className="w-24 text-right font-mono text-green-600">
+//                       -₹{savingsData.prnvDiscount}
+//                     </Text>
+//                   </View>
+//                   <View className="flex-row px-3 py-2 border-b border-gray-200">
+//                     <Text className="flex-1 text-gray-500">GST (0%)</Text>
+//                     <Text className="w-24 text-right font-mono text-gray-500">
+//                       ₹0
+//                     </Text>
+//                   </View> */}
+//                   <View className="flex-row px-3 py-2 bg-gray-100">
+//                     <Text className="flex-1 font-semibold">Final Price</Text>
+//                     <Text className="w-24 text-right font-semibold text-fuchsia-600 font-mono">
+//                       ₹{savingsData.prnvFinal}
+//                     </Text>
+//                   </View>
+//                 </View>
+//               </View>
+
+//               {/* Competitor Pricing */}
+//               <View className="bg-yellow-50 rounded-xl p-2 mb-2">
+//                 <Text className="text-lg font-semibold mb-3 text-gray-800">
+//                   Competitor Pricing
+//                 </Text>
+//                 <View className="border border-gray-200 rounded-lg overflow-hidden">
+//                   <View className="flex-row bg-yellow-100 px-3 py-2 border-b border-gray-200">
+//                     <Text className="flex-1 font-semibold text-gray-700">
+//                       Description
+//                     </Text>
+//                     <Text className="w-24 text-right font-semibold text-gray-700">
+//                       Amount
+//                     </Text>
+//                   </View>
+
+//                   <View className="flex-row px-3 py-2 border-b border-gray-200">
+//                     <Text className="flex-1 text-gray-700">
+//                       Base Price (30% higher)
+//                     </Text>
+//                     <Text className="w-24 text-right font-mono text-gray-700">
+//                       ₹{savingsData.otherBase}
+//                     </Text>
+//                   </View>
+//                   <View className="flex-row px-3 py-2 border-b border-gray-200">
+//                     <Text className="flex-1 text-gray-500">GST (18%)</Text>
+//                     <Text className="w-24 text-right font-mono text-gray-500">
+//                       ₹{savingsData.otherGst}
+//                     </Text>
+//                   </View>
+//                   <View className="flex-row px-3 py-2 bg-yellow-100">
+//                     <Text className="flex-1 font-semibold">Total</Text>
+//                     <Text className="w-24 text-right font-semibold text-red-600 font-mono">
+//                       ₹{savingsData.otherTotal}
+//                     </Text>
+//                   </View>
+//                 </View>
+//               </View>
+
+//               {/* Savings Summary */}
+//               <View className="bg-green-50 rounded-xl p-4 mb-6 flex-row justify-between items-center">
+//                 <Text className="text-lg font-bold">Total Savings</Text>
+//                 <Text className="font-mono text-green-600 text-lg font-bold">
+//                   ₹{savingsData.savings}
+//                 </Text>
+//               </View>
+//             </>
+//           )}
+
+//           {/* Info Note */}
+//           <View className="bg-blue-50 rounded-xl p-4 mb-6">
+//             <Text className="text-blue-800 text-sm">
+//               PRNV offers competitive pricing with{" "}
+//               <Text className="font-semibold">no GST</Text> and rates{" "}
+//               <Text className="font-semibold">30% lower</Text> than competitors,
+//               saving you money!
+//             </Text>
+//           </View>
+
+//           {/* CTA Button */}
+//           <TouchableOpacity
+//             className="w-full bg-fuchsia-500 py-3 rounded-xl"
+//             onPress={onViewTransactions}
+//           >
+//             <Text className="text-white font-semibold text-center">
+//               View Transaction Details
+//             </Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+// };
+
+
+// const SavingsModal: React.FC<{
+//   show: boolean;
+//   onClose: () => void;
+//   savingsData: SavingsData | null;
+//   onViewTransactions: () => void;
+// }> = ({ show, onClose, savingsData, onViewTransactions }) => {
+//   if (!show) return null;
+
+//   return (
+//     <Modal visible={show} transparent animationType="fade">
+//       <View className="flex-1 bg-black/50 items-center justify-center p-4">
+//         <View className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl border border-gray-200 relative">
+//           <TouchableOpacity
+//             className="absolute top-4 right-4"
+//             onPress={onClose}
+//           >
+//             <Ionicons name="close" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <View className="text-center mb-6">
+//             <View className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+//               <MaterialIcons name="check" size={32} color="green" />
+//             </View>
+//             <Text className="text-2xl font-bold text-gray-800 mb-2">
+//               Congratulations!
+//             </Text>
+//             <Text className="text-gray-600">Your booking was successful!</Text>
+//           </View>
+
+//           {savingsData && (
+//             <>
+//               <View className="bg-gray-50 rounded-xl p-4 mb-4">
+//                 <Text className="text-lg font-semibold mb-3 text-gray-800">PRNV Billing</Text>
+//                 <View className="space-y-2 text-sm">
+//                   <View className="flex justify-between">
+//                     <Text>Product Price</Text>
+//                     <Text className="font-mono">₹{savingsData.prnvBase}</Text>
+//                   </View>
+//                   <View className="flex justify-between text-green-600">
+//                     <Text>Discount</Text>
+//                     <Text className="font-mono">-₹{savingsData.prnvDiscount}</Text>
+//                   </View>
+//                   <View className="flex justify-between text-gray-500">
+//                     <Text>GST (0%)</Text>
+//                     <Text className="font-mono">₹0</Text>
+//                   </View>
+//                   <View className="h-px bg-gray-200 my-2" />
+//                   <View className="flex justify-between font-semibold">
+//                     <Text>Final Price</Text>
+//                     <Text className="font-mono text-fuchsia-600">₹{savingsData.prnvFinal}</Text>
+//                   </View>
+//                 </View>
+//               </View>
+
+//               <View className="bg-yellow-50 rounded-xl p-4 mb-4">
+//                 <Text className="text-lg font-semibold mb-3 text-gray-800">Competitor Pricing</Text>
+//                 <View className="space-y-2 text-sm">
+//                   <View className="flex justify-between">
+//                     <Text>Base Price (30% higher)</Text>
+//                     <Text className="font-mono">₹{savingsData.otherBase}</Text>
+//                   </View>
+//                   <View className="flex justify-between text-gray-500">
+//                     <Text>GST (18%)</Text>
+//                     <Text className="font-mono">₹{savingsData.otherGst}</Text>
+//                   </View>
+//                   <View className="h-px bg-gray-200 my-2" />
+//                   <View className="flex justify-between font-semibold">
+//                     <Text>Total</Text>
+//                     <Text className="font-mono text-red-600">₹{savingsData.otherTotal}</Text>
+//                   </View>
+//                 </View>
+//               </View>
+
+//               <View className="bg-green-50 rounded-xl p-4 mb-6">
+//                 <View className="flex justify-between text-lg font-bold">
+//                   <Text>Total Savings</Text>
+//                   <Text className="font-mono text-green-600">₹{savingsData.savings}</Text>
+//                 </View>
+//               </View>
+//             </>
+//           )}
+
+//           <View className="bg-blue-50 rounded-xl p-4 mb-6 text-sm text-blue-800">
+//             <Text>
+//               PRNV offers competitive pricing with{" "}
+//               <Text className="font-semibold">no GST</Text> and rates{" "}
+//               <Text className="font-semibold">30% lower</Text> than competitors,
+//               saving you money!
+//             </Text>
+//           </View>
+
+//           <TouchableOpacity
+//             className="w-full bg-fuchsia-500 py-3 rounded-xl"
+//             onPress={onViewTransactions}
+//           >
+//             <Text className="text-white font-semibold text-center">
+//               View Transaction Details
+//             </Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+// };
 
 const CartScreen: React.FC = () => {
   const navigation = useNavigation<any>();
@@ -389,30 +812,41 @@ const CartScreen: React.FC = () => {
       if (selectedItems.some((item) => !item.bookingDate)) {
         throw new Error("Select dates for all selected items");
       }
-      const prnvTotal = selectedItems.reduce(
-        (acc, item) => acc + (item.servicePrice || 0) * item.quantity,
-        0
-      );
-      const otherBaseTotal = prnvTotal * 1.3;
+      let prnvBase = 0;
+      let prnvDiscountTotal = 0;
+      selectedItems.forEach((item) => {
+        const bd = calculateItemBreakdown(item);
+        prnvBase += bd.originalSubtotal;
+        prnvDiscountTotal += bd.discountAmount;
+      });
+      const prnvFinal = prnvBase - prnvDiscountTotal;
+      const otherBaseTotal = prnvBase * 1.3;
       const otherGst = Math.round(otherBaseTotal * 0.18);
       const otherTotal = Math.round(otherBaseTotal) + otherGst;
-      const savings = otherTotal - prnvTotal;
-      const bookings = selectedItems.map((item) => ({
-        userId,
-        serviceId: item.serviceId,
-        technicianId: item.technicianId,
-        quantity: String(item.quantity),
-        bookingDate: item.bookingDate,
-        servicePrice: String((item.servicePrice || 0) * item.quantity),
-        gst: "0",
-        totalPrice: String((item.servicePrice || 0) * item.quantity),
-      }));
+      const savings = otherTotal - prnvFinal;
+      const bookings = selectedItems.map((item) => {
+        const bd = calculateItemBreakdown(item);
+        return {
+          userId,
+          serviceId: item.serviceId,
+          technicianId: item.technicianId,
+          quantity: String(item.quantity),
+          bookingDate: item.bookingDate,
+          servicePrice: Math.round(bd.subtotal).toString(),
+          gst: "0",
+          totalPrice: Math.round(bd.total).toString(),
+        };
+      });
       const response = await createBookService(bookings);
       if (!response?.success) {
         throw new Error(response?.message || "Booking failed");
       }
       setSavingsData({
-        prnvTotal: Math.round(prnvTotal),
+        prnvBase: Math.round(prnvBase),
+        prnvDiscount: Math.round(prnvDiscountTotal),
+        prnvFinal: Math.round(prnvFinal),
+        otherBase: Math.round(otherBaseTotal),
+        otherGst,
         otherTotal,
         savings,
       });
@@ -441,14 +875,6 @@ const CartScreen: React.FC = () => {
     const maxDate = new Date();
     maxDate.setDate(today.getDate() + 7);
     return maxDate;
-  };
-
-  const calculateItemTotal = (item: CartItem) => {
-    const price = item.servicePrice || 0;
-    const subtotal = price * item.quantity;
-    const gst = 0;
-    const total = subtotal + gst;
-    return { subtotal, gst, total };
   };
 
   const isBookingDisabled =
@@ -527,6 +953,7 @@ const CartScreen: React.FC = () => {
             <View className="flex-col gap-4">
               {cartData.cart.items.map((item) => {
                 const isProcessing = processingItems[item._id];
+                const breakdown = calculateItemBreakdown(item);
                 return (
                   <View
                     key={item._id}
@@ -607,7 +1034,7 @@ const CartScreen: React.FC = () => {
                       </View>
 
                       <Text className="font-semibold text-gray-800">
-                        ₹ {(item.servicePrice || 0) * item.quantity}
+                        ₹ {Math.round(breakdown.originalSubtotal)}
                       </Text>
 
                       <TouchableOpacity
@@ -642,7 +1069,7 @@ const CartScreen: React.FC = () => {
               <View className="mt-6 border-t pt-4">
                 <Text className="text-lg font-semibold mb-4">Selected Items</Text>
                 {selectedItems.map((item) => {
-                  const { subtotal, gst, total } = calculateItemTotal(item);
+                  const breakdown = calculateItemBreakdown(item);
                   const truncatedServiceName =
                     item.serviceName.length > 30
                       ? `${item.serviceName.substring(0, 30)}...`
@@ -654,12 +1081,16 @@ const CartScreen: React.FC = () => {
                       style={{ width: itemWidth }}
                     >
                       <View className="flex-row justify-between">
-                        <Text className="font-medium"
-                          numberOfLines={2}
+                        <Text className="font-normal"
+                          numberOfLines={1}
                           ellipsizeMode="tail">
-                          {truncatedServiceName} ({item.quantity})
+                          {truncatedServiceName} ({item.quantity} )
                         </Text>
-                        <Text className="font-mono">₹ {subtotal}</Text>
+                        <Text className="font-mono">₹ {Math.round(breakdown.originalSubtotal)}</Text>
+                      </View>
+                      <View className="flex-row justify-between text-sm text-green-600 mt-2">
+                        <Text>Discount ({breakdown.discountRate}%)</Text>
+                        <Text className="font-mono">-₹{Math.round(breakdown.discountAmount)}</Text>
                       </View>
                       <View className="flex-row justify-between text-sm text-gray-600 mt-2">
                         <Text>Booking Date</Text>
@@ -671,65 +1102,31 @@ const CartScreen: React.FC = () => {
                         <Text>GST</Text>
                         <Text>0</Text>
                       </View>
-                      <View className="flex-row justify-between font-semibold mt-2">
+                      <View className="flex-row justify-between font-semibold mt-2 border-t pt-2 border-gray-200">
                         <Text>Total</Text>
-                        <Text className="font-mono">₹ {total}</Text>
+                        <Text className="font-mono">₹ {Math.round(breakdown.total)}</Text>
                       </View>
                     </View>
                   );
                 })}
+                {(() => {
+                  const grandTotal = selectedItems.reduce(
+                    (acc, item) => acc + calculateItemBreakdown(item).total,
+                    0
+                  );
+                  return (
+                    <View className="mt-4 p-3 bg-gray-50 rounded-lg">
+                      <View className="flex justify-between text-lg font-bold">
+                        <Text>Total ({selectedItems.length} services)</Text>
+                        <Text className="font-mono text-fuchsia-600">
+                          ₹{Math.round(grandTotal)}
+                        </Text>
+                      </View>
+                    </View>
+                  );
+                })()}
               </View>
             )}
-            {/* {selectedItems.length > 0 && (
-              <View className="mt-6 border-t pt-4">
-                <Text className="text-lg font-semibold mb-4">
-                  Selected Items
-                </Text>
-                {selectedItems.map((item) => {
-                  const { subtotal, gst, total } = calculateItemTotal(item);
-                  // Truncate serviceName if longer than 20 characters
-                  const truncatedServiceName =
-                    item.serviceName.length > 20
-                      ? `${item.serviceName.substring(0, 20)}...`
-                      : item.serviceName;
-
-                  return (
-                    <View
-                      key={item._id}
-                      className="mb-4 p-4 border rounded-lg bg-white shadow-sm"
-                      style={{ width: itemWidth, maxWidth: 300 }} // Set a max width for better control
-                    >
-                      <View className="flex-row justify-between">
-                        <Text
-                          className="font-medium"
-                          numberOfLines={2}
-                          ellipsizeMode="tail"
-                        >
-                          {truncatedServiceName} ({item.quantity})
-                        </Text>
-                        <Text className="font-mono">₹ {subtotal}</Text>
-                      </View>
-                      <View className="flex-row justify-between text-sm text-gray-600 mt-2">
-                        <Text>Booking Date</Text>
-                        <Text>
-                          {item.bookingDate
-                            ? new Date(item.bookingDate).toLocaleDateString()
-                            : "Not set"}
-                        </Text>
-                      </View>
-                      <View className="flex-row justify-between text-sm text-gray-600 mt-2">
-                        <Text>GST</Text>
-                        <Text>0%</Text>
-                      </View>
-                      <View className="flex-row justify-between font-semibold mt-2">
-                        <Text>Total</Text>
-                        <Text className="font-mono">₹ {total}</Text>
-                      </View>
-                    </View>
-                  );
-                })}
-              </View>
-            )} */}
 
             <View className="flex-row justify-between items-center mt-6">
               <Text className="text-gray-800">Missed Something?</Text>
@@ -742,7 +1139,7 @@ const CartScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            <View className="mt-6 border-t pt-4 pb-6">
+            <View className="mt-6 mb-6 border-t pt-4 pb-6">
               <TouchableOpacity
                 className={`w-full py-3 rounded-xl text-lg font-semibold ${
                   isBookingDisabled
@@ -792,6 +1189,800 @@ const CartScreen: React.FC = () => {
 };
 
 export default CartScreen;
+// import React, { useEffect, useState } from "react";
+// import {
+//   View,
+//   Text,
+//   Image,
+//   TouchableOpacity,
+//   ScrollView,
+//   ActivityIndicator,
+//   Modal,
+//   Platform,
+//   Dimensions,
+//   RefreshControl,
+// } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import DateTimePicker from "@react-native-community/datetimepicker";
+// import Ionicons from "@expo/vector-icons/Ionicons";
+// import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+// import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+// import {
+//   removeFromCart,
+//   addToCart,
+//   getCartItems,
+//   createBookService,
+// } from "../api/apiMethods";
+
+// interface CartItem {
+//   _id: string;
+//   technicianId: string;
+//   serviceId: string;
+//   serviceName: string;
+//   serviceImg?: string;
+//   servicePrice?: number;
+//   price?: number;
+//   quantity: number;
+//   bookingDate: string;
+//   otp?: number;
+//   isSelected: boolean;
+// }
+
+// interface CartData {
+//   user: {
+//     _id: string;
+//     username: string;
+//     phoneNumber: string;
+//     role: string;
+//     buildingName: string;
+//     areaName: string;
+//     city: string;
+//     state: string;
+//     pincode: string;
+//   };
+//   cart: {
+//     _id: string;
+//     userId: string;
+//     items: CartItem[];
+//   };
+// }
+
+// interface SavingsData {
+//   prnvTotal: number;
+//   otherTotal: number;
+//   savings: number;
+// }
+
+// const SavingsModal: React.FC<{
+//   show: boolean;
+//   onClose: () => void;
+//   savingsData: SavingsData | null;
+//   onViewTransactions: () => void;
+// }> = ({ show, onClose, savingsData, onViewTransactions }) => {
+//   if (!show) return null;
+
+//   return (
+//     <Modal visible={show} transparent animationType="fade">
+//       <View className="flex-1 bg-black/50 items-center justify-center p-4">
+//         <View className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl border border-gray-200 relative">
+//           <TouchableOpacity
+//             className="absolute top-4 right-4"
+//             onPress={onClose}
+//           >
+//             <Ionicons name="close" size={20} color="gray" />
+//           </TouchableOpacity>
+//           <View className="text-center mb-6">
+//             <View className="w-16 h-16 bg-green-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+//               <MaterialIcons name="check" size={32} color="green" />
+//             </View>
+//             <Text className="text-2xl font-bold text-gray-800 mb-2">
+//               Congratulations!
+//             </Text>
+//             <Text className="text-gray-600">Your booking was successful!</Text>
+//           </View>
+
+//           {savingsData && (
+//             <View className="bg-gray-50 rounded-xl p-4 mb-6">
+//               <View className="flex-row justify-between border-b border-gray-200 py-2 text-gray-700 font-semibold">
+//                 <Text>Description</Text>
+//                 <Text>Amount (₹)</Text>
+//               </View>
+//               <View className="flex-row justify-between border-b border-gray-100 py-2">
+//                 <Text>PRNV Service (No GST)</Text>
+//                 <Text className="font-mono">{savingsData.prnvTotal}</Text>
+//               </View>
+//               <View className="flex-row justify-between border-b border-gray-100 py-2">
+//                 <Text>Other Services (30% higher + 18% GST)</Text>
+//                 <Text className="font-mono">{savingsData.otherTotal}</Text>
+//               </View>
+//               <View className="flex-row justify-between bg-green-50 py-2 font-semibold">
+//                 <Text>Your Total Savings</Text>
+//                 <Text className="text-green-600 font-mono">
+//                   ₹ {savingsData.savings}
+//                 </Text>
+//               </View>
+//             </View>
+//           )}
+
+//           <View className="bg-blue-50 rounded-xl p-4 mb-6 text-sm text-blue-800">
+//             <Text>
+//               PRNV offers competitive pricing with{" "}
+//               <Text className="font-semibold">no GST</Text> and rates{" "}
+//               <Text className="font-semibold">30% lower</Text> than competitors,
+//               saving you money!
+//             </Text>
+//           </View>
+
+//           <TouchableOpacity
+//             className="w-full bg-fuchsia-500 py-3 rounded-xl"
+//             onPress={onViewTransactions}
+//           >
+//             <Text className="text-white font-semibold text-center">
+//               View Transaction Details
+//             </Text>
+//           </TouchableOpacity>
+//         </View>
+//       </View>
+//     </Modal>
+//   );
+// };
+
+// const CartScreen: React.FC = () => {
+//   const navigation = useNavigation<any>();
+//   const [cartData, setCartData] = useState<CartData | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [processingItems, setProcessingItems] = useState<{
+//     [key: string]: boolean;
+//   }>({});
+//   const [isBooking, setIsBooking] = useState(false);
+//   const [selectedItems, setSelectedItems] = useState<CartItem[]>([]);
+//   const [showSavingsModal, setShowSavingsModal] = useState(false);
+//   const [savingsData, setSavingsData] = useState<SavingsData | null>(null);
+//   const [showDatePicker, setShowDatePicker] = useState(false);
+//   const [currentItemId, setCurrentItemId] = useState<string | null>(null);
+//   const [date, setDate] = useState(new Date());
+//   const [refreshing, setRefreshing] = useState(false); // State for pull-to-refresh
+//   const { width } = Dimensions.get("window");
+//   const itemWidth = width * 0.9;
+
+//   useEffect(() => {
+//     fetchCartData();
+//   }, []);
+
+//   const fetchCartData = async () => {
+//     try {
+//       setLoading(true);
+//       setError(null);
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         setError("User not logged in");
+//         return;
+//       }
+//       const response = await getCartItems(userId);
+//       if (response?.success && response?.result?.cart) {
+//         const formattedItems = response.result.cart.map((item: any) => ({
+//           _id: item?._id || "",
+//           serviceId: item?.serviceId || "",
+//           serviceName: item?.serviceName || "Unknown Service",
+//           serviceImg: item?.serviceImg || "",
+//           servicePrice: Number(item?.servicePrice || item?.price || 0),
+//           quantity: Number(item?.quantity || 1),
+//           technicianId: item?.technicianId || "",
+//           bookingDate: item?.bookingDate || "",
+//           isSelected: false,
+//         }));
+//         setCartData({
+//           user: response.result.user || {},
+//           cart: {
+//             _id: response.result.cart._id || "",
+//             userId: response.result.cart.userId || userId,
+//             items: formattedItems,
+//           },
+//         });
+//         setSelectedItems([]);
+//       } else {
+//         setError(response?.message || "Failed to fetch cart data");
+//       }
+//     } catch (err: any) {
+//       setError(err?.message || "Failed to fetch cart data");
+//     } finally {
+//       setLoading(false);
+//       setRefreshing(false); // Stop refresh spinner
+//     }
+//   };
+
+//   // Pull-to-refresh handler
+//   const onRefresh = async () => {
+//     setRefreshing(true);
+//     await fetchCartData(); // Re-fetch cart data
+//   };
+
+//   const handleCalendarClick = (itemId: string) => {
+//     setCurrentItemId(itemId);
+//     const item = cartData?.cart.items.find((i) => i._id === itemId);
+//     setDate(item?.bookingDate ? new Date(item.bookingDate) : new Date());
+//     setShowDatePicker(true);
+//   };
+
+//   const handleDateChange = (event: any, selectedDate?: Date) => {
+//     setShowDatePicker(Platform.OS === "ios");
+//     if (event.type === "dismissed" || !selectedDate) return;
+//     if (currentItemId) {
+//       const dateStr = selectedDate.toISOString().split("T")[0];
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.map((item) =>
+//               item._id === currentItemId
+//                 ? { ...item, bookingDate: dateStr }
+//                 : item
+//             ),
+//           },
+//         };
+//       });
+//       setSelectedItems((prev) =>
+//         prev.map((item) =>
+//           item._id === currentItemId ? { ...item, bookingDate: dateStr } : item
+//         )
+//       );
+//       setDate(selectedDate);
+//     }
+//   };
+
+//   const handleClearDate = (itemId: string) => {
+//     setCartData((prev) => {
+//       if (!prev) return null;
+//       return {
+//         ...prev,
+//         cart: {
+//           ...prev.cart,
+//           items: prev.cart.items.map((item) =>
+//             item._id === itemId ? { ...item, bookingDate: "" } : item
+//           ),
+//         },
+//       };
+//     });
+//     setSelectedItems((prev) =>
+//       prev.map((item) =>
+//         item._id === itemId ? { ...item, bookingDate: "" } : item
+//       )
+//     );
+//   };
+
+//   const handleQuantityChange = async (itemId: string, delta: number) => {
+//     try {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         throw new Error("User not logged in");
+//       }
+//       const item = cartData?.cart.items.find((item) => item._id === itemId);
+//       if (!item) {
+//         throw new Error("Item not found");
+//       }
+//       const newQuantity = Math.max(1, item.quantity + delta);
+//       const payload = {
+//         userId,
+//         serviceId: item.serviceId,
+//         technicianId: item.technicianId,
+//         quantity: newQuantity,
+//       };
+//       const response = await addToCart(payload);
+//       if (!response?.success) {
+//         throw new Error(response?.message || "Failed to update quantity");
+//       }
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.map((cartItem) =>
+//               cartItem._id === itemId
+//                 ? { ...cartItem, quantity: newQuantity }
+//                 : cartItem
+//             ),
+//           },
+//         };
+//       });
+//       setSelectedItems((prev) =>
+//         prev.map((item) =>
+//           item._id === itemId ? { ...item, quantity: newQuantity } : item
+//         )
+//       );
+//     } catch (err: any) {
+//       setError(err.message || "Failed to update quantity");
+//       await fetchCartData();
+//     } finally {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
+//     }
+//   };
+
+//   const handleRemove = async (itemId: string) => {
+//     try {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: true }));
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         throw new Error("User not logged in");
+//       }
+//       const item = cartData?.cart.items.find((item) => item._id === itemId);
+//       if (!item) {
+//         throw new Error("Item not found");
+//       }
+//       const response = await removeFromCart({
+//         userId,
+//         serviceId: item.serviceId,
+//         technicianId: item.technicianId,
+//       });
+//       if (!response?.success) {
+//         throw new Error(response?.message || "Failed to remove item");
+//       }
+//       setCartData((prev) => {
+//         if (!prev) return null;
+//         return {
+//           ...prev,
+//           cart: {
+//             ...prev.cart,
+//             items: prev.cart.items.filter(
+//               (cartItem) => cartItem._id !== itemId
+//             ),
+//           },
+//         };
+//       });
+//       setSelectedItems((prev) => prev.filter((item) => item._id !== itemId));
+//     } catch (err: any) {
+//       setError(err.message || "Failed to remove item");
+//       await fetchCartData();
+//     } finally {
+//       setProcessingItems((prev) => ({ ...prev, [itemId]: false }));
+//     }
+//   };
+
+//   const handleCheckboxChange = (itemId: string) => {
+//     setCartData((prev) => {
+//       if (!prev) return null;
+//       const updatedItems = prev.cart.items.map((item) => {
+//         if (item._id === itemId) {
+//           const newSelectedState = !item.isSelected;
+//           setSelectedItems((prevSelected) => {
+//             if (newSelectedState) {
+//               return [...prevSelected, { ...item, isSelected: true }];
+//             }
+//             return prevSelected.filter((selected) => selected._id !== itemId);
+//           });
+//           return { ...item, isSelected: newSelectedState };
+//         }
+//         return item;
+//       });
+//       return {
+//         ...prev,
+//         cart: { ...prev.cart, items: updatedItems },
+//       };
+//     });
+//   };
+
+//   const handleBookNow = async () => {
+//     try {
+//       setIsBooking(true);
+//       setError(null);
+//       const userId = await AsyncStorage.getItem("userId");
+//       if (!userId) {
+//         throw new Error("User not logged in");
+//       }
+//       if (selectedItems.length === 0) {
+//         throw new Error("No items selected for booking");
+//       }
+//       if (selectedItems.some((item) => !item.bookingDate)) {
+//         throw new Error("Select dates for all selected items");
+//       }
+//       const prnvTotal = selectedItems.reduce(
+//         (acc, item) => acc + (item.servicePrice || 0) * item.quantity,
+//         0
+//       );
+//       const otherBaseTotal = prnvTotal * 1.3;
+//       const otherGst = Math.round(otherBaseTotal * 0.18);
+//       const otherTotal = Math.round(otherBaseTotal) + otherGst;
+//       const savings = otherTotal - prnvTotal;
+//       const bookings = selectedItems.map((item) => ({
+//         userId,
+//         serviceId: item.serviceId,
+//         technicianId: item.technicianId,
+//         quantity: String(item.quantity),
+//         bookingDate: item.bookingDate,
+//         servicePrice: String((item.servicePrice || 0) * item.quantity),
+//         gst: "0",
+//         totalPrice: String((item.servicePrice || 0) * item.quantity),
+//       }));
+//       const response = await createBookService(bookings);
+//       if (!response?.success) {
+//         throw new Error(response?.message || "Booking failed");
+//       }
+//       setSavingsData({
+//         prnvTotal: Math.round(prnvTotal),
+//         otherTotal,
+//         savings,
+//       });
+//       setShowSavingsModal(true);
+//       await fetchCartData();
+//       setSelectedItems([]);
+//     } catch (err: any) {
+//       setError(err.message || "Failed to create bookings");
+//     } finally {
+//       setIsBooking(false);
+//     }
+//   };
+
+//   const closeModal = () => {
+//     setShowSavingsModal(false);
+//     setSavingsData(null);
+//   };
+
+//   const handleViewTransactions = () => {
+//     closeModal();
+//     navigation.navigate("Transactions");
+//   };
+
+//   const getMaxDate = () => {
+//     const today = new Date();
+//     const maxDate = new Date();
+//     maxDate.setDate(today.getDate() + 7);
+//     return maxDate;
+//   };
+
+//   const calculateItemTotal = (item: CartItem) => {
+//     const price = item.servicePrice || 0;
+//     const subtotal = price * item.quantity;
+//     const gst = 0;
+//     const total = subtotal + gst;
+//     return { subtotal, gst, total };
+//   };
+
+//   const isBookingDisabled =
+//     selectedItems.length === 0 ||
+//     selectedItems.some((item) => !item.bookingDate);
+
+//   return (
+//     <View className="flex-1 bg-white">
+//       <ScrollView
+//         className="px-4 py-6"
+//         refreshControl={
+//           <RefreshControl
+//             refreshing={refreshing}
+//             onRefresh={onRefresh}
+//             colors={["#A21CAF", "fuchsia"]}
+//             tintColor="#A21CAF"
+//           />
+//         }
+//       >
+//         {loading && (
+//           <View className="flex justify-center items-center h-64">
+//             <ActivityIndicator size="large" color="#A21CAF" />
+//           </View>
+//         )}
+
+//         {error && (
+//           <View className="p-4">
+//             <Text className="text-red-500 text-center text-lg font-semibold">
+//               {error}
+//             </Text>
+//             <View className="flex-row justify-center gap-4 mt-4">
+//               {error.includes("log in") && (
+//                 <TouchableOpacity
+//                   className="bg-fuchsia-500 px-6 py-2 rounded-lg"
+//                   onPress={() => navigation.navigate("Login")}
+//                 >
+//                   <Text className="text-white">Log In</Text>
+//                 </TouchableOpacity>
+//               )}
+//               <TouchableOpacity
+//                 className="bg-fuchsia-500 px-6 py-2 rounded-lg"
+//                 onPress={fetchCartData}
+//               >
+//                 <Text className="text-white">Try Again</Text>
+//               </TouchableOpacity>
+//             </View>
+//           </View>
+//         )}
+
+//         {!loading &&
+//           !error &&
+//           (!cartData || cartData.cart.items.length === 0) && (
+//             <View className="px-1 py-2">
+//               <Text className="text-2xl font-bold text-gray-800 mb-6">
+//                 Your Cart
+//               </Text>
+//               <View className="flex-col items-center">
+//                 <Text className="text-gray-500 text-lg">
+//                   Your cart is empty
+//                 </Text>
+//                 <TouchableOpacity
+//                   className="mt-4 bg-fuchsia-500 px-6 py-2 rounded-lg"
+//                   onPress={() => navigation.navigate("Category")}
+//                 >
+//                   <Text className="text-white">Browse Services</Text>
+//                 </TouchableOpacity>
+//               </View>
+//             </View>
+//           )}
+
+//         {!loading && !error && cartData && cartData.cart.items.length > 0 && (
+//           <>
+//             <Text className="text-2xl font-bold text-gray-800 mb-6">
+//               Your Cart
+//             </Text>
+//             <View className="flex-col gap-4">
+//               {cartData.cart.items.map((item) => {
+//                 const isProcessing = processingItems[item._id];
+//                 return (
+//                   <View
+//                     key={item._id}
+//                     className="flex-row items-center justify-between border border-gray-300 p-4 rounded-xl bg-white shadow-lg"
+//                     style={{ width: itemWidth }}
+//                   >
+//                     <View className="flex-row items-center flex-1">
+//                       <TouchableOpacity
+//                         onPress={() => handleCheckboxChange(item._id)}
+//                         className="h-5 w-5 mr-4"
+//                         disabled={isProcessing}
+//                       >
+//                         <MaterialCommunityIcons
+//                           name={
+//                             item.isSelected
+//                               ? "checkbox-marked"
+//                               : "checkbox-blank-outline"
+//                           }
+//                           size={20}
+//                           color="#A21CAF"
+//                         />
+//                       </TouchableOpacity>
+//                       <Image
+//                         source={{ uri: item.serviceImg }}
+//                         className="rounded-xl w-16 h-16 object-cover border border-gray-200"
+//                       />
+//                       <View className="ml-4 flex-1">
+//                         <Text className="text-lg font-semibold text-gray-800">
+//                           {item.serviceName}
+//                         </Text>
+//                         <Text className="text-gray-600">
+//                           ₹{" "}
+//                           <Text className="text-fuchsia-600">
+//                             {item.servicePrice}
+//                           </Text>{" "}
+//                           per unit
+//                         </Text>
+//                       </View>
+//                     </View>
+
+//                     <View className="flex-col items-center gap-4">
+//                       <View className="flex-row items-center gap-2 bg-fuchsia-50 rounded-lg px-2 py-1 border border-fuchsia-200">
+//                         {item.quantity === 1 ? (
+//                           <TouchableOpacity
+//                             onPress={() =>
+//                               !isProcessing && handleRemove(item._id)
+//                             }
+//                             disabled={isProcessing}
+//                           >
+//                             <MaterialIcons
+//                               name="delete"
+//                               size={16}
+//                               color="red"
+//                             />
+//                           </TouchableOpacity>
+//                         ) : (
+//                           <TouchableOpacity
+//                             onPress={() =>
+//                               !isProcessing &&
+//                               handleQuantityChange(item._id, -1)
+//                             }
+//                             disabled={isProcessing}
+//                           >
+//                             <Ionicons name="remove" size={12} color="#A21CAF" />
+//                           </TouchableOpacity>
+//                         )}
+//                         <Text className="text-sm text-gray-800 w-8 text-center font-mono">
+//                           {isProcessing ? "..." : item.quantity}
+//                         </Text>
+//                         <TouchableOpacity
+//                           onPress={() =>
+//                             !isProcessing && handleQuantityChange(item._id, 1)
+//                           }
+//                           disabled={isProcessing}
+//                         >
+//                           <Ionicons name="add" size={16} color="#A21CAF" />
+//                         </TouchableOpacity>
+//                       </View>
+
+//                       <Text className="font-semibold text-gray-800">
+//                         ₹ {(item.servicePrice || 0) * item.quantity}
+//                       </Text>
+
+//                       <TouchableOpacity
+//                         onPress={() => handleCalendarClick(item._id)}
+//                       >
+//                         {item.bookingDate ? (
+//                           <View className="flex-row items-center">
+//                             <Text className="text-gray-800">
+//                               {new Date(item.bookingDate).toLocaleDateString()}
+//                             </Text>
+//                             <TouchableOpacity
+//                               onPress={() => handleClearDate(item._id)}
+//                             >
+//                               <Ionicons name="close" size={16} color="gray" />
+//                             </TouchableOpacity>
+//                           </View>
+//                         ) : (
+//                           <MaterialCommunityIcons
+//                             name="calendar-outline"
+//                             size={25}
+//                             color="#A21CAF"
+//                           />
+//                         )}
+//                       </TouchableOpacity>
+//                     </View>
+//                   </View>
+//                 );
+//               })}
+//             </View>
+
+//             {selectedItems.length > 0 && (
+//               <View className="mt-6 border-t pt-4">
+//                 <Text className="text-lg font-semibold mb-4">Selected Items</Text>
+//                 {selectedItems.map((item) => {
+//                   const { subtotal, gst, total } = calculateItemTotal(item);
+//                   const truncatedServiceName =
+//                     item.serviceName.length > 30
+//                       ? `${item.serviceName.substring(0, 30)}...`
+//                       : item.serviceName;
+//                   return (
+//                     <View
+//                       key={item._id}
+//                       className="mb-4 p-4 border rounded-lg bg-white shadow-sm"
+//                       style={{ width: itemWidth }}
+//                     >
+//                       <View className="flex-row justify-between">
+//                         <Text className="font-medium"
+//                           numberOfLines={2}
+//                           ellipsizeMode="tail">
+//                           {truncatedServiceName} ({item.quantity})
+//                         </Text>
+//                         <Text className="font-mono">₹ {subtotal}</Text>
+//                       </View>
+//                       <View className="flex-row justify-between text-sm text-gray-600 mt-2">
+//                         <Text>Booking Date</Text>
+//                         <Text>
+//                           {item.bookingDate ? new Date(item.bookingDate).toLocaleDateString() : "Not set"}
+//                         </Text>
+//                       </View>
+//                       <View className="flex-row justify-between text-sm text-gray-600 mt-2">
+//                         <Text>GST</Text>
+//                         <Text>0</Text>
+//                       </View>
+//                       <View className="flex-row justify-between font-semibold mt-2">
+//                         <Text>Total</Text>
+//                         <Text className="font-mono">₹ {total}</Text>
+//                       </View>
+//                     </View>
+//                   );
+//                 })}
+//               </View>
+//             )}
+//             {/* {selectedItems.length > 0 && (
+//               <View className="mt-6 border-t pt-4">
+//                 <Text className="text-lg font-semibold mb-4">
+//                   Selected Items
+//                 </Text>
+//                 {selectedItems.map((item) => {
+//                   const { subtotal, gst, total } = calculateItemTotal(item);
+//                   // Truncate serviceName if longer than 20 characters
+//                   const truncatedServiceName =
+//                     item.serviceName.length > 20
+//                       ? `${item.serviceName.substring(0, 20)}...`
+//                       : item.serviceName;
+
+//                   return (
+//                     <View
+//                       key={item._id}
+//                       className="mb-4 p-4 border rounded-lg bg-white shadow-sm"
+//                       style={{ width: itemWidth, maxWidth: 300 }} // Set a max width for better control
+//                     >
+//                       <View className="flex-row justify-between">
+//                         <Text
+//                           className="font-medium"
+//                           numberOfLines={2}
+//                           ellipsizeMode="tail"
+//                         >
+//                           {truncatedServiceName} ({item.quantity})
+//                         </Text>
+//                         <Text className="font-mono">₹ {subtotal}</Text>
+//                       </View>
+//                       <View className="flex-row justify-between text-sm text-gray-600 mt-2">
+//                         <Text>Booking Date</Text>
+//                         <Text>
+//                           {item.bookingDate
+//                             ? new Date(item.bookingDate).toLocaleDateString()
+//                             : "Not set"}
+//                         </Text>
+//                       </View>
+//                       <View className="flex-row justify-between text-sm text-gray-600 mt-2">
+//                         <Text>GST</Text>
+//                         <Text>0%</Text>
+//                       </View>
+//                       <View className="flex-row justify-between font-semibold mt-2">
+//                         <Text>Total</Text>
+//                         <Text className="font-mono">₹ {total}</Text>
+//                       </View>
+//                     </View>
+//                   );
+//                 })}
+//               </View>
+//             )} */}
+
+//             <View className="flex-row justify-between items-center mt-6">
+//               <Text className="text-gray-800">Missed Something?</Text>
+//               <TouchableOpacity
+//                 className="bg-red-600 flex-row items-center px-4 py-2 rounded-lg"
+//                 onPress={() => navigation.navigate("Category")}
+//               >
+//                 <Ionicons name="add" size={20} color="white" />
+//                 <Text className="text-white ml-2">Add More Items</Text>
+//               </TouchableOpacity>
+//             </View>
+
+//             <View className="mt-6 border-t pt-4 pb-6">
+//               <TouchableOpacity
+//                 className={`w-full py-3 rounded-xl text-lg font-semibold ${
+//                   isBookingDisabled
+//                     ? "bg-gray-200 text-gray-500"
+//                     : "bg-fuchsia-500 text-white"
+//                 } ${isBooking ? "opacity-70" : ""}`}
+//                 disabled={isBookingDisabled || isBooking}
+//                 onPress={handleBookNow}
+//                 style={{ width: itemWidth }}
+//               >
+//                 <Text className="text-center">
+//                   {isBooking
+//                     ? "Processing..."
+//                     : isBookingDisabled
+//                       ? selectedItems.length === 0
+//                         ? "Select at least one item"
+//                         : "Select dates for all selected items"
+//                       : "Book Now"}
+//                 </Text>
+//               </TouchableOpacity>
+//             </View>
+//           </>
+//         )}
+//       </ScrollView>
+
+//       {showDatePicker && (
+//         <DateTimePicker
+//           testID="dateTimePicker"
+//           value={date}
+//           mode="date"
+//           is24Hour={true}
+//           display={Platform.OS === "ios" ? "spinner" : "default"}
+//           onChange={handleDateChange}
+//           minimumDate={new Date()}
+//           maximumDate={getMaxDate()}
+//         />
+//       )}
+
+//       <SavingsModal
+//         show={showSavingsModal}
+//         onClose={closeModal}
+//         savingsData={savingsData}
+//         onViewTransactions={handleViewTransactions}
+//       />
+//     </View>
+//   );
+// };
+
+// export default CartScreen;
 // import React, { useEffect, useState } from 'react';
 // import { View, Text, Image, TouchableOpacity, ScrollView, ActivityIndicator, Modal, Platform, Dimensions } from 'react-native';
 // import { useNavigation } from '@react-navigation/native';

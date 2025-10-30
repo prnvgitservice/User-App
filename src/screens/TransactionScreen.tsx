@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -6,19 +6,21 @@ import {
   ActivityIndicator,
   ScrollView,
   Animated,
+  RefreshControl,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getOrdersByUserId } from "../api/apiMethods";
-import BookingsListScreen from "../components/transaction/BookingsList";
+import BookingsList from "../components/transaction/BookingsList";
 import CompletedDetailsScreen from "../components/transaction/CompletedDetailsScreen";
 import CancelledCard from "../components/transaction/CancelledCard";
 import SavingsScreen from "../components/transaction/SavingsScreen";
-import FinalRatingScreen from "../components/transaction/FinalRatingScreen.tsx";
+import FinalRatingScreen from "../components/transaction/FinalRatingScreen";
 import CongratulationsModal from "../components/transaction/CongratulationsModal";
-import BookingDetailsScreen from "../components/transaction/BookingDetaillsScreen.tsx";
-import { RefreshControl } from "react-native-gesture-handler";
+import UpcomingDetailsScreen from "../components/transaction/UpcomingDetailsScreen";
 
-interface Booking {
+// src/types/booking.ts
+
+export interface Booking {
   _id: string;
   userId: string;
   technicianId: string;
@@ -32,12 +34,11 @@ interface Booking {
   otp: number;
   createdAt: string;
   updatedAt: string;
-  __v: number;
   rating?: number;
   review?: string;
 }
 
-interface Technician {
+export interface Technician {
   _id: string;
   username: string;
   phoneNumber: string;
@@ -49,7 +50,7 @@ interface Technician {
   profileImage?: string;
 }
 
-interface User {
+export interface User {
   _id: string;
   username: string;
   phoneNumber: string;
@@ -61,21 +62,21 @@ interface User {
   profileImage?: string;
 }
 
-interface Service {
+export interface Service {
   _id: string;
   serviceName: string;
   serviceImg: string;
   servicePrice: number;
 }
 
-interface BookingData {
+export interface BookingData {
   booking: Booking;
   technician: Technician;
   service: Service | null;
   user: User;
 }
 
-interface ApiResponse {
+export interface ApiResponse {
   success: boolean;
   message: string;
   result: {
@@ -83,45 +84,46 @@ interface ApiResponse {
   };
 }
 
+
+type TabType = "upcoming" | "completed" | "cancelled";
+
 const TransactionPageScreen: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<
-    "upcoming" | "completed" | "cancelled"
-  >("upcoming");
+  const [activeTab, setActiveTab] = useState<TabType>("upcoming");
   const [bookingsData, setBookingsData] = useState<BookingData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<string>("bookings");
-  const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(
-    null
-  );
-  const fadeAnim = useState(new Animated.Value(0))[0]; // Animation for content fade-in
-  
-  const [refreshing, setRefreshing] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(null);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchBookings(); // Re-fetch bookings data
-    setRefreshing(false);
-  };
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-    const transactionTabs = [
-    { id: 'upcoming', name: 'Upcoming', color: 'text-purple-600', bgColor: 'bg-purple-100', borderColor: 'border-purple-600' },
-    { id: 'completed', name: 'Completed', color: 'text-green-600', bgColor: 'bg-green-100', borderColor: 'border-green-600' },
-    { id: 'cancelled', name: 'Cancelled', color: 'text-red-600', bgColor: 'bg-red-100', borderColor: 'border-red-600' },
+  const transactionTabs = [
+    { id: "upcoming", name: "Upcoming", color: "text-purple-600", bgColor: "bg-purple-100", borderColor: "border-purple-600" },
+    { id: "completed", name: "Completed", color: "text-green-600", bgColor: "bg-green-100", borderColor: "border-green-600" },
+    { id: "cancelled", name: "Cancelled", color: "text-red-600", bgColor: "bg-red-100", borderColor: "border-red-600" },
   ];
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
       const userId = await AsyncStorage.getItem("userId");
+      if (!userId) throw new Error("User not found");
+
       const response: ApiResponse = await getOrdersByUserId(userId);
-      if (response.success) {
-        setBookingsData(response.result.bookings);
+      if (response.success && response.result.bookings.length) {
+        const sorted = response.result.bookings.sort(
+          (a, b) =>
+            new Date(b.booking.bookingDate).getTime() -
+            new Date(a.booking.bookingDate).getTime()
+        );
+        setBookingsData(sorted);
       } else {
-        setError(response.message || "Failed to fetch bookings");
+        setBookingsData([]);
+        setError(response.message || "No bookings found");
       }
     } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(err.message || "Failed to fetch bookings");
     } finally {
       setLoading(false);
       Animated.timing(fadeAnim, {
@@ -136,18 +138,21 @@ const TransactionPageScreen: React.FC = () => {
     fetchBookings();
   }, []);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchBookings();
+    setRefreshing(false);
+  };
+
   const handleBookingSelect = (booking: BookingData) => {
     setSelectedBooking(booking);
-    fadeAnim.setValue(0); 
-    if (booking.booking.status.toLowerCase() === "completed") {
-      setCurrentStep("completed-details");
-    } else if (
-      ["cancelled", "declined"].includes(booking.booking.status.toLowerCase())
-    ) {
-      setCurrentStep("cancelled-details");
-    } else {
-      setCurrentStep("booking-details");
-    }
+    fadeAnim.setValue(0);
+    const status = booking.booking.status.toLowerCase();
+
+    if (status === "completed") setCurrentStep("completed-details");
+    else if (["cancelled", "declined"].includes(status)) setCurrentStep("cancelled-details");
+    else setCurrentStep("booking-details");
+
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 300,
@@ -155,20 +160,15 @@ const TransactionPageScreen: React.FC = () => {
     }).start();
   };
 
-  const handleTabPress = (tab: "upcoming" | "completed" | "cancelled") => {
+  const handleTabPress = (tab: TabType) => {
     setActiveTab(tab);
     setCurrentStep("bookings");
-    fadeAnim.setValue(0); 
+    fadeAnim.setValue(0);
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 300,
       useNativeDriver: true,
     }).start();
-  };
-
-  const handleRetry = () => {
-    setError(null);
-    fetchBookings();
   };
 
   const renderContent = () => {
@@ -176,9 +176,7 @@ const TransactionPageScreen: React.FC = () => {
       return (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#9333ea" />
-          <Text className="mt-4 text-gray-600">
-            Loading your transactions...
-          </Text>
+          <Text className="mt-4 text-gray-600">Loading your transactions...</Text>
         </View>
       );
     }
@@ -187,10 +185,7 @@ const TransactionPageScreen: React.FC = () => {
       return (
         <View className="flex-1 justify-center items-center">
           <Text className="text-red-500 text-center mb-4">{error}</Text>
-          <TouchableOpacity
-            onPress={handleRetry}
-            className="bg-purple-600 px-6 py-2 rounded-full"
-          >
+          <TouchableOpacity onPress={fetchBookings} className="bg-purple-600 px-6 py-2 rounded-full">
             <Text className="text-white font-medium">Retry</Text>
           </TouchableOpacity>
         </View>
@@ -200,14 +195,14 @@ const TransactionPageScreen: React.FC = () => {
     return (
       <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
         {currentStep === "bookings" && (
-          <BookingsListScreen
+          <BookingsList
             bookings={bookingsData}
             activeTab={activeTab}
             onBookingSelect={handleBookingSelect}
           />
         )}
         {currentStep === "booking-details" && selectedBooking && (
-          <BookingDetailsScreen
+          <UpcomingDetailsScreen
             booking={selectedBooking}
             setCurrentStep={setCurrentStep}
             setActiveTab={setActiveTab}
@@ -215,22 +210,13 @@ const TransactionPageScreen: React.FC = () => {
           />
         )}
         {currentStep === "completed-details" && selectedBooking && (
-          <CompletedDetailsScreen
-            booking={selectedBooking}
-            setCurrentStep={setCurrentStep}
-          />
+          <CompletedDetailsScreen booking={selectedBooking} setCurrentStep={setCurrentStep} />
         )}
         {currentStep === "cancelled-details" && selectedBooking && (
-          <CancelledCard
-            booking={selectedBooking}
-            setCurrentStep={setCurrentStep}
-          />
+          <CancelledCard booking={selectedBooking} setCurrentStep={setCurrentStep} />
         )}
         {currentStep === "savings" && selectedBooking && (
-          <SavingsScreen
-            booking={selectedBooking}
-            setCurrentStep={setCurrentStep}
-          />
+          <SavingsScreen booking={selectedBooking} setCurrentStep={setCurrentStep} />
         )}
         {currentStep === "final-rating" && selectedBooking && (
           <FinalRatingScreen
@@ -247,52 +233,348 @@ const TransactionPageScreen: React.FC = () => {
   };
 
   return (
-       
     <View className="flex-1 bg-gray-50">
+      {/* Header */}
       <View className="p-4 bg-white shadow-md">
-        <Text className="text-2xl font-bold text-gray-900 mb-4">
-          My Transactions
-        </Text>
-
+        <Text className="text-2xl font-bold text-gray-900 mb-4">My Transactions</Text>
         <View className="flex-row justify-around">
           {transactionTabs.map((tab) => (
             <TouchableOpacity
-            key={tab.id}
-            onPress={() => handleTabPress(tab.id as 'upcoming' | 'completed' | 'cancelled')}
-            className={`flex-1 py-3 rounded-lg mx-1 ${
-                activeTab === tab.id ? tab.bgColor + ' border-b-2 ' + tab.borderColor : 'bg-gray-200'
+              key={tab.id}
+              onPress={() => handleTabPress(tab.id as TabType)}
+              className={`flex-1 py-3 rounded-lg mx-1 ${
+                activeTab === tab.id ? `${tab.bgColor} border-b-2 ${tab.borderColor}` : "bg-gray-200"
               }`}
               accessibilityLabel={`Switch to ${tab.name} transactions`}
               accessibilityRole="button"
             >
               <Text
                 className={`text-center font-medium ${
-                  activeTab === tab.id ? tab.color : 'text-gray-600'
+                  activeTab === tab.id ? tab.color : "text-gray-600"
                 }`}
-                >
+              >
                 {tab.name}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
-      <ScrollView className="flex-1 px-4"
-       refreshControl={
+
+      {/* Scrollable content */}
+      <ScrollView
+        className="flex-1 px-4"
+        refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#A21CAF", "fuchsia"]}
+            colors={["#A21CAF"]}
             tintColor="#A21CAF"
           />
         }
-
-      >{renderContent()}</ScrollView>
-                
+      >
+        {renderContent()}
+      </ScrollView>
     </View>
   );
 };
 
 export default TransactionPageScreen;
+
+// import React, { useState, useEffect } from "react";
+// import {
+//   View,
+//   Text,
+//   TouchableOpacity,
+//   ActivityIndicator,
+//   ScrollView,
+//   Animated,
+// } from "react-native";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { getOrdersByUserId } from "../api/apiMethods";
+// import BookingsListScreen from "../components/transaction/BookingsList";
+// import CompletedDetailsScreen from "../components/transaction/CompletedDetailsScreen";
+// import CancelledCard from "../components/transaction/CancelledCard";
+// import SavingsScreen from "../components/transaction/SavingsScreen";
+// import FinalRatingScreen from "../components/transaction/FinalRatingScreen";
+// import CongratulationsModal from "../components/transaction/CongratulationsModal";
+// import { RefreshControl } from "react-native-gesture-handler";
+// import UpcomingDetailsScreen from "../components/transaction/UpcomingDetailsScreen";
+
+// interface Booking {
+//   _id: string;
+//   userId: string;
+//   technicianId: string;
+//   serviceId: string;
+//   quantity: number;
+//   bookingDate: string;
+//   servicePrice: number;
+//   gst: number;
+//   totalPrice: number;
+//   status: string;
+//   otp: number;
+//   createdAt: string;
+//   updatedAt: string;
+//   __v: number;
+//   rating?: number;
+//   review?: string;
+// }
+
+// interface Technician {
+//   _id: string;
+//   username: string;
+//   phoneNumber: string;
+//   buildingName: string;
+//   areaName: string;
+//   city: string;
+//   state: string;
+//   pincode: string;
+//   profileImage?: string;
+// }
+
+// interface User {
+//   _id: string;
+//   username: string;
+//   phoneNumber: string;
+//   buildingName: string;
+//   areaName: string;
+//   city: string;
+//   state: string;
+//   pincode: string;
+//   profileImage?: string;
+// }
+
+// interface Service {
+//   _id: string;
+//   serviceName: string;
+//   serviceImg: string;
+//   servicePrice: number;
+// }
+
+// interface BookingData {
+//   booking: Booking;
+//   technician: Technician;
+//   service: Service | null;
+//   user: User;
+// }
+
+// interface ApiResponse {
+//   success: boolean;
+//   message: string;
+//   result: {
+//     bookings: BookingData[];
+//   };
+// }
+
+// const TransactionPageScreen: React.FC = () => {
+//   const [activeTab, setActiveTab] = useState<
+//     "upcoming" | "completed" | "cancelled"
+//   >("upcoming");
+//   const [bookingsData, setBookingsData] = useState<BookingData[]>([]);
+//   const [loading, setLoading] = useState<boolean>(true);
+//   const [error, setError] = useState<string | null>(null);
+//   const [currentStep, setCurrentStep] = useState<string>("bookings");
+//   const [selectedBooking, setSelectedBooking] = useState<BookingData | null>(
+//     null
+//   );
+//   const fadeAnim = useState(new Animated.Value(0))[0]; // Animation for content fade-in
+  
+//   const [refreshing, setRefreshing] = useState(false);
+
+//   const onRefresh = async () => {
+//     setRefreshing(true);
+//     await fetchBookings(); // Re-fetch bookings data
+//     setRefreshing(false);
+//   };
+
+//     const transactionTabs = [
+//     { id: 'upcoming', name: 'Upcoming', color: 'text-purple-600', bgColor: 'bg-purple-100', borderColor: 'border-purple-600' },
+//     { id: 'completed', name: 'Completed', color: 'text-green-600', bgColor: 'bg-green-100', borderColor: 'border-green-600' },
+//     { id: 'cancelled', name: 'Cancelled', color: 'text-red-600', bgColor: 'bg-red-100', borderColor: 'border-red-600' },
+//   ];
+
+//   const fetchBookings = async () => {
+//     try {
+//       setLoading(true);
+//       const userId = await AsyncStorage.getItem("userId");
+//       const response: ApiResponse = await getOrdersByUserId(userId);
+//       if (response.success) {
+//         setBookingsData(response.result.bookings);
+//       } else {
+//         setError(response.message || "Failed to fetch bookings");
+//       }
+//     } catch (err: any) {
+//       setError(err.message || "Something went wrong. Please try again.");
+//     } finally {
+//       setLoading(false);
+//       Animated.timing(fadeAnim, {
+//         toValue: 1,
+//         duration: 300,
+//         useNativeDriver: true,
+//       }).start();
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchBookings();
+//   }, []);
+
+//   const handleBookingSelect = (booking: BookingData) => {
+//     setSelectedBooking(booking);
+//     fadeAnim.setValue(0); 
+//     if (booking.booking.status.toLowerCase() === "completed") {
+//       setCurrentStep("completed-details");
+//     } else if (
+//       ["cancelled", "declined"].includes(booking.booking.status.toLowerCase())
+//     ) {
+//       setCurrentStep("cancelled-details");
+//     } else {
+//       setCurrentStep("booking-details");
+//     }
+//     Animated.timing(fadeAnim, {
+//       toValue: 1,
+//       duration: 300,
+//       useNativeDriver: true,
+//     }).start();
+//   };
+
+//   const handleTabPress = (tab: "upcoming" | "completed" | "cancelled") => {
+//     setActiveTab(tab);
+//     setCurrentStep("bookings");
+//     fadeAnim.setValue(0); 
+//     Animated.timing(fadeAnim, {
+//       toValue: 1,
+//       duration: 300,
+//       useNativeDriver: true,
+//     }).start();
+//   };
+
+//   const handleRetry = () => {
+//     setError(null);
+//     fetchBookings();
+//   };
+
+//   const renderContent = () => {
+//     if (loading) {
+//       return (
+//         <View className="flex-1 justify-center items-center">
+//           <ActivityIndicator size="large" color="#9333ea" />
+//           <Text className="mt-4 text-gray-600">
+//             Loading your transactions...
+//           </Text>
+//         </View>
+//       );
+//     }
+
+//     if (error) {
+//       return (
+//         <View className="flex-1 justify-center items-center">
+//           <Text className="text-red-500 text-center mb-4">{error}</Text>
+//           <TouchableOpacity
+//             onPress={handleRetry}
+//             className="bg-purple-600 px-6 py-2 rounded-full"
+//           >
+//             <Text className="text-white font-medium">Retry</Text>
+//           </TouchableOpacity>
+//         </View>
+//       );
+//     }
+
+//     return (
+//       <Animated.View style={{ opacity: fadeAnim, flex: 1 }}>
+//         {currentStep === "bookings" && (
+//           <BookingsListScreen
+//             bookings={bookingsData}
+//             activeTab={activeTab}
+//             onBookingSelect={handleBookingSelect}
+//           />
+//         )}
+//         {currentStep === "booking-details" && selectedBooking && (
+//           <UpcomingDetailsScreen
+//             booking={selectedBooking}
+//             setCurrentStep={setCurrentStep}
+//             setActiveTab={setActiveTab}
+//             refetchBookings={fetchBookings}
+//           />
+//         )}
+//         {currentStep === "completed-details" && selectedBooking && (
+//           <CompletedDetailsScreen
+//             booking={selectedBooking}
+//             setCurrentStep={setCurrentStep}
+//           />
+//         )}
+//         {currentStep === "cancelled-details" && selectedBooking && (
+//           <CancelledCard
+//             booking={selectedBooking}
+//             setCurrentStep={setCurrentStep}
+//           />
+//         )}
+//         {currentStep === "savings" && selectedBooking && (
+//           <SavingsScreen
+//             booking={selectedBooking}
+//             setCurrentStep={setCurrentStep}
+//           />
+//         )}
+//         {currentStep === "final-rating" && selectedBooking && (
+//           <FinalRatingScreen
+//             booking={selectedBooking}
+//             setCurrentStep={setCurrentStep}
+//             refetchBookings={fetchBookings}
+//           />
+//         )}
+//         {currentStep === "congratulations" && (
+//           <CongratulationsModal setCurrentStep={setCurrentStep} />
+//         )}
+//       </Animated.View>
+//     );
+//   };
+
+//   return (
+       
+//     <View className="flex-1 bg-gray-50">
+//       <View className="p-4 bg-white shadow-md">
+//         <Text className="text-2xl font-bold text-gray-900 mb-4">
+//           My Transactions
+//         </Text>
+
+//         <View className="flex-row justify-around">
+//           {transactionTabs.map((tab) => (
+//             <TouchableOpacity
+//             key={tab.id}
+//             onPress={() => handleTabPress(tab.id as 'upcoming' | 'completed' | 'cancelled')}
+//             className={`flex-1 py-3 rounded-lg mx-1 ${
+//                 activeTab === tab.id ? tab.bgColor + ' border-b-2 ' + tab.borderColor : 'bg-gray-200'
+//               }`}
+//               accessibilityLabel={`Switch to ${tab.name} transactions`}
+//               accessibilityRole="button"
+//             >
+//               <Text
+//                 className={`text-center font-medium ${
+//                   activeTab === tab.id ? tab.color : 'text-gray-600'
+//                 }`}
+//                 >
+//                 {tab.name}
+//               </Text>
+//             </TouchableOpacity>
+//           ))}
+//         </View>
+//       </View>
+//       <ScrollView className="flex-1 px-4"
+//        refreshControl={
+//           <RefreshControl
+//             refreshing={refreshing}
+//             onRefresh={onRefresh}
+//             colors={["#A21CAF", "fuchsia"]}
+//             tintColor="#A21CAF"
+//           />
+//         }
+
+//       >{renderContent()}</ScrollView>
+                
+//     </View>
+//   );
+// };
+
+// export default TransactionPageScreen;
 
 
 

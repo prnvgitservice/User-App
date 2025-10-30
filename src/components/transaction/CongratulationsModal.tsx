@@ -1,6 +1,6 @@
-import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Check } from 'react-native-feather';
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Check } from "react-native-feather";
 
 interface CongratulationsModalProps {
   setCurrentStep: (step: string) => void;
@@ -8,21 +8,34 @@ interface CongratulationsModalProps {
 
 const CongratulationsModal: React.FC<CongratulationsModalProps> = ({ setCurrentStep }) => {
   return (
-    <View className="flex-1 bg-white rounded-lg border border-gray-200 justify-center items-center">
-      <View className="max-w-md mx-auto p-8 items-center">
-        <View className="w-20 h-20 bg-green-100 rounded-full mx-auto mb-6 justify-center items-center">
+    <View className="flex-1 bg-white justify-center items-center px-6">
+      <View className="max-w-md w-full bg-white rounded-3xl shadow-md p-8 items-center">
+        {/* Success Icon */}
+        <View className="w-20 h-20 bg-green-100 rounded-full mb-6 justify-center items-center shadow-sm">
           <Check width={40} height={40} color="#22C55E" />
         </View>
-        <Text className="text-2xl font-bold text-gray-900 mb-4 text-center">Congratulations!</Text>
-        <Text className="text-gray-600 mb-2 text-center">Work completed successfully</Text>
-        <View className="bg-blue-50 rounded-2xl p-4 mb-8">
-          <Text className="text-blue-800 font-medium text-center">You have 1 week work guarantee</Text>
+
+        {/* Headline */}
+        <Text className="text-2xl font-bold text-gray-900 mb-3 text-center">
+          Congratulations!
+        </Text>
+        <Text className="text-gray-600 mb-2 text-center text-base">
+          Work completed successfully.
+        </Text>
+
+        {/* Guarantee Note */}
+        <View className="bg-blue-50 rounded-2xl p-4 my-6 w-full">
+          <Text className="text-blue-800 font-medium text-center">
+            You have a 1-week service guarantee.
+          </Text>
         </View>
+
+        {/* Return Button */}
         <TouchableOpacity
-          className="w-full bg-purple-500 py-2 px-3 rounded-2xl"
-          onPress={() => setCurrentStep('bookings')}
+          className="w-full bg-purple-600 py-3 px-4 rounded-2xl shadow-md"
+          onPress={() => setCurrentStep("bookings")}
         >
-          <Text className="text-white font-semibold text-center">OKAY</Text>
+          <Text className="text-white font-semibold text-center text-base">OKAY</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -30,6 +43,39 @@ const CongratulationsModal: React.FC<CongratulationsModalProps> = ({ setCurrentS
 };
 
 export default CongratulationsModal;
+
+// import React from 'react';
+// import { View, Text, TouchableOpacity } from 'react-native';
+// import { Check } from 'react-native-feather';
+
+// interface CongratulationsModalProps {
+//   setCurrentStep: (step: string) => void;
+// }
+
+// const CongratulationsModal: React.FC<CongratulationsModalProps> = ({ setCurrentStep }) => {
+//   return (
+//     <View className="flex-1 bg-white rounded-lg border border-gray-200 justify-center items-center">
+//       <View className="max-w-md mx-auto p-8 items-center">
+//         <View className="w-20 h-20 bg-green-100 rounded-full mx-auto mb-6 justify-center items-center">
+//           <Check width={40} height={40} color="#22C55E" />
+//         </View>
+//         <Text className="text-2xl font-bold text-gray-900 mb-4 text-center">Congratulations!</Text>
+//         <Text className="text-gray-600 mb-2 text-center">Work completed successfully</Text>
+//         <View className="bg-blue-50 rounded-2xl p-4 mb-8">
+//           <Text className="text-blue-800 font-medium text-center">You have 1 week work guarantee</Text>
+//         </View>
+//         <TouchableOpacity
+//           className="w-full bg-purple-500 py-2 px-3 rounded-2xl"
+//           onPress={() => setCurrentStep('bookings')}
+//         >
+//           <Text className="text-white font-semibold text-center">OKAY</Text>
+//         </TouchableOpacity>
+//       </View>
+//     </View>
+//   );
+// };
+
+// export default CongratulationsModal;
 // import React from 'react';
 // import { View, Text, TouchableOpacity } from 'react-native';
 // import { Check } from 'react-native-feather';

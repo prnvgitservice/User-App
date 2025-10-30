@@ -1,55 +1,8 @@
+import { BookingData } from '@/src/screens/TransactionScreen';
 import React from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { ChevronLeft, User, Phone, MapPin, XCircle, Globe } from 'react-native-feather';
 
-interface BookingData {
-  booking: {
-    _id: string;
-    userId: string;
-    technicianId: string;
-    serviceId: string;
-    quantity: number;
-    bookingDate: string;
-    servicePrice: number;
-    gst: number;
-    totalPrice: number;
-    status: string;
-    otp: number;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-    rating?: number;
-    review?: string;
-  };
-  technician: {
-    _id: string;
-    username: string;
-    phoneNumber: string;
-    buildingName: string;
-    areaName: string;
-    city: string;
-    state: string;
-    pincode: string;
-    profileImage?: string;
-  };
-  service: {
-    _id: string;
-    serviceName: string;
-    serviceImg: string;
-    servicePrice: number;
-  };
-  user: {
-    _id: string;
-    username: string;
-    phoneNumber: string;
-    buildingName: string;
-    areaName: string;
-    city: string;
-    state: string;
-    pincode: string;
-    profileImage?: string;
-  };
-}
 
 interface CancelledCardProps {
   booking: BookingData;
