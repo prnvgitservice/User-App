@@ -24,7 +24,7 @@ const Reviews = ({ ratings }: ReviewsProps) => {
         <Image
           source={{
             uri:
-              item.image ||
+              item.profileImage ||
               "https://i.pinimg.com/736x/21/24/92/21249201424022cdd93cd144f099b056.jpg",
           }}
           className="w-14 h-14 object-cover rounded-full"

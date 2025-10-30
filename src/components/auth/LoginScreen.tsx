@@ -21,29 +21,64 @@ interface LoginData {
   password: string;
 }
 
+interface FormErrors {
+  phoneNumber?: string;
+  password?: string;
+  general?: string;
+}
+
+const PHONE_REGEX = /^[0-9]{10}$/;
+const PASS_MIN = 6;
+const PASS_MAX = 10;
+
+const sanitizePhone = (value: string) => value.replace(/[^0-9]/g, "").slice(0, 10);
+
 const LoginScreen = () => {
   const navigation = useNavigation();
   const [formData, setFormData] = useState<LoginData>({
     phoneNumber: "",
     password: "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (name: keyof LoginData, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(null);
+    let sanitizedValue = value;
+    if (name === "phoneNumber") {
+      sanitizedValue = sanitizePhone(value);
+    }
+
+    setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
+    // Clear specific error on change
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+    if (errors.general) {
+      setErrors((prev) => ({ ...prev, general: undefined }));
+    }
+  };
+
+  const validateForm = (): FormErrors => {
+    const e: FormErrors = {};
+    if (!formData.phoneNumber || !PHONE_REGEX.test(formData.phoneNumber)) {
+      e.phoneNumber = "Please enter a valid 10-digit phone number";
+    }
+    if (!formData.password || formData.password.length < PASS_MIN || formData.password.length > PASS_MAX) {
+      e.password = `Password must be 6-10 characters`;
+    }
+    return e;
   };
 
   const handleSubmit = async () => {
-    if (!formData.phoneNumber || !formData.password) {
-      setError('Please fill in all fields');
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
       return;
     }
 
     setIsLoading(true);
-    setError(null);
+    setErrors({});
 
     try {
       const response = await userLogin({ ...formData });
@@ -63,7 +98,7 @@ const LoginScreen = () => {
       }
     } catch (err: any) {
       const errorMsg = 'Login failed. Please try again.';
-      setError(errorMsg);
+      setErrors((prev) => ({ ...prev, general: errorMsg }));
     } finally {
       setIsLoading(false);
     }
@@ -93,11 +128,11 @@ const LoginScreen = () => {
 
           <View className="self-center rounded-full mb-8 w-full max-w-sm">
             {/* Error Message */}
-            {error && (
+            {errors.general && (
               <View className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                 <View className="flex-row items-center">
                   <Text className="text-red-500 mr-2">⚠️</Text>
-                  <Text className="text-red-600 text-sm flex-1">{error}</Text>
+                  <Text className="text-red-600 text-sm flex-1">{errors.general}</Text>
                 </View>
               </View>
             )}
@@ -117,9 +152,11 @@ const LoginScreen = () => {
                   onChangeText={(text) => handleChange("phoneNumber", text)}
                   keyboardType="phone-pad"
                   autoCapitalize="none"
+                  maxLength={10}
                   editable={!isLoading}
                 />
               </View>
+              {errors.phoneNumber && <Text className="text-red-500 text-xs mt-1">{errors.phoneNumber}</Text>}
             </View>
 
             {/* Password Input */}
@@ -136,6 +173,7 @@ const LoginScreen = () => {
                   value={formData.password}
                   onChangeText={(text) => handleChange("password", text)}
                   secureTextEntry={!showPassword}
+                  maxLength={10}
                   editable={!isLoading}
                 />
                 <Pressable
@@ -146,6 +184,7 @@ const LoginScreen = () => {
                   <Text className="text-xl">{showPassword ? "🙈" : "👁️"}</Text>
                 </Pressable>
               </View>
+              {errors.password && <Text className="text-red-500 text-xs mt-1">{errors.password}</Text>}
             </View>
 
             <View className="flex flex-row w-full justify-center items-center gap-2">
@@ -197,6 +236,205 @@ const LoginScreen = () => {
 };
 
 export default LoginScreen;
+// import React, { useState } from "react";
+// import {
+//   View,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   Pressable,
+//   Platform,
+//   KeyboardAvoidingView,
+//   ScrollView,
+//   Image,
+//   Alert,
+// } from "react-native";
+// import { useNavigation } from "@react-navigation/native";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { userLogin } from "@/src/api/apiMethods";
+// // import { userLogin } from "@/src/api/apiMethods";
+
+// interface LoginData {
+//   phoneNumber: string;
+//   password: string;
+// }
+
+// const LoginScreen = () => {
+//   const navigation = useNavigation();
+//   const [formData, setFormData] = useState<LoginData>({
+//     phoneNumber: "",
+//     password: "",
+//   });
+//   const [showPassword, setShowPassword] = useState(false);
+//   const [error, setError] = useState<string | null>(null);
+//   const [isLoading, setIsLoading] = useState(false);
+
+//   const handleChange = (name: keyof LoginData, value: string) => {
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//     if (error) setError(null);
+//   };
+
+//   const handleSubmit = async () => {
+//     if (!formData.phoneNumber || !formData.password) {
+//       setError('Please fill in all fields');
+//       return;
+//     }
+
+//     setIsLoading(true);
+//     setError(null);
+
+//     try {
+//       const response = await userLogin({ ...formData });
+//       if (response?.result?.token) {
+//         await AsyncStorage.setItem('jwt_token', response.result.token);
+//         await AsyncStorage.setItem('user', JSON.stringify(response.result));
+//         await AsyncStorage.setItem('userId', response.result.id.toString());
+//         await AsyncStorage.setItem('role', response.result.role);
+        
+//         // For cart update event, you can use a global event emitter or context
+//         // Here we'll just log it for now
+//         Alert.alert('Login Successfully')
+        
+//         navigation.replace('Main');
+//       } else {
+//         throw new Error('Invalid credentials or server error');
+//       }
+//     } catch (err: any) {
+//       const errorMsg = 'Login failed. Please try again.';
+//       setError(errorMsg);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   return (
+//       <KeyboardAvoidingView
+//         behavior={Platform.OS === "ios" ? "padding" : "height"}
+//         className="flex-1"
+//       >
+//         <ScrollView contentContainerClassName="flex-grow px-6 pt-8 pb-8 justify-center">
+//           {/* Logo */}
+//           <View className="items-center mb-6">
+//             <View className="bg-blue-900 rounded-lg px-4 py-3">
+//               <Image
+//                 source={require("../../../assets/prnv_logo.jpg")}
+//                 className="h-10 w-64"
+//                 resizeMode="contain"
+//               />
+//             </View>
+//           </View>
+
+//           {/* Title */}
+//           <Text className="text-4xl font-bold text-gray-800 text-center mb-10">
+//             Sign In
+//           </Text>
+
+//           <View className="self-center rounded-full mb-8 w-full max-w-sm">
+//             {/* Error Message */}
+//             {error && (
+//               <View className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+//                 <View className="flex-row items-center">
+//                   <Text className="text-red-500 mr-2">⚠️</Text>
+//                   <Text className="text-red-600 text-sm flex-1">{error}</Text>
+//                 </View>
+//               </View>
+//             )}
+
+//             {/* Phone Number Input */}
+//             <View className="mb-4">
+//               <Text className="text-sm font-medium text-gray-700 mb-1">
+//                 Phone Number <Text className="text-red-500">*</Text>
+//               </Text>
+//               <View className="flex-row items-center border border-gray-300 rounded-lg px-3 h-12">
+//                 <Text className="text-xl mr-2.5">📞</Text>
+//                 <TextInput
+//                   className="flex-1 text-base text-gray-800"
+//                   placeholder="Enter phone number"
+//                   placeholderTextColor="#9ca3af"
+//                   value={formData.phoneNumber}
+//                   onChangeText={(text) => handleChange("phoneNumber", text)}
+//                   keyboardType="phone-pad"
+//                   autoCapitalize="none"
+//                   editable={!isLoading}
+//                 />
+//               </View>
+//             </View>
+
+//             {/* Password Input */}
+//             <View className="mb-6">
+//               <Text className="text-sm font-medium text-gray-700 mb-1">
+//                 Password <Text className="text-red-500">*</Text>
+//               </Text>
+//               <View className="flex-row items-center border border-gray-300 rounded-lg px-4 h-12 relative">
+//                 <Text className="text-xl mr-2.5">🔒</Text>
+//                 <TextInput
+//                   className="flex-1 text-base text-gray-800"
+//                   placeholder="Password"
+//                   placeholderTextColor="#9ca3af"
+//                   value={formData.password}
+//                   onChangeText={(text) => handleChange("password", text)}
+//                   secureTextEntry={!showPassword}
+//                   editable={!isLoading}
+//                 />
+//                 <Pressable
+//                   onPress={() => !isLoading && setShowPassword(!showPassword)}
+//                   className="absolute right-3"
+//                   disabled={isLoading}
+//                 >
+//                   <Text className="text-xl">{showPassword ? "🙈" : "👁️"}</Text>
+//                 </Pressable>
+//               </View>
+//             </View>
+
+//             <View className="flex flex-row w-full justify-center items-center gap-2">
+//               <TouchableOpacity
+//               className={`rounded-lg py-3 items-center shadow-md bg-green-600 w-1/2`}
+//               onPress={()=>{navigation.navigate('Main' as never)}}
+//               disabled={isLoading}
+//             >
+//               <Text className="text-white text-base font-semibold">
+//                 Guest
+//               </Text>
+//             </TouchableOpacity>
+
+
+//             {/* Sign In Button */}
+//             <TouchableOpacity
+//               className={`rounded-lg py-3 items-center shadow-md ${
+//                 isLoading ? 'bg-blue-400' : 'bg-blue-600'
+//               }  w-1/2`}
+//               onPress={handleSubmit}
+//               disabled={isLoading}
+//             >
+//               <Text className="text-white text-base font-semibold">
+//                 {isLoading ? 'Signing In...' : 'Sign In'}
+//               </Text>
+//             </TouchableOpacity>
+//             </View>
+
+//             {/* Sign Up Link */}
+//             <View className="flex-row justify-center mt-4">
+//               <Text className="text-gray-600 text-sm">
+//                 Don't have an account?{" "}
+//               </Text>
+//               <TouchableOpacity
+//                 onPress={() => !isLoading && navigation.navigate("Signup" as never)}
+//                 disabled={isLoading}
+//               >
+//                 <Text className={`text-sm font-medium ${
+//                   isLoading ? 'text-gray-400' : 'text-blue-600'
+//                 }`}>
+//                   Sign Up
+//                 </Text>
+//               </TouchableOpacity>
+//             </View>
+//           </View>
+//         </ScrollView>
+//       </KeyboardAvoidingView>
+//   );
+// };
+
+// export default LoginScreen;
 // import React, { useState } from "react";
 // import {
 //   SafeAreaView,

@@ -29,7 +29,7 @@ import CompanyReviewScreen from "../components/profile/CompanyReviewScreen";
 import ProfileEditPage from "../components/profile/EditProfile";
 import { SafeAreaView } from "react-native";
 import HomeScreen from "../screens/HomeScreen";
-import TransactionPageScreen from "../screens/TransactionScreen.tsx";
+import TransactionPageScreen from "../screens/TransactionScreen";
 // import TransactionPageScreen from "../screens/TransactionScreen.tsx";
 
 // Root Stack Params

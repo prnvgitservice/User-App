@@ -181,12 +181,7 @@ const TechnicianItem = memo(({ item }: { item: Technician }) => {
                   ).toFixed(1)
                 : "4.0"}
             </Text>
-            <MaterialCommunityIcons
-              name="star-outline"
-              size={18}
-              color="#ffc71b"
-              className="ml-1"
-            />
+            <AntDesign name="star" size={15} color="#ffc71b" className="ml-1" />
           </View>
           {item.ratings && (
             <Text className="text-gray-600 text-sm">

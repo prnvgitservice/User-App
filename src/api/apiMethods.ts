@@ -5,6 +5,8 @@ export const login = (data: any) => apiRequest("login", data);
 
 export const userLogin = (data: any) => apiRequest("userLogin", data);
 
+export const userRegister = (data: any) => apiRequest("userRegister", data);
+
 export const getAllCategories = (data: any) => apiRequest("getAllCategories", data);
 
 export const getTechByCategorie = (id: string) =>apiRequest('getTechByCategorie', null , id)

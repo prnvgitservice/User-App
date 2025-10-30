@@ -11,6 +11,11 @@ const endpoints: any = {
     url: () => `/api/userAuth/login`,
   },
 
+  userRegister: {
+    method: "post",
+    url: () => `/api/userAuth/register`,
+  },
+
   getAllCategories: {
     method: "get",
     url: () => {

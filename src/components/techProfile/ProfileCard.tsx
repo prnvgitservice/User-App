@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import {
+  AntDesign,
   FontAwesome,
   Ionicons,
   MaterialCommunityIcons,
@@ -31,13 +32,13 @@ const ProfileCard = ({ technician, ratings }: ProfileCardProps) => {
         ).toFixed(1)
       : "4";
 
-  const openWhatsApp = (number: string, message: string) => {
+  const openWhatsApp = (number: number, message: string) => {
     const url = `whatsapp://send?phone=${number}&text=${encodeURIComponent(message)}`;
     Linking.openURL(url).catch(() => alert("WhatsApp is not installed"));
   };
 
   const handleShare = async () => {
-    const shareUrl = `https://prnv-472906.web.app/technicianById/${technician._id}`;
+    const shareUrl = `https://prnvservices.com/technicianById/${technician._id}`;
 
     const shareText = `${technician.username} - Expert Technician
 Rated ${averageRating} ★ | ${reviewCount} Reviews
@@ -90,12 +91,8 @@ Check out the profile: ${shareUrl}`;
         <View className="flex-row items-center gap-4 my-3">
           <View className="flex-row items-center border border-yellow-500 rounded-lg px-2 py-1">
             <Text>{averageRating}</Text>
-            <MaterialCommunityIcons
-              name="star-outline"
-              size={18}
-              color="#ffc71b"
-              className="ml-1"
-            />
+            <AntDesign name="star" size={15} color="#ffc71b" className="ml-1" />
+
           </View>
           <Text className="text-gray-600 text-sm font-light">
             {reviewCount} Ratings

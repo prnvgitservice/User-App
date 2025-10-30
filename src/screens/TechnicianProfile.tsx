@@ -53,8 +53,9 @@ export interface Rating {
   review: string;
   rating: number;
   createdAt: string;
-  name?: string;
+  username?: string;
   image?: string;
+  profileImage: string;
 }
 
 export interface TechnicianDetailsResponse {
