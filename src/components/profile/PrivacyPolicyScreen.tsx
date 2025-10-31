@@ -1,438 +1,858 @@
 import React from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  SafeAreaView,
+} from 'react-native';
 
-const PrivacyPolicyScreen = () => {
+const PrivacyPolicyScreen: React.FC = () => {
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="max-w-6xl mx-auto px-2 py-4">
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView
+        className="flex-1"
+        contentContainerClassName="px-4 py-8"
+        showsVerticalScrollIndicator={false}
+      >
         <Text className="text-3xl font-bold text-gray-900 mb-8 text-center">
           Privacy Policy
         </Text>
 
         <View className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <View className="space-y-6">
-            <Text className="text-sm text-gray-600 mb-6">
-              <Text className="font-bold">Last updated:</Text> February 07, 2023
-            </Text>
+          <Text className="text-sm text-gray-600 mb-6">
+            <Text className="font-semibold">Last updated:</Text> February 07, 2023
+          </Text>
 
-            <Text className="text-base text-gray-700 leading-relaxed">
-              This Privacy Policy describes our policies and procedures for collecting, using, and disclosing your information when you use our services or register as a professional (technician or service provider). It also informs you of your privacy rights and the legal safeguards that apply to you.
-            </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            This Privacy Policy describes our policies and procedures for collecting, using, and disclosing your information when you use our services or register as a professional (technician or service provider). It also informs you of your privacy rights and the legal safeguards that apply to you.
+          </Text>
 
-            <Text className="text-base text-gray-700 leading-relaxed">
-              <Text className="font-bold">PRNV Services</Text> use your personal data to provide and improve the service from both customer and professional (technician/service provider) end. By using the service, you agree to the collection and use of information in accordance with this privacy policy.
-            </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            <Text className="font-semibold">PRNV Services</Text> use your personal data to provide and improve the service from both customer and professional (technician/service provider) end. By using the service, you agree to the collection and use of information in accordance with this privacy policy.
+          </Text>
 
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Interpretation and Definitions
-            </Text>
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Interpretation and Definitions
+          </Text>
 
-            <Text className="text-xl font-semibold text-gray-800 mb-3">
-              Interpretation
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear singular or plural.
-            </Text>
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Interpretation
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear singular or plural.
+          </Text>
 
-            <Text className="text-xl font-semibold text-gray-800 mb-3">
-              Definitions
-            </Text>
-            <Text className="text-base text-gray-700 mb-4">
-              For the purposes of this Privacy Policy:
-            </Text>
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Definitions
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-3">
+            For the purposes of this Privacy Policy:
+          </Text>
 
-            <View className="bg-gray-50 p-6 rounded-lg">
-              <View className="space-y-2">
-                <Text className="text-sm text-gray-700">
-                  1. <Text className="font-semibold">Account</Text> means an individual account created for you to access our service or to be a part of our service.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  2. <Text className="font-semibold">Company</Text> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to PRNV Services, 6th floor, Swathi Plaza, Leelanagar, Ameerpet, Hyderabad.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  3. <Text className="font-semibold">Cookies</Text> are small files placed on your computer, mobile device, or any other device by a website, containing the details of your browsing history on that website among its many uses.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  4. <Text className="font-semibold">Device</Text> means any device that can access the service, such as a computer, a cellphone, or a digital tablet.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  5. <Text className="font-semibold">Personal Data</Text> is any information related to an identified or identifiable individual.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  6. <Text className="font-semibold">Third-party Social Media Service</Text> refers to any website or social network website through which a user or professional (technician/service provider) can log in or create an account to use the service or be a part of our service.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  7. <Text className="font-semibold">Usage Data</Text> refers to data collected automatically, either generated by the use of the service or from the service infrastructure itself (for example, the duration of a page visit).
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  8. <Text className="font-semibold">Website</Text> refers to PRNV Services, accessible from https://www.prnvservices.com.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  9. <Text className="font-semibold">You</Text> mean the individual accessing or using the Service or the Company or other legal entity on behalf of which such individual is accessing or using the service, as applicable.
-                </Text>
-              </View>
+          <View className="bg-gray-50 p-6 rounded-lg mb-6">
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              1. <Text className="font-normal">Account</Text> means an individual account created for you to access our service or to be a part of our service.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              2. <Text className="font-normal">Company</Text> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to PRNV SERVICES, Flat No. 301, Sai Manor Apartment, H.NO. 7-1-621/10, Near Umesh Chandra Statue, IAS Quarters Lane, SR Nagar, Hyderabad, Telangana, 500038
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              3. <Text className="font-normal">Cookies</Text> are small files placed on your computer, mobile device, or any other device by a website, containing the details of your browsing history on that website among its many uses.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              4. <Text className="font-normal">Device</Text> means any device that can access the service, such as a computer, a cellphone, or a digital tablet.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              5. <Text className="font-normal">Personal Data</Text> is any information related to an identified or identifiable individual.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              6. <Text className="font-normal">Usage Data</Text> refers to data collected automatically, either generated by the use of the service or from the service infrastructure itself (for example, the duration of a page visit).
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              7. <Text className="font-normal">Website</Text> refers to PRNV Services, accessible from https://www.prnvservices.com.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2 font-semibold">
+              8. <Text className="font-normal">You</Text> mean the individual accessing or using the Service or the Company or other legal entity on behalf of which such individual is accessing or using the service, as applicable. Collecting and using your personal data.
+            </Text>
+          </View>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Types of Data Collected
+          </Text>
+
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Personal Data
+          </Text>
+
+          <View className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-400 mb-6">
+            <Text className="font-semibold text-blue-800 mb-3">
+              For Customers:
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              We may ask You to provide Us with personally identifiable information that can be used to contact or identify You while using our service. Personally identifiable information may include, but is not limited to, the following:
+            </Text>
+            <View className="mb-3">
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• First name and last name</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Phone number</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Address, State, Province, ZIP/Postal code, City</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Usage Data</Text>
             </View>
+          </View>
 
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Types of Data Collected
+          <View className="bg-green-50 p-6 rounded-lg border-l-4 border-green-400 mb-6">
+            <Text className="font-semibold text-green-800 mb-3">
+              For Professional (Technician/Service Provider):
             </Text>
-
-            <Text className="text-xl font-semibold text-gray-800 mb-3">
-              Personal Data
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              The Professional who choose to use our services as a Professional (Technician/Service Provider), we will ask you for some personal information that will allow us to get in touch with you or identify you. This private information includes:
             </Text>
-
-            <View className="space-y-6">
-              <View className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-400">
-                <Text className="font-semibold text-blue-800 mb-3">
-                  For Customers:
-                </Text>
-                <Text className="text-sm text-gray-700 mb-3">
-                  We may ask You to provide Us with personally identifiable information that can be used to contact or identify You while using our service. Personally identifiable information may include, but is not limited to, the following:
-                </Text>
-                <View className="space-y-1">
-                  <Text className="text-sm text-gray-700">• Email address</Text>
-                  <Text className="text-sm text-gray-700">• First name and last name</Text>
-                  <Text className="text-sm text-gray-700">• Phone number</Text>
-                  <Text className="text-sm text-gray-700">• Address, State, Province, ZIP/Postal code, City</Text>
-                  <Text className="text-sm text-gray-700">• Usage Data</Text>
-                </View>
-              </View>
-
-              <View className="bg-green-50 p-6 rounded-lg border-l-4 border-green-400">
-                <Text className="font-semibold text-green-800 mb-3">
-                  For Professional (Technician/Service Provider):
-                </Text>
-                <Text className="text-sm text-gray-700 mb-3">
-                  The Professional who choose to use our services as a Professional (Technician/Service Provider), we will ask you for some personal information that will allow us to get in touch with you or identify you. This private information includes:
-                </Text>
-                <View className="space-y-1">
-                  <Text className="text-sm text-gray-700">• Email address</Text>
-                  <Text className="text-sm text-gray-700">• First name and last name</Text>
-                  <Text className="text-sm text-gray-700">• Phone number</Text>
-                  <Text className="text-sm text-gray-700">• 2 Referral Mobile Number</Text>
-                  <Text className="text-sm text-gray-700">• Current Address & Permanent Address</Text>
-                  <Text className="text-sm text-gray-700">• Aadhar Card, Voter Card, or Driving License</Text>
-                  <Text className="text-sm text-gray-700">• Your Passport Size Photo for Profile</Text>
-                  <Text className="text-sm text-gray-700">• Usage Data</Text>
-                </View>
-                <Text className="text-sm text-gray-700 mt-3">
-                  <Text className="font-semibold">Note:</Text> This personal data is not limited; it is unlimited and subject to periodic changes.
-                </Text>
-              </View>
+            <View className="mb-3">
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• First name and last name</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Phone number</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• 2 Referral Mobile Number</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Current Address & Permanent Address</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Aadhar Card, Voter Card, or Driving License</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Your Passport Size Photo for Profile</Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-1">• Usage Data</Text>
             </View>
+            <Text className="text-sm text-gray-700 leading-5 mt-3">
+              <Text className="font-semibold">Note:</Text> This personal data is not limited; it is unlimited and subject to periodic changes.
+            </Text>
+          </View>
 
-            <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
-              Usage Data
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Usage Data
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Usage Data is collected automatically when using the services.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Usage Data may include information such as Your Device's Internet Protocol address (e.g., IP address), browser type, browser version, the pages of our service that You visit, the time and date of your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            When you access the service by or through a mobile device, we may collect certain information automatically, including, but not limited to, the type of mobile device you use, your mobile device's unique ID, the IP address of your mobile device, your mobile operating system, the type of mobile Internet browser you use, unique device identifiers and other diagnostic data.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            We may also collect information that your browser sends whenever you visit our service or access the service through a mobile device.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Tracking Technologies and Cookies
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            We use Cookies and similar tracking technologies to track the activity on our service and store certain information. Tracking technologies are beacons, tags, and scripts to collect and track information and improve and analyze our service. The technologies We use may include:
+          </Text>
+          <View className="mb-3 ml-6">
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              1. <Text className="font-semibold">Cookies or Browser Cookies:</Text> A cookie is a small file placed on your device. You can instruct your browser to refuse all Cookies or to indicate when a cookie is being sent. However, if you do not accept Cookies, You may not be able to use some parts of our service. Unless you have adjusted your browser setting so it will refuse cookies, our service may use Cookies.
             </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              Usage Data is collected automatically when using the services.
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              2. <Text className="font-semibold">Web Beacons:</Text> Certain sections of our service and our emails may contain small electronic files known as web beacons (also referred to as clear gifs, pixel tags, and single-pixel gifs) that permit the Company, for example, to count users who have visited those pages or opened an email and for other related website statistics (for example, recording the popularity of a certain section and verifying system and server integrity).
             </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              Usage Data may include information such as Your Device's Internet Protocol address (e.g., IP address), browser type, browser version, the pages of our service that You visit, the time and date of your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
+          </View>
+
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            We use both Sessions and Persistent Cookies for the purposes set out below:
+          </Text>
+
+          <View className="bg-gray-50 p-6 rounded-lg mb-6">
+            <Text className="font-semibold text-gray-800 mt-6 mb-3">
+              Necessary / Essential Cookies
             </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              When you access the service by or through a mobile device, we may collect certain information automatically, including, but not limited to, the type of mobile device you use, your mobile device's unique ID, the IP address of your mobile device, your mobile operating system, the type of mobile Internet browser you use, unique device identifiers and other diagnostic data.
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Type:</Text> Session Cookies
             </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              We may also collect information that your browser sends whenever you visit our service or access the service through a mobile device.
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Administered by:</Text> Us
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Purpose:</Text> These Cookies are essential to provide you with services available through the website and to enable you to use some of its features. They help to authenticate users and prevent fraudulent use of user accounts. Without these Cookies, the services that You have asked for cannot be provided, and We only use these Cookies to provide you with those services.
             </Text>
 
-            <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
-              Information from Third-Party Social Media Services
+            <Text className="font-semibold text-gray-800 mt-6 mb-3">
+              Cookies Policy / Notice Acceptance Cookies
             </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The Company allows you to create an account and log in to use the services through the following Third-party Social Media Services:
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Type:</Text> Persistent Cookies
             </Text>
-            <View className="ml-6 space-y-2">
-              <Text className="text-base text-gray-700">1. Gmail</Text>
-              <Text className="text-base text-gray-700">2. Facebook</Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Administered by:</Text> Us
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Purpose:</Text> These Cookies identify if users have accepted the use of cookies on the Website.
+            </Text>
+
+            <Text className="font-semibold text-gray-800 mt-6 mb-3">
+              Functionality Cookies
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Type:</Text> Persistent Cookies
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-3">
+              <Text className="font-semibold">Administered by:</Text> Us
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5">
+              <Text className="font-semibold">Purpose:</Text> These Cookies allow us to remember choices You make when You use the Website, such as remembering your login details or language preference. The purpose of these Cookies is to provide You with a more personal experience and to avoid You having to re-enter your preferences every time You use the Website.
+            </Text>
+          </View>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Use of Your Personal Data
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            The Company may use Personal Data for the following purposes:
+          </Text>
+          <View className="ml-6 mb-6">
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              1. To provide and maintain our Service, including monitoring the usage of our Service.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              2. To Manage Your Account, to manage Your registration as a user of the Service or as a professional (technician/service provider). The Personal Data You provide can give You access to different functionalities of the Service that are available to You as a registered user or a professional (technician/service provider).
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              3. For the performance of a professional (technician/service provider) and undertaking of the services you book through our website.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              4. To Contact You by telephone calls, SMS, or other equivalent forms of electronic communication, such as a mobile application regarding updates or informative communications related to the functionalities, products, or contracted services, including the security updates, when necessary or reasonable for their implementation.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              5. To provide You with news, special offers, and general information about other goods, services, and events which we offer that are similar to those that you have already purchased or enquired about unless You have opted not to receive such information.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              6. To manage Your requests means to attend and manage your requests to us.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              7. For other purposes means we may use Your information for other purposes, such as data analysis, identifying usage trends, determining the effectiveness of our promotional campaigns, and evaluating and improving our Service, marketing, and your experience.
+            </Text>
+          </View>
+
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            We may share Your personal information in the following situations:
+          </Text>
+          <View className="ml-6 mb-6">
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              1. <Text className="font-semibold">With Professionals (Technicians/Service Providers):</Text> We may give professionals (technicians/service providers) access to your contact number, so they can get in touch with you about the services you've requested.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              2. <Text className="font-semibold">With Affiliates:</Text> We may share Your information with Our affiliates, which will require those affiliates to honor this Privacy Policy. Affiliates include Our parent company and any other subsidiaries, joint venture partners, or other companies that We control or that are under common control with Us.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              3. <Text className="font-semibold">With business partners:</Text> We may share Your information with Our business partners to offer You certain products, services, or promotions.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              4. <Text className="font-semibold">With other users:</Text> when You share personal information or otherwise interact in public areas with other users, such information may be viewed by all users and may be publicly distributed outside. If You interact with other users or register through a Third-Party Social Media Service, Your contacts on the Third-Party Social Media Service may see Your name, profile, pictures, and description of Your activity. Similarly, other users will be able to view descriptions of Your activity, communicate with You and view Your profile.
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              5. <Text className="font-semibold">With Your consent:</Text> We may disclose Your personal information for any other purpose with Your consent.
+            </Text>
+          </View>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Retention of Your Personal Data
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            The Company will retain Your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use Your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            The Company will also retain Usage Data for internal analysis purposes. Usage Data is generally retained for a shorter period of time, except when this data is used to strengthen the security or improve the functionality of Our Service. We are legally obligated to retain this data for longer.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Transfer of Your Personal Data
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Your information, including Personal Data, is processed at the Company's operating offices and other places where the parties involved in the processing are located. It means that this information may be transferred to — and maintained on — computers located outside of Your state, province, country, or other governmental jurisdiction where the data protection laws may differ than those from Your jurisdiction.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Your consent to this Privacy Policy, followed by Your submission of such information, represents Your agreement to that transfer.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy, and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place, including the security of Your data and other personal information.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Delete Your Personal Data
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            You have the right to delete or request that We assist in deleting the Personal Data We have collected about You.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Our Service may allow You to delete certain information about You from within the Service. You may update, amend, or delete Your information at any time by signing in to Your Account, if you have one, and visiting the account settings section that allows you to manage Your personal information. You may also contact Us to request access to, correct, or delete any personal information you have provided.
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Please note, however, that We may need to retain certain information when we have a legal obligation or lawful basis to do so.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Disclosure of Your Personal Data
+          </Text>
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Business Transactions
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            If the Company is involved in a merger, acquisition, or asset sale, Your Personal Data may be transferred. We will provide notice before Your Personal Data is transferred and becomes subject to a different Privacy Policy.
+          </Text>
+
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Law Enforcement
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Under certain circumstances, the Company may be required to disclose Your Personal Data if required by law or in response to valid requests by public authorities (e.g., a court or a government agency).
+          </Text>
+
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Other legal requirements
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            The Company may disclose Your Personal Data in the good faith belief that such action is necessary to:
+          </Text>
+          <View className="ml-6 mb-6">
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              1. Comply with a legal obligation
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              2. Protect and defend the rights or property of the Company
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              3. Prevent or investigate possible wrongdoing in connection with the Service
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              4. Protect the personal safety of Users of the Service or the public
+            </Text>
+            <Text className="text-sm text-gray-700 leading-5 mb-2">
+              5. Protect against legal liability
+            </Text>
+          </View>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Security of Your Personal Data
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet or method of electronic storage is 100% secure. While We strive to use commercially acceptable means to protect Your Personal Data, We cannot guarantee its absolute security.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Reservation of Rights
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            We reserve the right to request that you remove all links or any particular link to our website. You approve of immediately removing all links to our website upon request. We also reserve the right to amend these terms and conditions and its linking policy at any time. By continuously linking to our website, you agree to be bound to and follow these terms and conditions.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Links to Other Websites
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            Our Service may contain links to other websites that we do not operate. If You click on a third-party link, You will be directed to that third-party's site. We strongly advise you to review the Privacy Policy of every site You visit. We have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Changes to this Privacy Policy
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page. We will inform you via email and/or a prominent notice on our service before the change becomes effective and update the "Last updated" date at the top of this Privacy Policy. You are advised to review this Privacy Policy periodically for any changes. This Privacy Policy changes are effective when posted on this page.
+          </Text>
+
+          <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+            Payment Policy
+          </Text>
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Customer:
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            There is no online payment process for customers who book services on our website. Because payment is made only after the work is completed directly to the professional (technician/service provider). There is no refund for the amount paid to the service provider.
+          </Text>
+
+          <View className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400 mb-6">
+            <Text className="font-semibold text-yellow-800 mb-3">
+              Note:
+            </Text>
+            <View className="mb-3 ml-6">
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                1. PRNV Services is not involved in any payment between the customer and professional (technician/service provider).
+              </Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                2. Customer should make payment to the professional (technician/service provider) after work is done.
+              </Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                3. After work is done, customers should mention all the required fields, including work started, work amount paid, rating, and reviews on the service profile page. These details will be tracked for different processes like providing 1 week of work guarantee.
+              </Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                4. The amount paid to a professional (technician/service provider) after work is not refundable.
+              </Text>
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                5. To get compensation from the professional (technician/service provider) for any damage during work as per the agreement with PRNV Services, the customer should mention the total work amount accepted, work started, work completed, the total amount paid, rating & reviews.
+              </Text>
             </View>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              When you decide to register through or otherwise grant us access to a Third-Party Social Media Service, We may collect Personal data that is already associated with your Third-Party Social Media Service's account, such as your name, email address, activities, or contact list associated with that account.
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              You may also have the option of sharing additional information with the Company through your Third-Party Social Media Service's account. If you choose to provide such information and Personal Data during registration or otherwise, you are giving the Company permission to use, share, and store it in a manner consistent with this Privacy Policy.
-            </Text>
+          </View>
 
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Tracking Technologies and Cookies
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              We use Cookies and similar tracking technologies to track the activity on our service and store certain information. Tracking technologies are beacons, tags, and scripts to collect and track information and improve and analyze our service. The technologies We use may include:
-            </Text>
-            <View className="ml-6 space-y-2">
-              <Text className="text-base text-gray-700">
-                1. <Text className="font-semibold">Cookies or Browser Cookies:</Text> A cookie is a small file placed on your device. You can instruct your browser to refuse all Cookies or to indicate when a cookie is being sent. However, if you do not accept Cookies, You may not be able to use some parts of our service. Unless you have adjusted your browser setting so it will refuse cookies, our service may use Cookies.
-              </Text>
-              <Text className="text-base text-gray-700">
-                2. <Text className="font-semibold">Web Beacons:</Text> Certain sections of our service and our emails may contain small electronic files known as web beacons (also referred to as clear gifs, pixel tags, and single-pixel gifs) that permit the Company, for example, to count users who have visited those pages or opened an email and for other related website statistics (for example, recording the popularity of a certain section and verifying system and server integrity).
-              </Text>
-            </View>
+          <Text className="text-xl font-semibold text-gray-800 mt-8 mb-3">
+            Professional (Technician/Service Provider):
+          </Text>
+          <Text className="text-base text-gray-700 leading-6 mb-6">
+            One of our plans.
+          </Text>
 
-            <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
-              We use both Sessions and Persistent Cookies for the purposes set out below:
+          <View className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400 mb-6">
+            <Text className="font-semibold text-yellow-800 mb-3">
+              Note:
             </Text>
-
-            <View className="bg-gray-50 p-6 rounded-lg">
-              <Text className="font-semibold text-gray-800 mb-3">
-                Necessary / Essential Cookies
+            <View className="mb-3 ml-6">
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                1. Professionals (Technicians/Service Providers) can change the pin code during the Time of renewal. He can't change the pincode in the ongoing plan.
               </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Type:</Text> Session Cookies
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                2. Professionals (Technicians/Service Providers) can change the plan only after the completion of an ongoing plan for 30 days. And the base fare may vary according to the new plan you choose.
               </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Administered by:</Text> Us
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                3. Professionals (Technicians/Service Providers) must renew the plan in 30 days. On failing, the profile will not be accessible to the customers. And the next renewal amount may change according to the fares of that time.
               </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Purpose:</Text> These Cookies are essential to provide you with services available through the website and to enable you to use some of its features. They help to authenticate users and prevent fraudulent use of user accounts. Without these Cookies, the services that You have asked for cannot be provided, and We only use these Cookies to provide you with those services.
+              <Text className="text-sm text-gray-700 leading-5 mb-2">
+                4. The professional (technician/service provider) profile in the searched category will be displayed based on seniority, like first come, first serve. Professionals (Technicians/Service Providers) will lose the seniority benefits if they fail to renew on time.
               </Text>
-
-              <Text className="font-semibold text-gray-800 mb-3 mt-6">
-                Cookies Policy / Notice Acceptance Cookies
-              </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Type:</Text> Persistent Cookies
-              </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Administered by:</Text> Us
-              </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Purpose:</Text> These Cookies identify if users have accepted the use of cookies on the Website.
-              </Text>
-
-              <Text className="font-semibold text-gray-800 mb-3 mt-6">
-                Functionality Cookies
-              </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Type:</Text> Persistent Cookies
-              </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Administered by:</Text> Us
-              </Text>
-              <Text className="text-sm text-gray-700">
-                <Text className="font-semibold">Purpose:</Text> These Cookies allow us to remember choices You make when You use the Website, such as remembering your login details or language preference. The purpose of these Cookies is to provide You with a more personal experience and to avoid You having to re-enter your preferences every time You use the Website.
-              </Text>
-            </View>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Use of Your Personal Data
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The Company may use Personal Data for the following purposes:
-            </Text>
-            <View className="ml-6 space-y-2">
-              <Text className="text-base text-gray-700">
-                1. To provide and maintain our Service, including monitoring the usage of our Service.
-              </Text>
-              <Text className="text-base text-gray-700">
-                2. To Manage Your Account, to manage Your registration as a user of the Service or as a professional (technician/service provider). The Personal Data You provide can give You access to different functionalities of the Service that are available to You as a registered user or a professional (technician/service provider).
-              </Text>
-              <Text className="text-base text-gray-700">
-                3. For the performance of a professional (technician/service provider) and undertaking of the services you book through our website.
-              </Text>
-              <Text className="text-base text-gray-700">
-                4. To Contact You by email, telephone calls, SMS, or other equivalent forms of electronic communication, such as a mobile application's push notifications regarding updates or informative communications related to the functionalities, products, or contracted services, including the security updates, when necessary or reasonable for their implementation.
-              </Text>
-              <Text className="text-base text-gray-700">
-                5. To provide You with news, special offers, and general information about other goods, services, and events which we offer that are similar to those that you have already purchased or enquired about unless You have opted not to receive such information.
-              </Text>
-              <Text className="text-base text-gray-700">
-                6. To manage Your requests means to attend and manage your requests to us.
-              </Text>
-              <Text className="text-base text-gray-700">
-                7. For other purposes means we may use Your information for other purposes, such as data analysis, identifying usage trends, determining the effectiveness of our promotional campaigns, and evaluating and improving our Service, marketing, and your experience.
-              </Text>
-            </View>
-
-            <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
-              We may share Your personal information in the following situations:
-            </Text>
-            <View className="ml-6 space-y-2">
-              <Text className="text-base text-gray-700">
-                1. <Text className="font-semibold">With Professionals (Technicians/Service Providers):</Text> We may give professionals (technicians/service providers) access to your contact number, so they can get in touch with you about the services you've requested.
-              </Text>
-              <Text className="text-base text-gray-700">
-                2. <Text className="font-semibold">With Affiliates:</Text> We may share Your information with Our affiliates, which will require those affiliates to honor this Privacy Policy. Affiliates include Our parent company and any other subsidiaries, joint venture partners, or other companies that We control or that are under common control with Us.
-              </Text>
-              <Text className="text-base text-gray-700">
-                3. <Text className="font-semibold">With business partners:</Text> We may share Your information with Our business partners to offer You certain products, services, or promotions.
-              </Text>
-              <Text className="text-base text-gray-700">
-                4. <Text className="font-semibold">With other users:</Text> when You share personal information or otherwise interact in public areas with other users, such information may be viewed by all users and may be publicly distributed outside. If You interact with other users or register through a Third-Party Social Media Service, Your contacts on the Third-Party Social Media Service may see Your name, profile, pictures, and description of Your activity. Similarly, other users will be able to view descriptions of Your activity, communicate with You and view Your profile.
-              </Text>
-              <Text className="text-base text-gray-700">
-                5. <Text className="font-semibold">With Your consent:</Text> We may disclose Your personal information for any other purpose with Your consent.
-              </Text>
-            </View>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Retention of Your Personal Data
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The Company will retain Your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use Your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The Company will also retain Usage Data for internal analysis purposes. Usage Data is generally retained for a shorter period of time, except when this data is used to strengthen the security or improve the functionality of Our Service. We are legally obligated to retain this data for longer.
-            </Text>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Transfer of Your Personal Data
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              Your information, including Personal Data, is processed at the Company's operating offices and other places where the parties involved in the processing are located. It means that this information may be transferred to — and maintained on — computers located outside of Your state, province, country, or other governmental jurisdiction where the data protection laws may differ than those from Your jurisdiction.
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              Your consent to this Privacy Policy, followed by Your submission of such information, represents Your agreement to that transfer.
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy, and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place, including the security of Your data and other personal information.
-            </Text>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Delete Your Personal Data
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              You have the right to delete or request that We assist in deleting the Personal Data We have collected about You.
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              Our Service may allow You to delete certain information about You from within the Service. You may update, amend, or delete Your information at any time by signing in to Your Account, if you have one, and visiting the account settings section that allows you to manage Your personal information. You may also contact Us to request access to, correct, or delete any personal information you have provided.
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              Please note, however, that We may need to retain certain information when we have a legal obligation or lawful basis to do so.
-            </Text>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Disclosure of Your Personal Data
-            </Text>
-            <Text className="text-xl font-semibold text-gray-800 mb-3">
-              Business Transactions
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              If the Company is involved in a merger, acquisition, or asset sale, Your Personal Data may be transferred. We will provide notice before Your Personal Data is transferred and becomes subject to a different Privacy Policy.
-            </Text>
-
-            <Text className="text-xl font-semibold text-gray-800 mb-3">
-              Law Enforcement
-            </Text>
-            <Text classNameITES="text-base text-gray-700 leading-relaxed">
-              Under certain circumstances, the Company may be required to disclose Your Personal Data if required by law or in response to valid requests by public authorities (e.g., a court or a government agency).
-            </Text>
-
-            <Text className="text-xl font-semibold text-gray-800 mb-3">
-              Other legal requirements
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The Company may disclose Your Personal Data in the good faith belief that such action is necessary to:
-            </Text>
-            <View className="ml-6 space-y-2">
-              <Text className="text-base text-gray-700">
-                1. Comply with a legal obligation
-              </Text>
-              <Text className="text-base text-gray-700">
-                2. Protect and defend the rights or property of the Company
-              </Text>
-              <Text className="text-base text-gray-700">
-                3. Prevent or investigate possible wrongdoing in connection with the Service
-              </Text>
-              <Text className="text-base text-gray-700">
-                4. Protect the personal safety of Users of the Service or the public
-              </Text>
-              <Text className="text-base text-gray-700">
-                5. Protect against legal liability
-              </Text>
-            </View>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Security of Your Personal Data
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet or method of electronic storage is 100% secure. While We strive to use commercially acceptable means to protect Your Personal Data, We cannot guarantee its absolute security.
-            </Text>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Reservation of Rights
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              We reserve the right to request that you remove all links or any particular link to our website. You approve of immediately removing all links to our website upon request. We also reserve the right to amend these terms and conditions and its linking policy at any time. By continuously linking to our website, you agree to be bound to and follow these terms and conditions.
-            </Text>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Links to Other Websites
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              Our Service may contain links to other websites that we do not operate. If You click on a third-party link, You will be directed to that third-party's site. We strongly advise you to review the Privacy Policy of every site You visit. We have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.
-            </Text>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Changes to this Privacy Policy
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page. We will inform you via email and/or a prominent notice on our service before the change becomes effective and update the "Last updated" date at the top of this Privacy Policy. You are advised to review this Privacy Policy periodically for any changes. This Privacy Policy changes are effective when posted on this page.
-            </Text>
-
-            <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
-              Payment Policy
-            </Text>
-            <Text className="text-xl font-semibold text-gray-800 mb-3">
-              Customer:
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              There is no online payment process for customers who book services on our website. Because payment is made only after the work is completed directly to the professional (technician/service provider). There is no refund for the amount paid to the service provider.
-            </Text>
-
-            <View className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400">
-              <Text className="font-semibold text-yellow-800 mb-3">Note:</Text>
-              <View className="space-y-2">
-                <Text className="text-sm text-gray-700">
-                  1. PRNV Services is not involved in any payment between the customer and professional (technician/service provider).
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  2. Customer should make payment to the professional (technician/service provider) after work is done.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  3. After work is done, customers should mention all the required fields, including work started, work amount paid, rating, and reviews on the service profile page. These details will be tracked for different processes like providing 1 week of work guarantee.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  4. The amount paid to a professional (technician/service provider) after work is not refundable.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  5. To get compensation from the professional (technician/service provider) for any damage during work as per the agreement with PRNV Services, the customer should mention the total work amount accepted, work started, work completed, the total amount paid, rating & reviews.
-                </Text>
-              </View>
-            </View>
-
-            <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
-              Professional (Technician/Service Provider):
-            </Text>
-            <Text className="text-base text-gray-700 leading-relaxed">
-              The Professional (Technician/Service Provider) has to pay a monthly fee by enrolling in one of four plans. When a professional (technician/service provider) subscribes to any of these plans, the fee is non-refundable. During the payment process, the details of your cards or UPI will be safely stored with us, making your payment safe and secure.
-            </Text>
-
-            <View className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400">
-              <Text className="font-semibold text-yellow-800 mb-3">Note:</Text>
-              <View className="space-y-2">
-                <Text className="text-sm text-gray-700">
-                  1. Professionals (Technicians/Service Providers) can change the pin code during the Time of renewal. He can't change the pincode in the ongoing plan.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  2. Professionals (Technicians/Service Providers) can change the plan only after the completion of an ongoing plan for 30 days. And the base fare may vary according to the new plan you choose.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  3. Professionals (Technicians/Service Providers) must renew the plan in 30 days. On failing, the profile will not be accessible to the customers. And the next renewal amount may change according to the fares of that time.
-                </Text>
-                <Text className="text-sm text-gray-700">
-                  4. The professional (technician/service provider) profile in the searched category will be displayed based on seniority, like first come, first serve. Professionals (Technicians/Service Providers) will lose the seniority benefits if they fail to renew on time.
-                </Text>
-              </View>
             </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 export default PrivacyPolicyScreen;
+// import React from 'react';
+// import { View, Text, ScrollView } from 'react-native';
+
+// const PrivacyPolicyScreen = () => {
+//   return (
+//     <ScrollView className="flex-1 bg-white">
+//       <View className="max-w-6xl mx-auto px-2 py-4">
+//         <Text className="text-3xl font-bold text-gray-900 mb-8 text-center">
+//           Privacy Policy
+//         </Text>
+
+//         <View className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+//           <View className="space-y-6">
+//             <Text className="text-sm text-gray-600 mb-6">
+//               <Text className="font-bold">Last updated:</Text> February 07, 2023
+//             </Text>
+
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               This Privacy Policy describes our policies and procedures for collecting, using, and disclosing your information when you use our services or register as a professional (technician or service provider). It also informs you of your privacy rights and the legal safeguards that apply to you.
+//             </Text>
+
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               <Text className="font-bold">PRNV Services</Text> use your personal data to provide and improve the service from both customer and professional (technician/service provider) end. By using the service, you agree to the collection and use of information in accordance with this privacy policy.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Interpretation and Definitions
+//             </Text>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3">
+//               Interpretation
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The words of which the initial letter is capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear singular or plural.
+//             </Text>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3">
+//               Definitions
+//             </Text>
+//             <Text className="text-base text-gray-700 mb-4">
+//               For the purposes of this Privacy Policy:
+//             </Text>
+
+//             <View className="bg-gray-50 p-6 rounded-lg">
+//               <View className="space-y-2">
+//                 <Text className="text-sm text-gray-700">
+//                   1. <Text className="font-semibold">Account</Text> means an individual account created for you to access our service or to be a part of our service.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   2. <Text className="font-semibold">Company</Text> (referred to as either "the Company", "We", "Us" or "Our" in this Agreement) refers to PRNV Services, 6th floor, Swathi Plaza, Leelanagar, Ameerpet, Hyderabad.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   3. <Text className="font-semibold">Cookies</Text> are small files placed on your computer, mobile device, or any other device by a website, containing the details of your browsing history on that website among its many uses.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   4. <Text className="font-semibold">Device</Text> means any device that can access the service, such as a computer, a cellphone, or a digital tablet.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   5. <Text className="font-semibold">Personal Data</Text> is any information related to an identified or identifiable individual.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   6. <Text className="font-semibold">Third-party Social Media Service</Text> refers to any website or social network website through which a user or professional (technician/service provider) can log in or create an account to use the service or be a part of our service.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   7. <Text className="font-semibold">Usage Data</Text> refers to data collected automatically, either generated by the use of the service or from the service infrastructure itself (for example, the duration of a page visit).
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   8. <Text className="font-semibold">Website</Text> refers to PRNV Services, accessible from https://www.prnvservices.com.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   9. <Text className="font-semibold">You</Text> mean the individual accessing or using the Service or the Company or other legal entity on behalf of which such individual is accessing or using the service, as applicable.
+//                 </Text>
+//               </View>
+//             </View>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Types of Data Collected
+//             </Text>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3">
+//               Personal Data
+//             </Text>
+
+//             <View className="space-y-6">
+//               <View className="bg-blue-50 p-6 rounded-lg border-l-4 border-blue-400">
+//                 <Text className="font-semibold text-blue-800 mb-3">
+//                   For Customers:
+//                 </Text>
+//                 <Text className="text-sm text-gray-700 mb-3">
+//                   We may ask You to provide Us with personally identifiable information that can be used to contact or identify You while using our service. Personally identifiable information may include, but is not limited to, the following:
+//                 </Text>
+//                 <View className="space-y-1">
+//                   <Text className="text-sm text-gray-700">• Email address</Text>
+//                   <Text className="text-sm text-gray-700">• First name and last name</Text>
+//                   <Text className="text-sm text-gray-700">• Phone number</Text>
+//                   <Text className="text-sm text-gray-700">• Address, State, Province, ZIP/Postal code, City</Text>
+//                   <Text className="text-sm text-gray-700">• Usage Data</Text>
+//                 </View>
+//               </View>
+
+//               <View className="bg-green-50 p-6 rounded-lg border-l-4 border-green-400">
+//                 <Text className="font-semibold text-green-800 mb-3">
+//                   For Professional (Technician/Service Provider):
+//                 </Text>
+//                 <Text className="text-sm text-gray-700 mb-3">
+//                   The Professional who choose to use our services as a Professional (Technician/Service Provider), we will ask you for some personal information that will allow us to get in touch with you or identify you. This private information includes:
+//                 </Text>
+//                 <View className="space-y-1">
+//                   <Text className="text-sm text-gray-700">• Email address</Text>
+//                   <Text className="text-sm text-gray-700">• First name and last name</Text>
+//                   <Text className="text-sm text-gray-700">• Phone number</Text>
+//                   <Text className="text-sm text-gray-700">• 2 Referral Mobile Number</Text>
+//                   <Text className="text-sm text-gray-700">• Current Address & Permanent Address</Text>
+//                   <Text className="text-sm text-gray-700">• Aadhar Card, Voter Card, or Driving License</Text>
+//                   <Text className="text-sm text-gray-700">• Your Passport Size Photo for Profile</Text>
+//                   <Text className="text-sm text-gray-700">• Usage Data</Text>
+//                 </View>
+//                 <Text className="text-sm text-gray-700 mt-3">
+//                   <Text className="font-semibold">Note:</Text> This personal data is not limited; it is unlimited and subject to periodic changes.
+//                 </Text>
+//               </View>
+//             </View>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
+//               Usage Data
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               Usage Data is collected automatically when using the services.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               Usage Data may include information such as Your Device's Internet Protocol address (e.g., IP address), browser type, browser version, the pages of our service that You visit, the time and date of your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               When you access the service by or through a mobile device, we may collect certain information automatically, including, but not limited to, the type of mobile device you use, your mobile device's unique ID, the IP address of your mobile device, your mobile operating system, the type of mobile Internet browser you use, unique device identifiers and other diagnostic data.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               We may also collect information that your browser sends whenever you visit our service or access the service through a mobile device.
+//             </Text>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
+//               Information from Third-Party Social Media Services
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The Company allows you to create an account and log in to use the services through the following Third-party Social Media Services:
+//             </Text>
+//             <View className="ml-6 space-y-2">
+//               <Text className="text-base text-gray-700">1. Gmail</Text>
+//               <Text className="text-base text-gray-700">2. Facebook</Text>
+//             </View>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               When you decide to register through or otherwise grant us access to a Third-Party Social Media Service, We may collect Personal data that is already associated with your Third-Party Social Media Service's account, such as your name, email address, activities, or contact list associated with that account.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               You may also have the option of sharing additional information with the Company through your Third-Party Social Media Service's account. If you choose to provide such information and Personal Data during registration or otherwise, you are giving the Company permission to use, share, and store it in a manner consistent with this Privacy Policy.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Tracking Technologies and Cookies
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               We use Cookies and similar tracking technologies to track the activity on our service and store certain information. Tracking technologies are beacons, tags, and scripts to collect and track information and improve and analyze our service. The technologies We use may include:
+//             </Text>
+//             <View className="ml-6 space-y-2">
+//               <Text className="text-base text-gray-700">
+//                 1. <Text className="font-semibold">Cookies or Browser Cookies:</Text> A cookie is a small file placed on your device. You can instruct your browser to refuse all Cookies or to indicate when a cookie is being sent. However, if you do not accept Cookies, You may not be able to use some parts of our service. Unless you have adjusted your browser setting so it will refuse cookies, our service may use Cookies.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 2. <Text className="font-semibold">Web Beacons:</Text> Certain sections of our service and our emails may contain small electronic files known as web beacons (also referred to as clear gifs, pixel tags, and single-pixel gifs) that permit the Company, for example, to count users who have visited those pages or opened an email and for other related website statistics (for example, recording the popularity of a certain section and verifying system and server integrity).
+//               </Text>
+//             </View>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
+//               We use both Sessions and Persistent Cookies for the purposes set out below:
+//             </Text>
+
+//             <View className="bg-gray-50 p-6 rounded-lg">
+//               <Text className="font-semibold text-gray-800 mb-3">
+//                 Necessary / Essential Cookies
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Type:</Text> Session Cookies
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Administered by:</Text> Us
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Purpose:</Text> These Cookies are essential to provide you with services available through the website and to enable you to use some of its features. They help to authenticate users and prevent fraudulent use of user accounts. Without these Cookies, the services that You have asked for cannot be provided, and We only use these Cookies to provide you with those services.
+//               </Text>
+
+//               <Text className="font-semibold text-gray-800 mb-3 mt-6">
+//                 Cookies Policy / Notice Acceptance Cookies
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Type:</Text> Persistent Cookies
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Administered by:</Text> Us
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Purpose:</Text> These Cookies identify if users have accepted the use of cookies on the Website.
+//               </Text>
+
+//               <Text className="font-semibold text-gray-800 mb-3 mt-6">
+//                 Functionality Cookies
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Type:</Text> Persistent Cookies
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Administered by:</Text> Us
+//               </Text>
+//               <Text className="text-sm text-gray-700">
+//                 <Text className="font-semibold">Purpose:</Text> These Cookies allow us to remember choices You make when You use the Website, such as remembering your login details or language preference. The purpose of these Cookies is to provide You with a more personal experience and to avoid You having to re-enter your preferences every time You use the Website.
+//               </Text>
+//             </View>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Use of Your Personal Data
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The Company may use Personal Data for the following purposes:
+//             </Text>
+//             <View className="ml-6 space-y-2">
+//               <Text className="text-base text-gray-700">
+//                 1. To provide and maintain our Service, including monitoring the usage of our Service.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 2. To Manage Your Account, to manage Your registration as a user of the Service or as a professional (technician/service provider). The Personal Data You provide can give You access to different functionalities of the Service that are available to You as a registered user or a professional (technician/service provider).
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 3. For the performance of a professional (technician/service provider) and undertaking of the services you book through our website.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 4. To Contact You by email, telephone calls, SMS, or other equivalent forms of electronic communication, such as a mobile application's push notifications regarding updates or informative communications related to the functionalities, products, or contracted services, including the security updates, when necessary or reasonable for their implementation.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 5. To provide You with news, special offers, and general information about other goods, services, and events which we offer that are similar to those that you have already purchased or enquired about unless You have opted not to receive such information.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 6. To manage Your requests means to attend and manage your requests to us.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 7. For other purposes means we may use Your information for other purposes, such as data analysis, identifying usage trends, determining the effectiveness of our promotional campaigns, and evaluating and improving our Service, marketing, and your experience.
+//               </Text>
+//             </View>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
+//               We may share Your personal information in the following situations:
+//             </Text>
+//             <View className="ml-6 space-y-2">
+//               <Text className="text-base text-gray-700">
+//                 1. <Text className="font-semibold">With Professionals (Technicians/Service Providers):</Text> We may give professionals (technicians/service providers) access to your contact number, so they can get in touch with you about the services you've requested.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 2. <Text className="font-semibold">With Affiliates:</Text> We may share Your information with Our affiliates, which will require those affiliates to honor this Privacy Policy. Affiliates include Our parent company and any other subsidiaries, joint venture partners, or other companies that We control or that are under common control with Us.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 3. <Text className="font-semibold">With business partners:</Text> We may share Your information with Our business partners to offer You certain products, services, or promotions.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 4. <Text className="font-semibold">With other users:</Text> when You share personal information or otherwise interact in public areas with other users, such information may be viewed by all users and may be publicly distributed outside. If You interact with other users or register through a Third-Party Social Media Service, Your contacts on the Third-Party Social Media Service may see Your name, profile, pictures, and description of Your activity. Similarly, other users will be able to view descriptions of Your activity, communicate with You and view Your profile.
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 5. <Text className="font-semibold">With Your consent:</Text> We may disclose Your personal information for any other purpose with Your consent.
+//               </Text>
+//             </View>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Retention of Your Personal Data
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The Company will retain Your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use Your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The Company will also retain Usage Data for internal analysis purposes. Usage Data is generally retained for a shorter period of time, except when this data is used to strengthen the security or improve the functionality of Our Service. We are legally obligated to retain this data for longer.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Transfer of Your Personal Data
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               Your information, including Personal Data, is processed at the Company's operating offices and other places where the parties involved in the processing are located. It means that this information may be transferred to — and maintained on — computers located outside of Your state, province, country, or other governmental jurisdiction where the data protection laws may differ than those from Your jurisdiction.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               Your consent to this Privacy Policy, followed by Your submission of such information, represents Your agreement to that transfer.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy, and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place, including the security of Your data and other personal information.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Delete Your Personal Data
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               You have the right to delete or request that We assist in deleting the Personal Data We have collected about You.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               Our Service may allow You to delete certain information about You from within the Service. You may update, amend, or delete Your information at any time by signing in to Your Account, if you have one, and visiting the account settings section that allows you to manage Your personal information. You may also contact Us to request access to, correct, or delete any personal information you have provided.
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               Please note, however, that We may need to retain certain information when we have a legal obligation or lawful basis to do so.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Disclosure of Your Personal Data
+//             </Text>
+//             <Text className="text-xl font-semibold text-gray-800 mb-3">
+//               Business Transactions
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               If the Company is involved in a merger, acquisition, or asset sale, Your Personal Data may be transferred. We will provide notice before Your Personal Data is transferred and becomes subject to a different Privacy Policy.
+//             </Text>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3">
+//               Law Enforcement
+//             </Text>
+//             <Text classNameITES="text-base text-gray-700 leading-relaxed">
+//               Under certain circumstances, the Company may be required to disclose Your Personal Data if required by law or in response to valid requests by public authorities (e.g., a court or a government agency).
+//             </Text>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3">
+//               Other legal requirements
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The Company may disclose Your Personal Data in the good faith belief that such action is necessary to:
+//             </Text>
+//             <View className="ml-6 space-y-2">
+//               <Text className="text-base text-gray-700">
+//                 1. Comply with a legal obligation
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 2. Protect and defend the rights or property of the Company
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 3. Prevent or investigate possible wrongdoing in connection with the Service
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 4. Protect the personal safety of Users of the Service or the public
+//               </Text>
+//               <Text className="text-base text-gray-700">
+//                 5. Protect against legal liability
+//               </Text>
+//             </View>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Security of Your Personal Data
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet or method of electronic storage is 100% secure. While We strive to use commercially acceptable means to protect Your Personal Data, We cannot guarantee its absolute security.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Reservation of Rights
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               We reserve the right to request that you remove all links or any particular link to our website. You approve of immediately removing all links to our website upon request. We also reserve the right to amend these terms and conditions and its linking policy at any time. By continuously linking to our website, you agree to be bound to and follow these terms and conditions.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Links to Other Websites
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               Our Service may contain links to other websites that we do not operate. If You click on a third-party link, You will be directed to that third-party's site. We strongly advise you to review the Privacy Policy of every site You visit. We have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Changes to this Privacy Policy
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page. We will inform you via email and/or a prominent notice on our service before the change becomes effective and update the "Last updated" date at the top of this Privacy Policy. You are advised to review this Privacy Policy periodically for any changes. This Privacy Policy changes are effective when posted on this page.
+//             </Text>
+
+//             <Text className="text-2xl font-semibold text-blue-700 mt-8 mb-4">
+//               Payment Policy
+//             </Text>
+//             <Text className="text-xl font-semibold text-gray-800 mb-3">
+//               Customer:
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               There is no online payment process for customers who book services on our website. Because payment is made only after the work is completed directly to the professional (technician/service provider). There is no refund for the amount paid to the service provider.
+//             </Text>
+
+//             <View className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400">
+//               <Text className="font-semibold text-yellow-800 mb-3">Note:</Text>
+//               <View className="space-y-2">
+//                 <Text className="text-sm text-gray-700">
+//                   1. PRNV Services is not involved in any payment between the customer and professional (technician/service provider).
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   2. Customer should make payment to the professional (technician/service provider) after work is done.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   3. After work is done, customers should mention all the required fields, including work started, work amount paid, rating, and reviews on the service profile page. These details will be tracked for different processes like providing 1 week of work guarantee.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   4. The amount paid to a professional (technician/service provider) after work is not refundable.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   5. To get compensation from the professional (technician/service provider) for any damage during work as per the agreement with PRNV Services, the customer should mention the total work amount accepted, work started, work completed, the total amount paid, rating & reviews.
+//                 </Text>
+//               </View>
+//             </View>
+
+//             <Text className="text-xl font-semibold text-gray-800 mb-3 mt-8">
+//               Professional (Technician/Service Provider):
+//             </Text>
+//             <Text className="text-base text-gray-700 leading-relaxed">
+//               The Professional (Technician/Service Provider) has to pay a monthly fee by enrolling in one of four plans. When a professional (technician/service provider) subscribes to any of these plans, the fee is non-refundable. During the payment process, the details of your cards or UPI will be safely stored with us, making your payment safe and secure.
+//             </Text>
+
+//             <View className="bg-yellow-50 p-6 rounded-lg border-l-4 border-yellow-400">
+//               <Text className="font-semibold text-yellow-800 mb-3">Note:</Text>
+//               <View className="space-y-2">
+//                 <Text className="text-sm text-gray-700">
+//                   1. Professionals (Technicians/Service Providers) can change the pin code during the Time of renewal. He can't change the pincode in the ongoing plan.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   2. Professionals (Technicians/Service Providers) can change the plan only after the completion of an ongoing plan for 30 days. And the base fare may vary according to the new plan you choose.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   3. Professionals (Technicians/Service Providers) must renew the plan in 30 days. On failing, the profile will not be accessible to the customers. And the next renewal amount may change according to the fares of that time.
+//                 </Text>
+//                 <Text className="text-sm text-gray-700">
+//                   4. The professional (technician/service provider) profile in the searched category will be displayed based on seniority, like first come, first serve. Professionals (Technicians/Service Providers) will lose the seniority benefits if they fail to renew on time.
+//                 </Text>
+//               </View>
+//             </View>
+//           </View>
+//         </View>
+//       </View>
+//     </ScrollView>
+//   );
+// };
+
+// export default PrivacyPolicyScreen;
 // import React from "react";
 // import { ScrollView, View, Text } from "react-native";
 
