@@ -7,87 +7,22 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
-  Dimensions,
   Alert,
-  Platform,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  User,
-  Eye,
-  EyeOff,
-  Save,
-  X,
-  Camera,
-  Phone,
-  Lock,
-  Home,
-  MapPin,
-} from "lucide-react-native";
-import { useNavigation, useRouter } from "expo-router";
-import { getAllPincodes, userEditProfile, userGetProfile } from "@/src/api/apiMethods";
-// import {
-//   getAllPincodes,
-//   userEditProfile,
-//   userGetProfile,
-// } from "@/src/api/apiMethods";
+  userGetProfile,
+  userEditProfile,
+  getAllPincodes,
+} from "@/src/api/apiMethods";
+import { useNavigation } from "@react-navigation/native";
 
-const { width } = Dimensions.get("window");
-
-interface SubArea {
-  _id: string;
-  name: string;
-}
-
-interface Area {
-  _id: string;
-  name: string;
-  subAreas?: SubArea[];
-}
-
-interface Pincode {
-  _id: string;
-  code: string;
-  city: string;
-  state: string;
-  areas: Area[];
-}
-
-interface FormData {
-  profileImage: string;
-  username: string;
-  phoneNumber: string;
-  password: string;
-  confirmPassword: string;
-  houseName: string;
-  areaName: string;
-  subAreaName: string;
-  city: string;
-  state: string;
-  pincode: string;
-}
-
-interface UserProfile {
-  id: string;
-  username: string;
-  phoneNumber: string;
-  role: string;
-  buildingName: string;
-  areaName: string;
-  subAreaName: string;
-  city: string;
-  state: string;
-  pincode: string;
-  profileImage?: string;
-}
-
-const ProfileEditPage: React.FC = () => {
-  const router = useRouter();
+const ProfileEditPage = () => {
   const navigation = useNavigation();
-  const [formData, setFormData] = useState<FormData>({
+
+  const [formData, setFormData] = useState({
     profileImage: "",
     username: "",
     phoneNumber: "",
@@ -100,553 +35,988 @@ const ProfileEditPage: React.FC = () => {
     state: "",
     pincode: "",
   });
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [updating, setUpdating] = useState<boolean>(false);
-  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
-  const [pincodeData, setPincodeData] = useState<Pincode[]>([]);
-  const [areaOptions, setAreaOptions] = useState<Area[]>([]);
-  const [subAreaOptions, setSubAreaOptions] = useState<SubArea[]>([]);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] =
-    useState<boolean>(false);
 
+  const [pincodeData, setPincodeData] = useState([]);
+  const [areaOptions, setAreaOptions] = useState([]);
+  const [subAreaOptions, setSubAreaOptions] = useState([]);
+  const [imageFile, setImageFile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // -------------------- Fetch User Profile --------------------
   useEffect(() => {
-    const fetchUserProfile = async (): Promise<void> => {
+    const fetchProfile = async () => {
       try {
         const userId = await AsyncStorage.getItem("userId");
         if (!userId) {
-          setError("User ID not found. Please login again.");
+          setError("User not found. Please login again.");
           return;
         }
-
-        const response = await userGetProfile(userId);
-        if (response && response.success) {
-          const userData: UserProfile = response.result;
+        const res = await userGetProfile(userId);
+        if (res?.success && res?.result) {
+          const u = res.result;
           setFormData({
-            profileImage: userData.profileImage || "",
-            username: userData.username || "",
-            phoneNumber: userData.phoneNumber || "",
+            profileImage: u.profileImage || "",
+            username: u.username || "",
+            phoneNumber: u.phoneNumber || "",
             password: "",
             confirmPassword: "",
-            houseName: userData.buildingName || "",
-            areaName: userData.areaName || "",
-            subAreaName: userData.subAreaName || "",
-            city: userData.city || "",
-            state: userData.state || "",
-            pincode: userData.pincode || "",
+            houseName: u.buildingName || "",
+            areaName: u.areaName || "",
+            subAreaName: u.subAreaName || "",
+            city: u.city || "",
+            state: u.state || "",
+            pincode: u.pincode || "",
           });
         }
-      } catch (err: any) {
-        setError(err?.message || "Failed to fetch profile data.");
+      } catch (err) {
+        console.log("Fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    fetchUserProfile();
+    fetchProfile();
   }, []);
 
+  // -------------------- Fetch Pincodes --------------------
   useEffect(() => {
-    const fetchPincodes = async (): Promise<void> => {
+    const loadPincodes = async () => {
       try {
-        const response = await getAllPincodes();
-        if (Array.isArray(response?.data)) {
-          setPincodeData(response.data);
-          const foundPincode = response.data.find(
-            (p) => p.code === formData.pincode
-          );
-          if (foundPincode) {
-            setAreaOptions(foundPincode.areas || []);
-            setFormData((prev) => ({
-              ...prev,
-              city: foundPincode.city,
-              state: foundPincode.state,
-            }));
-            const foundArea = foundPincode.areas.find(
-              (a) => a.name === formData.areaName
-            );
-            if (foundArea) {
-              setSubAreaOptions(foundArea.subAreas || []);
-            }
-          }
+        const res = await getAllPincodes();
+        if (Array.isArray(res?.data)) {
+          setPincodeData(res.data);
         }
       } catch (err) {
-        setError("Failed to fetch pincodes. Please try again.");
+        console.log("Pincode fetch error:", err);
       }
     };
+    loadPincodes();
+  }, []);
 
-    fetchPincodes();
-  }, [formData.pincode]);
-
+  // -------------------- Area & SubArea Cascade --------------------
   useEffect(() => {
-    if (formData.pincode) {
-      const found = pincodeData.find((p) => p.code === formData.pincode);
-      if (found && found.areas) {
-        setAreaOptions(found.areas);
-        // Pre-select the area if it exists in the fetched data
-        const defaultArea = found.areas.find(
-          (a) => a.name === formData.areaName
-        );
-        if (defaultArea) {
-          setSubAreaOptions(defaultArea.subAreas || []);
-        } else {
-          setSubAreaOptions([]);
-        }
-        setFormData((prev) => ({
-          ...prev,
-          city: found.city,
-          state: found.state,
-        }));
-      } else {
-        setAreaOptions([]);
-        setSubAreaOptions([]);
-      }
+    const found = pincodeData.find((p) => p.code === formData.pincode);
+    if (found) {
+      setAreaOptions(found.areas || []);
+      setFormData((prev) => ({
+        ...prev,
+        city: found.city,
+        state: found.state,
+      }));
+    } else {
+      setAreaOptions([]);
+      setSubAreaOptions([]);
     }
   }, [formData.pincode, pincodeData]);
 
   useEffect(() => {
-    if (formData.areaName && areaOptions.length > 0) {
-      const foundArea = areaOptions.find((a) => a.name === formData.areaName);
-      if (foundArea && foundArea.subAreas) {
-        setSubAreaOptions(foundArea.subAreas);
-      } else {
-        setSubAreaOptions([]);
-      }
-    }
+    const area = areaOptions.find((a) => a.name === formData.areaName);
+    if (area) setSubAreaOptions(area.subAreas || []);
+    else setSubAreaOptions([]);
   }, [formData.areaName, areaOptions]);
 
-  const handleChange = (name: keyof FormData, value: string): void => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (error) setError(null);
-    if (success) setSuccess(null);
+  // -------------------- Handlers --------------------
+  const handleChange = (key: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  const pickImage = async (): Promise<void> => {
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission required",
-          "Sorry, we need camera roll permissions to make this work!"
-        );
-        return;
-      }
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission required", "Please grant access to gallery.");
+      return;
+    }
 
-      setUploadingImage(true);
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.7,
+      allowsEditing: true,
+    });
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-        base64: true,
+    if (!result.canceled && result.assets?.[0]) {
+      const file = result.assets[0];
+      setImageFile({
+        uri: file.uri,
+        name: file.fileName || "profile.jpg",
+        type: file.mimeType || "image/jpeg",
       });
-
-      if (!result.canceled && result.assets[0]) {
-        const imageDataUrl = `data:image/jpeg;base64,${result.assets[0].base64}`;
-        setFormData((prev) => ({ ...prev, profileImage: imageDataUrl }));
-        setSuccess("Profile image selected successfully!");
-        setTimeout(() => setSuccess(null), 3000);
-      }
-    } catch (error) {
-      console.error("Error picking image:", error);
-      setError("Failed to select image. Please try again.");
-    } finally {
-      setUploadingImage(false);
+      setFormData((prev) => ({ ...prev, profileImage: file.uri }));
     }
   };
 
-  const handleCancel = (): void => {
-    navigation.navigate("Profile" as never);
-  };
-
-  const handleSubmit = async (): Promise<void> => {
-    setError(null);
-    setSuccess(null);
-    setUpdating(true);
-
+  // -------------------- Submit --------------------
+  const handleSubmit = async () => {
     try {
-      if (formData.password && formData.password !== formData.confirmPassword) {
-        setError("Passwords do not match");
-        return;
-      }
+      setSaving(true);
+      setError(null);
 
       if (
         formData.password &&
-        (formData.password.length < 6 || formData.password.length > 10)
+        formData.password !== formData.confirmPassword
       ) {
-        setError("Password must be between 6 and 10 characters long");
+        setError("Passwords do not match.");
+        setSaving(false);
         return;
       }
 
       const userId = await AsyncStorage.getItem("userId");
-      const token = await AsyncStorage.getItem("jwt_token");
-      if (!userId || !token) {
-        setError("User ID or token not found. Please login again.");
+      if (!userId) {
+        setError("User not found. Please login again.");
+        setSaving(false);
         return;
       }
 
-      const updateData = {
-        id: userId,
-        username: formData.username,
-        password: formData.password || undefined,
-        profileImage: formData.profileImage,
-        buildingName: formData.houseName,
-        areaName: formData.areaName,
-        subAreaName: formData.subAreaName,
-        city: formData.city,
-        state: formData.state,
-        pincode: formData.pincode,
-      };
+      const form = new FormData();
+      form.append("id", userId);
+      form.append("username", formData.username);
+      if (formData.password) form.append("password", formData.password);
+      form.append("buildingName", formData.houseName);
+      form.append("areaName", formData.areaName);
+      form.append("subAreaName", formData.subAreaName);
+      form.append("city", formData.city);
+      form.append("state", formData.state);
+      form.append("pincode", formData.pincode);
 
-      const response = await userEditProfile(updateData);
+      if (imageFile) form.append("profileImage", imageFile);
 
-      if (response && response.success) {
-        setSuccess("Profile updated successfully!");
-        const userData = response.result;
-        const updatedUser = {
-          ...userData,
-          id: userId,
-          username: userData.username,
-          buildingName: userData.buildingName,
-          phoneNumber: userData.phoneNumber,
-          areaName: userData.areaName,
-          subAreaName: userData.subAreaName,
-          pincode: userData.pincode,
-          state: userData.state,
-          city: userData.city,
-          profileImage: userData.profileImage || formData.profileImage,
-          token,
-        };
+      console.log("Submitting form data:", form);
 
-        await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
-        setTimeout(() => navigation.navigate("Profile" as never), 2000);
+      const res = await userEditProfile(form);
+      console.log("Submit response:", res);
+      if (res?.success) {
+        Alert.alert("Success", "Profile updated successfully!");
+        navigation.goBack();
       } else {
-        setError(response?.message || "Failed to update profile.");
+        setError(res?.message || "Failed to update profile.");
       }
     } catch (err: any) {
-      setError(err?.message || "Failed to update profile. Please try again.");
+      console.log("Submit error:", err);
+      setError("Something went wrong. Please try again.");
     } finally {
-      setUpdating(false);
+      setSaving(false);
     }
   };
 
   if (loading) {
     return (
-      <LinearGradient
-        colors={["#f0f4f8", "#e0e7ff"]}
-        className="flex-1 justify-center items-center"
-      >
-        <ActivityIndicator size="large" color="#4c51bf" />
-        <Text className="text-gray-600 mt-2">Loading profile data...</Text>
-      </LinearGradient>
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="gray" />
+        <Text className="text-gray-600 mt-2">Loading profile...</Text>
+      </View>
     );
   }
 
+  // -------------------- UI --------------------
   return (
-    <ScrollView className="flex-1 bg-gray-50">
-      <View className="p-4">
-        {/* Header */}
-        <Text className="text-2xl font-semibold text-gray-800 text-center mb-6">
-          Edit Profile
-        </Text>
+    <ScrollView className="flex-1 bg-white p-4">
+      <Text className="text-xl font-semibold text-center mb-5">Edit Profile</Text>
 
-        {/* Profile Image */}
-        <View className="flex-1 items-center mb-6">
-          {/* Error/Success Messages */}
-          {error && (
-            <Text className="text-red-500 text-center mt-2 mb-3">{error}</Text>
-          )}
-          {success && (
-            <Text className="text-green-500 text-center mt-2 mb-3">{success}</Text>
-          )}
-          {/* <View className="w-28 h-28 rounded-full bg-gray-200 overflow-hidden border-2 border-gray-300">
-            {formData.profileImage ? (
-              <Image
-                source={{ uri: formData.profileImage }}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            ) : (
-              <User size={56} color="#9ca3af" className="mx-auto mt-4" />
-            )}
-          </View> */}
-          <View className="w-28 h-28 rounded-full bg-teal-400 p-1 shadow-lg">
-            <View className="w-full h-full rounded-full bg-white justify-center items-center overflow-hidden">
-              {formData.profileImage ? (
-                <Image
-                  source={{ uri: formData.profileImage }}
-                  className="w-full h-full"
-                />
-              ) : (
-                <User size={50} color="gray" />
-              )}
-            </View>
-          </View>
+      {error && <Text className="text-red-500 text-center mb-3">{error}</Text>}
 
-          <TouchableOpacity
-            className="mt-3 bg-blue-500 rounded-lg px-4 py-2"
-            onPress={pickImage}
-            disabled={uploadingImage}
+      <View className="items-center mb-5">
+        {formData.profileImage ? (
+          <Image
+            source={{ uri: formData.profileImage }}
+            style={{ width: 100, height: 100, borderRadius: 50 }}
+          />
+        ) : (
+          <View
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: 50,
+              backgroundColor: "#ddd",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            {uploadingImage ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text className="text-white text-center">Choose Image</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-        {/* Form Fields */}
-        <View className="space-y-3">
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">Name</Text>
-            <TextInput
-              className="border border-gray-300 rounded-lg p-3 bg-white text-gray-800"
-              value={formData.username}
-              onChangeText={(value) => handleChange("username", value)}
-              placeholder="Enter your name"
-              placeholderTextColor="#9ca3af"
-            />
+            <Text>No Image</Text>
           </View>
+        )}
+        <TouchableOpacity
+          onPress={pickImage}
+          className="bg-gray-200 px-3 py-1 rounded mt-2"
+        >
+          <Text>Select Image</Text>
+        </TouchableOpacity>
+      </View>
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
-              <Phone size={16} color="#6b7280" />
-              <TextInput
-                className="flex-1 ml-2 text-gray-500"
-                value={formData.phoneNumber}
-                editable={false}
-                placeholder="Enter phone number"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
-          </View>
+      {/* Name */}
+      <Text>Name</Text>
+      <TextInput
+        className="border border-gray-300 rounded p-2 mb-3"
+        value={formData.username}
+        onChangeText={(v) => handleChange("username", v)}
+      />
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              New Password
-            </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-white">
-              <Lock size={16} color="#6b7280" />
-              <TextInput
-                className="flex-1 ml-2 text-gray-800"
-                value={formData.password}
-                onChangeText={(value) => handleChange("password", value)}
-                secureTextEntry={!showPassword}
-                maxLength={10}
-                placeholder="Enter new password"
-                placeholderTextColor="#9ca3af"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <TouchableOpacity
-                onPress={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? (
-                  <EyeOff size={16} color="#6b7280" />
-                ) : (
-                  <Eye size={16} color="#6b7280" />
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
+      {/* Phone */}
+      <Text>Phone Number</Text>
+      <TextInput
+        className="border border-gray-300 rounded p-2 mb-3 text-gray-500"
+        value={formData.phoneNumber}
+        editable={false}
+      />
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-white">
-              <Lock size={16} color="#6b7280" />
-              <TextInput
-                className="flex-1 ml-2 text-gray-800"
-                value={formData.confirmPassword}
-                onChangeText={(value) => handleChange("confirmPassword", value)}
-                secureTextEntry={!showConfirmPassword}
-                maxLength={10}
-                placeholder="Confirm new password"
-                placeholderTextColor="#9ca3af"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <TouchableOpacity
-                onPress={() => setShowConfirmPassword((prev) => !prev)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff size={16} color="#6b7280" />
-                ) : (
-                  <Eye size={16} color="#6b7280" />
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
+      {/* Password */}
+      <Text>New Password</Text>
+      <TextInput
+        className="border border-gray-300 rounded p-2 mb-3"
+        value={formData.password}
+        secureTextEntry
+        onChangeText={(v) => handleChange("password", v)}
+      />
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              House/Building Name
-            </Text>
-            <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-white">
-              <Home size={16} color="#6b7280" />
-              <TextInput
-                className="flex-1 ml-2 text-gray-800"
-                value={formData.houseName}
-                onChangeText={(value) => handleChange("houseName", value)}
-                placeholder="Enter house or building name"
-                placeholderTextColor="#9ca3af"
-              />
-            </View>
-          </View>
+      {/* Confirm Password */}
+      <Text>Confirm Password</Text>
+      <TextInput
+        className="border border-gray-300 rounded p-2 mb-3"
+        value={formData.confirmPassword}
+        secureTextEntry
+        onChangeText={(v) => handleChange("confirmPassword", v)}
+      />
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              Pincode
-            </Text>
-            <View className="border border-gray-300 rounded-lg bg-white">
-              <Picker
-                selectedValue={formData.pincode}
-                onValueChange={(value) => handleChange("pincode", value)}
-                style={{ height: Platform.OS === "ios" ? 50 : 50 }}
-              >
-                <Picker.Item label="Select Pincode" value="" />
-                {pincodeData
-                  .sort((a, b) => Number(a.code) - Number(b.code))
-                  .map((p) => (
-                    <Picker.Item key={p._id} label={p.code} value={p.code} />
-                  ))}
-              </Picker>
-            </View>
-          </View>
+      {/* House Name */}
+      <Text>House / Building Name</Text>
+      <TextInput
+        className="border border-gray-300 rounded p-2 mb-3"
+        value={formData.houseName}
+        onChangeText={(v) => handleChange("houseName", v)}
+      />
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              Area Name
-            </Text>
-            <View className="border border-gray-300 rounded-lg bg-white">
-              <Picker
-                selectedValue={formData.areaName}
-                onValueChange={(value) => handleChange("areaName", value)}
-                style={{ height: Platform.OS === "ios" ? 50 : 50 }}
-              >
-                <Picker.Item label="Select Area" value="" />
-                {areaOptions.map((a) => (
-                  <Picker.Item key={a._id} label={a.name} value={a.name} />
-                ))}
-              </Picker>
-            </View>
-          </View>
+      {/* Pincode */}
+      <Text>Pincode</Text>
+      <View className="border border-gray-300 rounded mb-3">
+        <Picker
+          selectedValue={formData.pincode}
+          onValueChange={(v) => handleChange("pincode", v)}
+        >
+          <Picker.Item label="Select Pincode" value="" />
+          {pincodeData.map((p: any) => (
+            <Picker.Item key={p._id} label={p.code} value={p.code} />
+          ))}
+        </Picker>
+      </View>
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              Sub Area
-            </Text>
-            <View className="border border-gray-300 rounded-lg bg-white">
-              <Picker
-                selectedValue={formData.subAreaName}
-                onValueChange={(value) => handleChange("subAreaName", value)}
-                style={{ height: Platform.OS === "ios" ? 50 : 50 }}
-              >
-                <Picker.Item label="Select Sub Area" value="" />
-                {subAreaOptions.map((sa) => (
-                  <Picker.Item key={sa._id} label={sa.name} value={sa.name} />
-                ))}
-              </Picker>
-            </View>
-          </View>
+      {/* Area */}
+      <Text>Area</Text>
+      <View className="border border-gray-300 rounded mb-3">
+        <Picker
+          selectedValue={formData.areaName}
+          onValueChange={(v) => handleChange("areaName", v)}
+        >
+          <Picker.Item label="Select Area" value="" />
+          {areaOptions.map((a: any) => (
+            <Picker.Item key={a._id} label={a.name} value={a.name} />
+          ))}
+        </Picker>
+      </View>
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">City</Text>
-            <View className="border border-gray-300 rounded-lg bg-white">
-              <Picker
-                selectedValue={formData.city}
-                onValueChange={(value) => handleChange("city", value)}
-                style={{ height: Platform.OS === "ios" ? 50 : 50 }}
-              >
-                <Picker.Item label="Select City" value="" />
-                {formData.pincode &&
-                pincodeData.find((p) => p.code === formData.pincode) ? (
-                  <Picker.Item
-                    label={
-                      pincodeData.find((p) => p.code === formData.pincode)?.city
-                    }
-                    value={
-                      pincodeData.find((p) => p.code === formData.pincode)?.city
-                    }
-                  />
-                ) : (
-                  [...new Set(pincodeData.map((p) => p.city))].map((city) => (
-                    <Picker.Item key={city} label={city} value={city} />
-                  ))
-                )}
-              </Picker>
-            </View>
-          </View>
+      {/* Sub Area */}
+      <Text>Sub Area</Text>
+      <View className="border border-gray-300 rounded mb-3">
+        <Picker
+          selectedValue={formData.subAreaName}
+          onValueChange={(v) => handleChange("subAreaName", v)}
+        >
+          <Picker.Item label="Select Sub Area" value="" />
+          {subAreaOptions.map((sa: any) => (
+            <Picker.Item key={sa._id} label={sa.name} value={sa.name} />
+          ))}
+        </Picker>
+      </View>
 
-          <View>
-            <Text className="text-sm font-medium text-gray-700 mb-1">
-              State
-            </Text>
-            <View className="border border-gray-300 rounded-lg bg-white">
-              <Picker
-                selectedValue={formData.state}
-                onValueChange={(value) => handleChange("state", value)}
-                style={{ height: Platform.OS === "ios" ? 50 : 50 }}
-              >
-                <Picker.Item label="Select State" value="" />
-                {formData.pincode &&
-                pincodeData.find((p) => p.code === formData.pincode) ? (
-                  <Picker.Item
-                    label={
-                      pincodeData.find((p) => p.code === formData.pincode)
-                        ?.state
-                    }
-                    value={
-                      pincodeData.find((p) => p.code === formData.pincode)
-                        ?.state
-                    }
-                  />
-                ) : (
-                  [...new Set(pincodeData.map((p) => p.state))].map((state) => (
-                    <Picker.Item key={state} label={state} value={state} />
-                  ))
-                )}
-              </Picker>
-            </View>
-          </View>
+      {/* City */}
+      <Text>City</Text>
+      <TextInput
+        className="border border-gray-300 rounded p-2 mb-3"
+        value={formData.city}
+        editable={false}
+      />
 
-          {/* Action Buttons */}
-          <View className="flex-row justify-between mt-6">
-            <TouchableOpacity
-              className="flex-1 bg-blue-500 rounded-lg py-2 mr-1"
-              onPress={handleSubmit}
-              disabled={updating}
-            >
-              {updating ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text className="text-white text-center">Update</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 bg-gray-400 rounded-lg py-2 ml-1"
-              onPress={handleCancel}
-              disabled={updating}
-            >
-              <Text className="text-white text-center">Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      {/* State */}
+      <Text>State</Text>
+      <TextInput
+        className="border border-gray-300 rounded p-2 mb-5"
+        value={formData.state}
+        editable={false}
+      />
+
+      {/* Buttons */}
+      <View className="flex-row justify-between">
+        <TouchableOpacity
+          onPress={handleSubmit}
+          disabled={saving}
+          className="flex-1 bg-blue-500 py-2 rounded mr-1"
+        >
+          {saving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text className="text-white text-center">Update</Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="flex-1 bg-gray-400 py-2 rounded ml-1"
+        >
+          <Text className="text-white text-center">Cancel</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
 };
 
 export default ProfileEditPage;
+
+// import React, { useState, useEffect } from "react";
+// import {
+//   View,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   Image,
+//   ScrollView,
+//   ActivityIndicator,
+//   Dimensions,
+//   Alert,
+//   Platform,
+// } from "react-native";
+// import { Picker } from "@react-native-picker/picker";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { LinearGradient } from "expo-linear-gradient";
+// import * as ImagePicker from "expo-image-picker";
+// import {
+//   User,
+//   Eye,
+//   EyeOff,
+//   Save,
+//   X,
+//   Camera,
+//   Phone,
+//   Lock,
+//   Home,
+//   MapPin,
+// } from "lucide-react-native";
+// import { useNavigation, useRouter } from "expo-router";
+// import { getAllPincodes, userEditProfile, userGetProfile } from "@/src/api/apiMethods";
+// // import {
+// //   getAllPincodes,
+// //   userEditProfile,
+// //   userGetProfile,
+// // } from "@/src/api/apiMethods";
+
+// const { width } = Dimensions.get("window");
+
+// interface SubArea {
+//   _id: string;
+//   name: string;
+// }
+
+// interface Area {
+//   _id: string;
+//   name: string;
+//   subAreas?: SubArea[];
+// }
+
+// interface Pincode {
+//   _id: string;
+//   code: string;
+//   city: string;
+//   state: string;
+//   areas: Area[];
+// }
+
+// interface FormData {
+//   profileImage: string;
+//   username: string;
+//   phoneNumber: string;
+//   password: string;
+//   confirmPassword: string;
+//   houseName: string;
+//   areaName: string;
+//   subAreaName: string;
+//   city: string;
+//   state: string;
+//   pincode: string;
+// }
+
+// interface UserProfile {
+//   id: string;
+//   username: string;
+//   phoneNumber: string;
+//   role: string;
+//   buildingName: string;
+//   areaName: string;
+//   subAreaName: string;
+//   city: string;
+//   state: string;
+//   pincode: string;
+//   profileImage?: string;
+// }
+
+// const ProfileEditPage: React.FC = () => {
+//   const router = useRouter();
+//   const navigation = useNavigation();
+//   const [formData, setFormData] = useState<FormData>({
+//     profileImage: "",
+//     username: "",
+//     phoneNumber: "",
+//     password: "",
+//     confirmPassword: "",
+//     houseName: "",
+//     areaName: "",
+//     subAreaName: "",
+//     city: "",
+//     state: "",
+//     pincode: "",
+//   });
+//   const [error, setError] = useState<string | null>(null);
+//   const [success, setSuccess] = useState<string | null>(null);
+//   const [loading, setLoading] = useState<boolean>(true);
+//   const [updating, setUpdating] = useState<boolean>(false);
+//   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
+//   const [pincodeData, setPincodeData] = useState<Pincode[]>([]);
+//   const [areaOptions, setAreaOptions] = useState<Area[]>([]);
+//   const [subAreaOptions, setSubAreaOptions] = useState<SubArea[]>([]);
+//   const [showPassword, setShowPassword] = useState<boolean>(false);
+//   const [showConfirmPassword, setShowConfirmPassword] =
+//     useState<boolean>(false);
+
+//   useEffect(() => {
+//     const fetchUserProfile = async (): Promise<void> => {
+//       try {
+//         const userId = await AsyncStorage.getItem("userId");
+//         if (!userId) {
+//           setError("User ID not found. Please login again.");
+//           return;
+//         }
+
+//         const response = await userGetProfile(userId);
+//         if (response && response.success) {
+//           const userData: UserProfile = response.result;
+//           setFormData({
+//             profileImage: userData.profileImage || "",
+//             username: userData.username || "",
+//             phoneNumber: userData.phoneNumber || "",
+//             password: "",
+//             confirmPassword: "",
+//             houseName: userData.buildingName || "",
+//             areaName: userData.areaName || "",
+//             subAreaName: userData.subAreaName || "",
+//             city: userData.city || "",
+//             state: userData.state || "",
+//             pincode: userData.pincode || "",
+//           });
+//         }
+//       } catch (err: any) {
+//         setError(err?.message || "Failed to fetch profile data.");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     fetchUserProfile();
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchPincodes = async (): Promise<void> => {
+//       try {
+//         const response = await getAllPincodes();
+//         if (Array.isArray(response?.data)) {
+//           setPincodeData(response.data);
+//           const foundPincode = response.data.find(
+//             (p) => p.code === formData.pincode
+//           );
+//           if (foundPincode) {
+//             setAreaOptions(foundPincode.areas || []);
+//             setFormData((prev) => ({
+//               ...prev,
+//               city: foundPincode.city,
+//               state: foundPincode.state,
+//             }));
+//             const foundArea = foundPincode.areas.find(
+//               (a) => a.name === formData.areaName
+//             );
+//             if (foundArea) {
+//               setSubAreaOptions(foundArea.subAreas || []);
+//             }
+//           }
+//         }
+//       } catch (err) {
+//         setError("Failed to fetch pincodes. Please try again.");
+//       }
+//     };
+
+//     fetchPincodes();
+//   }, [formData.pincode]);
+
+//   useEffect(() => {
+//     if (formData.pincode) {
+//       const found = pincodeData.find((p) => p.code === formData.pincode);
+//       if (found && found.areas) {
+//         setAreaOptions(found.areas);
+//         // Pre-select the area if it exists in the fetched data
+//         const defaultArea = found.areas.find(
+//           (a) => a.name === formData.areaName
+//         );
+//         if (defaultArea) {
+//           setSubAreaOptions(defaultArea.subAreas || []);
+//         } else {
+//           setSubAreaOptions([]);
+//         }
+//         setFormData((prev) => ({
+//           ...prev,
+//           city: found.city,
+//           state: found.state,
+//         }));
+//       } else {
+//         setAreaOptions([]);
+//         setSubAreaOptions([]);
+//       }
+//     }
+//   }, [formData.pincode, pincodeData]);
+
+//   useEffect(() => {
+//     if (formData.areaName && areaOptions.length > 0) {
+//       const foundArea = areaOptions.find((a) => a.name === formData.areaName);
+//       if (foundArea && foundArea.subAreas) {
+//         setSubAreaOptions(foundArea.subAreas);
+//       } else {
+//         setSubAreaOptions([]);
+//       }
+//     }
+//   }, [formData.areaName, areaOptions]);
+
+//   const handleChange = (name: keyof FormData, value: string): void => {
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//     if (error) setError(null);
+//     if (success) setSuccess(null);
+//   };
+
+//   const pickImage = async (): Promise<void> => {
+//     try {
+//       const { status } =
+//         await ImagePicker.requestMediaLibraryPermissionsAsync();
+//       if (status !== "granted") {
+//         Alert.alert(
+//           "Permission required",
+//           "Sorry, we need camera roll permissions to make this work!"
+//         );
+//         return;
+//       }
+
+//       setUploadingImage(true);
+
+//       const result = await ImagePicker.launchImageLibraryAsync({
+//         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+//         allowsEditing: true,
+//         aspect: [1, 1],
+//         quality: 0.7,
+//         base64: true,
+//       });
+
+//       if (!result.canceled && result.assets[0]) {
+//         const imageDataUrl = `data:image/jpeg;base64,${result.assets[0].base64}`;
+//         setFormData((prev) => ({ ...prev, profileImage: imageDataUrl }));
+//         setSuccess("Profile image selected successfully!");
+//         setTimeout(() => setSuccess(null), 3000);
+//       }
+//     } catch (error) {
+//       console.error("Error picking image:", error);
+//       setError("Failed to select image. Please try again.");
+//     } finally {
+//       setUploadingImage(false);
+//     }
+//   };
+
+//   const handleCancel = (): void => {
+//     navigation.navigate("Profile" as never);
+//   };
+
+//   const handleSubmit = async (): Promise<void> => {
+//     setError(null);
+//     setSuccess(null);
+//     setUpdating(true);
+
+//     try {
+//       if (formData.password && formData.password !== formData.confirmPassword) {
+//         setError("Passwords do not match");
+//         return;
+//       }
+
+//       if (
+//         formData.password &&
+//         (formData.password.length < 6 || formData.password.length > 10)
+//       ) {
+//         setError("Password must be between 6 and 10 characters long");
+//         return;
+//       }
+
+//       const userId = await AsyncStorage.getItem("userId");
+//       const token = await AsyncStorage.getItem("jwt_token");
+//       if (!userId || !token) {
+//         setError("User ID or token not found. Please login again.");
+//         return;
+//       }
+
+//       const updateData = {
+//         id: userId,
+//         username: formData.username,
+//         password: formData.password || undefined,
+//         profileImage: formData.profileImage,
+//         buildingName: formData.houseName,
+//         areaName: formData.areaName,
+//         subAreaName: formData.subAreaName,
+//         city: formData.city,
+//         state: formData.state,
+//         pincode: formData.pincode,
+//       };
+
+//       const response = await userEditProfile(updateData);
+
+//       if (response && response.success) {
+//         setSuccess("Profile updated successfully!");
+//         const userData = response.result;
+//         const updatedUser = {
+//           ...userData,
+//           id: userId,
+//           username: userData.username,
+//           buildingName: userData.buildingName,
+//           phoneNumber: userData.phoneNumber,
+//           areaName: userData.areaName,
+//           subAreaName: userData.subAreaName,
+//           pincode: userData.pincode,
+//           state: userData.state,
+//           city: userData.city,
+//           profileImage: userData.profileImage || formData.profileImage,
+//           token,
+//         };
+
+//         await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+//         setTimeout(() => navigation.navigate("Profile" as never), 2000);
+//       } else {
+//         setError(response?.message || "Failed to update profile.");
+//       }
+//     } catch (err: any) {
+//       setError(err?.message || "Failed to update profile. Please try again.");
+//     } finally {
+//       setUpdating(false);
+//     }
+//   };
+
+//   if (loading) {
+//     return (
+//       <LinearGradient
+//         colors={["#f0f4f8", "#e0e7ff"]}
+//         className="flex-1 justify-center items-center"
+//       >
+//         <ActivityIndicator size="large" color="#4c51bf" />
+//         <Text className="text-gray-600 mt-2">Loading profile data...</Text>
+//       </LinearGradient>
+//     );
+//   }
+
+//   return (
+//     <ScrollView className="flex-1 bg-gray-50">
+//       <View className="p-4">
+//         {/* Header */}
+//         <Text className="text-2xl font-semibold text-gray-800 text-center mb-6">
+//           Edit Profile
+//         </Text>
+
+//         {/* Profile Image */}
+//         <View className="flex-1 items-center mb-6">
+//           {/* Error/Success Messages */}
+//           {error && (
+//             <Text className="text-red-500 text-center mt-2 mb-3">{error}</Text>
+//           )}
+//           {success && (
+//             <Text className="text-green-500 text-center mt-2 mb-3">{success}</Text>
+//           )}
+//           {/* <View className="w-28 h-28 rounded-full bg-gray-200 overflow-hidden border-2 border-gray-300">
+//             {formData.profileImage ? (
+//               <Image
+//                 source={{ uri: formData.profileImage }}
+//                 className="w-full h-full"
+//                 resizeMode="cover"
+//               />
+//             ) : (
+//               <User size={56} color="#9ca3af" className="mx-auto mt-4" />
+//             )}
+//           </View> */}
+//           <View className="w-28 h-28 rounded-full bg-teal-400 p-1 shadow-lg">
+//             <View className="w-full h-full rounded-full bg-white justify-center items-center overflow-hidden">
+//               {formData.profileImage ? (
+//                 <Image
+//                   source={{ uri: formData.profileImage }}
+//                   className="w-full h-full"
+//                 />
+//               ) : (
+//                 <User size={50} color="gray" />
+//               )}
+//             </View>
+//           </View>
+
+//           <TouchableOpacity
+//             className="mt-3 bg-blue-500 rounded-lg px-4 py-2"
+//             onPress={pickImage}
+//             disabled={uploadingImage}
+//           >
+//             {uploadingImage ? (
+//               <ActivityIndicator size="small" color="#fff" />
+//             ) : (
+//               <Text className="text-white text-center">Choose Image</Text>
+//             )}
+//           </TouchableOpacity>
+//         </View>
+
+//         {/* Form Fields */}
+//         <View className="space-y-3">
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">Name</Text>
+//             <TextInput
+//               className="border border-gray-300 rounded-lg p-3 bg-white text-gray-800"
+//               value={formData.username}
+//               onChangeText={(value) => handleChange("username", value)}
+//               placeholder="Enter your name"
+//               placeholderTextColor="#9ca3af"
+//             />
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               Phone Number
+//             </Text>
+//             <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-gray-50">
+//               <Phone size={16} color="#6b7280" />
+//               <TextInput
+//                 className="flex-1 ml-2 text-gray-500"
+//                 value={formData.phoneNumber}
+//                 editable={false}
+//                 placeholder="Enter phone number"
+//                 placeholderTextColor="#9ca3af"
+//               />
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               New Password
+//             </Text>
+//             <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-white">
+//               <Lock size={16} color="#6b7280" />
+//               <TextInput
+//                 className="flex-1 ml-2 text-gray-800"
+//                 value={formData.password}
+//                 onChangeText={(value) => handleChange("password", value)}
+//                 secureTextEntry={!showPassword}
+//                 maxLength={10}
+//                 placeholder="Enter new password"
+//                 placeholderTextColor="#9ca3af"
+//                 autoCapitalize="none"
+//                 autoCorrect={false}
+//               />
+//               <TouchableOpacity
+//                 onPress={() => setShowPassword((prev) => !prev)}
+//               >
+//                 {showPassword ? (
+//                   <EyeOff size={16} color="#6b7280" />
+//                 ) : (
+//                   <Eye size={16} color="#6b7280" />
+//                 )}
+//               </TouchableOpacity>
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               Confirm Password
+//             </Text>
+//             <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-white">
+//               <Lock size={16} color="#6b7280" />
+//               <TextInput
+//                 className="flex-1 ml-2 text-gray-800"
+//                 value={formData.confirmPassword}
+//                 onChangeText={(value) => handleChange("confirmPassword", value)}
+//                 secureTextEntry={!showConfirmPassword}
+//                 maxLength={10}
+//                 placeholder="Confirm new password"
+//                 placeholderTextColor="#9ca3af"
+//                 autoCapitalize="none"
+//                 autoCorrect={false}
+//               />
+//               <TouchableOpacity
+//                 onPress={() => setShowConfirmPassword((prev) => !prev)}
+//               >
+//                 {showConfirmPassword ? (
+//                   <EyeOff size={16} color="#6b7280" />
+//                 ) : (
+//                   <Eye size={16} color="#6b7280" />
+//                 )}
+//               </TouchableOpacity>
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               House/Building Name
+//             </Text>
+//             <View className="flex-row items-center border border-gray-300 rounded-lg p-3 bg-white">
+//               <Home size={16} color="#6b7280" />
+//               <TextInput
+//                 className="flex-1 ml-2 text-gray-800"
+//                 value={formData.houseName}
+//                 onChangeText={(value) => handleChange("houseName", value)}
+//                 placeholder="Enter house or building name"
+//                 placeholderTextColor="#9ca3af"
+//               />
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               Pincode
+//             </Text>
+//             <View className="border border-gray-300 rounded-lg bg-white">
+//               <Picker
+//                 selectedValue={formData.pincode}
+//                 onValueChange={(value) => handleChange("pincode", value)}
+//                 style={{ height: Platform.OS === "ios" ? 50 : 50 }}
+//               >
+//                 <Picker.Item label="Select Pincode" value="" />
+//                 {pincodeData
+//                   .sort((a, b) => Number(a.code) - Number(b.code))
+//                   .map((p) => (
+//                     <Picker.Item key={p._id} label={p.code} value={p.code} />
+//                   ))}
+//               </Picker>
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               Area Name
+//             </Text>
+//             <View className="border border-gray-300 rounded-lg bg-white">
+//               <Picker
+//                 selectedValue={formData.areaName}
+//                 onValueChange={(value) => handleChange("areaName", value)}
+//                 style={{ height: Platform.OS === "ios" ? 50 : 50 }}
+//               >
+//                 <Picker.Item label="Select Area" value="" />
+//                 {areaOptions.map((a) => (
+//                   <Picker.Item key={a._id} label={a.name} value={a.name} />
+//                 ))}
+//               </Picker>
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               Sub Area
+//             </Text>
+//             <View className="border border-gray-300 rounded-lg bg-white">
+//               <Picker
+//                 selectedValue={formData.subAreaName}
+//                 onValueChange={(value) => handleChange("subAreaName", value)}
+//                 style={{ height: Platform.OS === "ios" ? 50 : 50 }}
+//               >
+//                 <Picker.Item label="Select Sub Area" value="" />
+//                 {subAreaOptions.map((sa) => (
+//                   <Picker.Item key={sa._id} label={sa.name} value={sa.name} />
+//                 ))}
+//               </Picker>
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">City</Text>
+//             <View className="border border-gray-300 rounded-lg bg-white">
+//               <Picker
+//                 selectedValue={formData.city}
+//                 onValueChange={(value) => handleChange("city", value)}
+//                 style={{ height: Platform.OS === "ios" ? 50 : 50 }}
+//               >
+//                 <Picker.Item label="Select City" value="" />
+//                 {formData.pincode &&
+//                 pincodeData.find((p) => p.code === formData.pincode) ? (
+//                   <Picker.Item
+//                     label={
+//                       pincodeData.find((p) => p.code === formData.pincode)?.city
+//                     }
+//                     value={
+//                       pincodeData.find((p) => p.code === formData.pincode)?.city
+//                     }
+//                   />
+//                 ) : (
+//                   [...new Set(pincodeData.map((p) => p.city))].map((city) => (
+//                     <Picker.Item key={city} label={city} value={city} />
+//                   ))
+//                 )}
+//               </Picker>
+//             </View>
+//           </View>
+
+//           <View>
+//             <Text className="text-sm font-medium text-gray-700 mb-1">
+//               State
+//             </Text>
+//             <View className="border border-gray-300 rounded-lg bg-white">
+//               <Picker
+//                 selectedValue={formData.state}
+//                 onValueChange={(value) => handleChange("state", value)}
+//                 style={{ height: Platform.OS === "ios" ? 50 : 50 }}
+//               >
+//                 <Picker.Item label="Select State" value="" />
+//                 {formData.pincode &&
+//                 pincodeData.find((p) => p.code === formData.pincode) ? (
+//                   <Picker.Item
+//                     label={
+//                       pincodeData.find((p) => p.code === formData.pincode)
+//                         ?.state
+//                     }
+//                     value={
+//                       pincodeData.find((p) => p.code === formData.pincode)
+//                         ?.state
+//                     }
+//                   />
+//                 ) : (
+//                   [...new Set(pincodeData.map((p) => p.state))].map((state) => (
+//                     <Picker.Item key={state} label={state} value={state} />
+//                   ))
+//                 )}
+//               </Picker>
+//             </View>
+//           </View>
+
+//           {/* Action Buttons */}
+//           <View className="flex-row justify-between mt-6">
+//             <TouchableOpacity
+//               className="flex-1 bg-blue-500 rounded-lg py-2 mr-1"
+//               onPress={handleSubmit}
+//               disabled={updating}
+//             >
+//               {updating ? (
+//                 <ActivityIndicator size="small" color="#fff" />
+//               ) : (
+//                 <Text className="text-white text-center">Update</Text>
+//               )}
+//             </TouchableOpacity>
+//             <TouchableOpacity
+//               className="flex-1 bg-gray-400 rounded-lg py-2 ml-1"
+//               onPress={handleCancel}
+//               disabled={updating}
+//             >
+//               <Text className="text-white text-center">Cancel</Text>
+//             </TouchableOpacity>
+//           </View>
+//         </View>
+//       </View>
+//     </ScrollView>
+//   );
+// };
+
+// export default ProfileEditPage;
 // import React, { useState, useEffect } from 'react';
 // import { View, Text, TextInput, TouchableOpacity, Image, ScrollView, ActivityIndicator, Dimensions, Alert, Platform } from 'react-native';
 // import { Picker } from '@react-native-picker/picker';

@@ -43,7 +43,7 @@ export const bookingCancleByUser = (data: any) =>  apiRequest("bookingCancleByUs
 
 export const userGetProfile = (userId: string) => apiRequest("userGetProfile", null, userId);
 
-export const userEditProfile = (data: any) =>  apiRequest("userEditProfile", data);
+export const userEditProfile = (formData: any) =>  apiRequest("userEditProfile", formData);
 
 export const createGetInTouch = (formData: any) =>  apiRequest("createGetInTouch", formData);
 
