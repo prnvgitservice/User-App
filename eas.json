@@ -13,6 +13,20 @@
       "android": {
         "buildType": "apk"      
       }
+    },
+    "development": {
+      "android": {
+        "gradleCommand": ":app:assembleDebug",
+        "buildType": "apk",
+        "cache": {
+          "key": "gradle-v1"
+        }
+      },
+      "env": {
+        "REACT_OVERRIDE_VERSION": "19.0.0"
+      },
+      "developmentClient": true,
+      "distribution": "internal"
     }
   },
   "submit": {

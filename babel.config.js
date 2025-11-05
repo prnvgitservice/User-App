@@ -14,6 +14,7 @@ module.exports = function (api) {
     ],
     plugins: [
       // Optional: Add plugins for specific needs
+      "react-native-worklets/plugin",
       ["@babel/plugin-transform-runtime", { regenerator: true }], // Optimize async/await and generators
       ["module-resolver", { // Simplify import paths (optional)
         root: ["./"],
