@@ -81,10 +81,10 @@ const HomeScreen: React.FC = () => {
       >
         {/* Header with Logo and Auth Options */}
         <View className="flex-row justify-between items-center px-5 pt-4 pb-4">
-          <View className="bg-blue-900 rounded px-1 py-1 self-center">
+          <View className="rounded ">
             <Image
-              source={require("../../assets/prnv_logo.jpg")}
-              className="h-10 w-52"
+              source={require("../../assets/prnv_logo.png")}
+              style={{ width: 208, height: 50 }}
               resizeMode="contain"
             />
           </View>

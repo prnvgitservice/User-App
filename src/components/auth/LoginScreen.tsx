@@ -112,10 +112,10 @@ const LoginScreen = () => {
         <ScrollView contentContainerClassName="flex-grow px-6 pt-8 pb-8 justify-center">
           {/* Logo */}
           <View className="items-center mb-6">
-            <View className="bg-blue-900 rounded-lg px-4 py-3">
+            <View className="rounded-lg px-4 py-3">
               <Image
-                source={require("../../../assets/prnv_logo.jpg")}
-                className="h-10 w-64"
+                source={require("../../../assets/prnv_logo.png")}
+                className="h-20 w-64"
                 resizeMode="contain"
               />
             </View>

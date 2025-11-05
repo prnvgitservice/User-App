@@ -210,11 +210,11 @@ const RegisterScreen: React.FC = () => {
 
   return (
     <ScrollView className="flex-1 bg-white" contentContainerStyle={styles.contentContainer}>
-      <View className="items-center mb-5 bg-blue-900 p-1 rounded w-52 self-center">
+      <View className="items-center mb-5 p-1 rounded w-52 self-center">
         <Image
           // source={{ uri: 'https://old.prnvservices.com/uploads/logo/1695377568_logo-white.png' }}
-          source={require('../../../assets/prnv_logo.jpg')}
-          className="h-8 w-auto"
+          source={require('../../../assets/prnv_logo.png')}
+          className="h-20 w-auto"
           resizeMode="contain"
         />
       </View>
